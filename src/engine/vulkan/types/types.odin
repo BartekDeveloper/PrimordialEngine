@@ -26,7 +26,32 @@ VulkanData :: #type struct {
     
     // Physical Device
     physical: #type struct{
-        device: vk.PhysicalDevice,
+        index:    int,
+        type:     cstring,
+      
+        features:         vk.PhysicalDeviceFeatures,  
+        properties:       vk.PhysicalDeviceProperties,
+        capabilities:     vk.SurfaceCapabilitiesKHR,
+        memoryProperties: vk.PhysicalDeviceMemoryProperties,
+
+        formats: []vk.SurfaceFormatKHR,
+        modes:   []vk.PresentModeKHR, 
+
+        queues: #type struct{
+            idx: #type struct{
+                graphics: u32,
+                present:  u32,
+                compute:  u32,
+                transfer: u32
+            },
+            
+            graphics: vk.Queue,
+            present:  vk.Queue,
+            compute:  vk.Queue,
+            transfer: vk.Queue
+        }, 
+
+        device: vk.PhysicalDevice
     },
     
     // Logical Device

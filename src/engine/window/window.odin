@@ -114,7 +114,7 @@ GetInstanceExtensions :: proc() -> (ext: []cstring) {
     return
 }
 
-ProcAddr := rawptr(sdl.GL_GetProcAddress) 
+ProcAddr := sdl.Vulkan_GetVkGetInstanceProcAddr 
 
 VulkanCreateSurface :: proc(instance: ^vk.Instance, surface: ^vk.SurfaceKHR, data: ^WindowData = defaultWindowData) -> () {
     if !sdl.Vulkan_CreateSurface(data.ptr, instance^, nil, surface) {

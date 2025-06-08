@@ -16,23 +16,30 @@ import "create"
 
 import win "../window"
 
-InitFromZero :: proc(data: ^t.VulkanData) {
+InitFromZero :: proc(data: ^t.VulkanData, loc := #caller_location) {
     using data;
-    
-    // vk.load_proc_addresses(win.ProcAddr)
 
+    log.infof("%s", loc)
+    log.info("Initializing from zero")
+    
+    log.info("Vulkan reading addr")
+    vk.load_proc_addresses(rawptr(win.ProcAddr()))
+
+    log.info("Setting up layers and extensions")
     instance.layers = {
         "VK_LAYER_KHRONOS_validation"
     }
-
     instance.extensions = {
         vk.EXT_DEBUG_UTILS_EXTENSION_NAME
     }
     
     create.AppInfo(data)
-    create.Instance(data)
     
-    // vk.load_proc_addresses(data.instance.instance)
+    log.assert(vk.CreateInstance != nil)
+    create.Instance(data)
+   
+    log.info("Vulkan reading instance addresses")
+    vk.load_proc_addresses(data.instance.instance)
 
     create.Surface(data)
 }

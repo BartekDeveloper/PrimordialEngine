@@ -67,7 +67,7 @@ Instance :: proc(data: ^t.VulkanData, loc := #caller_location) -> () {
         log.debug("\t Creating debug messenger info")
         instance.messengerInfo = {
             sType           = .DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
-            messageSeverity = { .VERBOSE, .WARNING, .ERROR, .INFO },
+            messageSeverity = { .VERBOSE, .WARNING, .ERROR, .INFO   },
             messageType     = { .PERFORMANCE, .VALIDATION, .GENERAL },
             pfnUserCallback = VulkanDebugCallback,
             pUserData       = nil,

@@ -37,9 +37,6 @@ InitFromZero :: proc(data: ^t.VulkanData, loc := #caller_location) {
     
     log.assert(vk.CreateInstance != nil)
     create.Instance(data)
-   
-    log.info("Vulkan reading instance addresses")
-    vk.load_proc_addresses(data.instance.instance)
 
     create.Surface(data)
 }

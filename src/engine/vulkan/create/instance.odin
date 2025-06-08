@@ -48,7 +48,6 @@ Instance :: proc(data: ^t.VulkanData, loc := #caller_location) -> () {
     for i := 0; i < int(len(instance.extensions)); i += 1 {
         log.infof("\t %s", instance.extensions[i])
     }
-    log.info(instance.extensions)
     log.info("=*=*=*= INSTANCE EXTENSIONS =*=*=*=")
    
 
@@ -70,11 +69,10 @@ Instance :: proc(data: ^t.VulkanData, loc := #caller_location) -> () {
             messageSeverity = { .VERBOSE, .WARNING, .ERROR, .INFO   },
             messageType     = { .PERFORMANCE, .VALIDATION, .GENERAL },
             pfnUserCallback = VulkanDebugCallback,
-            pUserData       = nil,
+            pUserData       = nil
         }
         instance.createInfo.pNext = rawptr(&instance.messengerInfo)
     }
-
     log.debug(instance.createInfo)
 
     log.debug("\t Creating Instance")
@@ -86,16 +84,21 @@ Instance :: proc(data: ^t.VulkanData, loc := #caller_location) -> () {
     log.debug(result)
     if result != .SUCCESS do panic("Failed to create instance!")
     log.info("Created Instance!")
+    log.assert(instance.instance != nil, "SOMEHOW: Instance is nil!")
+
+    log.info("Loading instance addresses")
+    vk.load_proc_addresses(data.instance.instance)
 
     if ENABLE_VALIDATION_LAYERS {
-        log.info("Creating messenger")
-        
+        log.info("Creating messenger")       
+    
         result = vk.CreateDebugUtilsMessengerEXT(
             instance.instance,
             &instance.messengerInfo,
             nil,
             &instance.messenger
         )
+        log.debug(result)
         if result != .SUCCESS do panic("Failed to create messenger")
         
         log.info("Created messenger!")

@@ -30,14 +30,13 @@ InitFromZero :: proc(data: ^t.VulkanData, loc := #caller_location) {
         "VK_LAYER_KHRONOS_validation"
     }
     instance.extensions = {
-        vk.EXT_DEBUG_UTILS_EXTENSION_NAME
+        vk.EXT_DEBUG_UTILS_EXTENSION_NAME,
+        vk.KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME
     }
     
-    create.AppInfo(data)
-    
-    log.assert(vk.CreateInstance != nil)
+    create.AppInfo(data) 
     create.Instance(data)
-
     create.Surface(data)
+    create.PhysicalDeviceData(data)
 }
 

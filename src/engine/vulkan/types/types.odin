@@ -25,35 +25,8 @@ VulkanData :: #type struct {
     surface: vk.SurfaceKHR,
     
     // Physical Device
-    physical: #type struct{
-        index:    int,
-        type:     cstring,
-      
-        features:         vk.PhysicalDeviceFeatures,  
-        properties:       vk.PhysicalDeviceProperties,
-        capabilities:     vk.SurfaceCapabilitiesKHR,
-        memoryProperties: vk.PhysicalDeviceMemoryProperties,
+    physical: PhysicalDeviceData,
 
-        formats: []vk.SurfaceFormatKHR,
-        modes:   []vk.PresentModeKHR, 
-
-        queues: #type struct{
-            idx: #type struct{
-                graphics: u32,
-                present:  u32,
-                compute:  u32,
-                transfer: u32
-            },
-            
-            graphics: vk.Queue,
-            present:  vk.Queue,
-            compute:  vk.Queue,
-            transfer: vk.Queue
-        }, 
-
-        device: vk.PhysicalDevice
-    },
-    
     // Logical Device
     logical: #type struct {
         queueCreateInfos: []vk.DeviceQueueCreateInfo,    
@@ -179,11 +152,42 @@ Buffer :: #type struct{
 GBuffer :: #type struct{
     img:  vk.Image,
     view: vk.ImageView,
-    mem:  vk.DeviceMemory,
+    mem:  vk.DeviceMemory
 }
 
 vkad :: #type vk.AttachmentDescription
 vkar :: #type vk.AttachmentReference
 vibd :: #type vk.VertexInputBindingDescription
 viad :: #type vk.VertexInputAttributeDescription
+
+PhysicalDeviceData :: #type struct{
+    index:    int,
+    type:     cstring,
+  
+    features:         vk.PhysicalDeviceFeatures,  
+    properties:       vk.PhysicalDeviceProperties,
+    capabilities:     vk.SurfaceCapabilitiesKHR,
+    memoryProperties: vk.PhysicalDeviceMemoryProperties,
+
+    formats:          []vk.SurfaceFormatKHR,
+    modes:            []vk.PresentModeKHR, 
+
+    device:           vk.PhysicalDevice,
+    queues:           Queues
+}
+
+Queues :: #type struct{
+    idx:      QueueIndices,    
+    graphics: vk.Queue,
+    present:  vk.Queue,
+    compute:  vk.Queue,
+    transfer: vk.Queue
+}
+
+QueueIndices :: #type struct{
+    graphics: u32,
+    present:  u32,
+    compute:  u32,
+    transfer: u32
+}
 

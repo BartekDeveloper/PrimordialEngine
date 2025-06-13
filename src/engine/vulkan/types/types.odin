@@ -11,14 +11,14 @@ VulkanData :: #type struct {
    
     // Instance
     instance: #type struct {
-        extensions: [dynamic]cstring,
-        layers:     [dynamic]cstring,
+        extensions:    [dynamic]cstring,
+        layers:        [dynamic]cstring,
          
         createInfo:    vk.InstanceCreateInfo,        
         messengerInfo: vk.DebugUtilsMessengerCreateInfoEXT,
 
-        instance:  vk.Instance,
-        messenger: vk.DebugUtilsMessengerEXT,
+        instance:      vk.Instance,
+        messenger:     vk.DebugUtilsMessengerEXT,
     },
 
     // Surface
@@ -26,33 +26,34 @@ VulkanData :: #type struct {
     
     // Physical Device
     physical: PhysicalDeviceData,
-
+    
     // Logical Device
     logical: #type struct {
-        queueCreateInfos: []vk.DeviceQueueCreateInfo,    
-        deviceExtensions: []cstring,
+        queueCreateInfos:  []vk.DeviceQueueCreateInfo,    
+        extensions:        []cstring,
         requestedFeatures: vk.PhysicalDeviceFeatures,
-        
-        createInfo: vk.DeviceCreateInfo,
-        device: vk.Device,
+         
+        createInfo:        vk.DeviceCreateInfo,
+        device:            vk.Device,
     },
 
     // Swapchain
     swapchain: #type struct{
         formats: #type struct{
-            surface: vk.SurfaceKHR,
+            surface: vk.SurfaceFormatKHR,
             color:   vk.Format,
             depth:   vk.Format,
         },
-        presentMode: vk.PresentModeKHR,
-        extent: vk.Extent2D,
-        imageCount: u32,    
 
-        createInfo: vk.SwapchainCreateInfoKHR,        
-        swapchain: vk.SwapchainKHR,
+        presentMode: vk.PresentModeKHR,
+        extent:      vk.Extent2D,
+        imageCount:  u32,    
+
+        createInfo:  vk.SwapchainCreateInfoKHR,        
+        swapchain:   vk.SwapchainKHR,
         
-        images: [dynamic]vk.Image,
-        views:  [dynamic]vk.ImageView,
+        images:      [dynamic]vk.Image,
+        views:       [dynamic]vk.ImageView,
     },
 
     // Image Samplers
@@ -66,7 +67,7 @@ VulkanData :: #type struct {
 
     // Descriptors
     descritporPoolCreateInfo: vk.DescriptorPoolCreateInfo,
-    descriptorPool: vk.DescriptorPool,
+    descriptorPool:           vk.DescriptorPool,
     
     // Commands
     commandPools: map[string]struct{
@@ -161,8 +162,8 @@ vibd :: #type vk.VertexInputBindingDescription
 viad :: #type vk.VertexInputAttributeDescription
 
 PhysicalDeviceData :: #type struct{
-    index:    int,
-    type:     cstring,
+    index:            int,
+    type:             string,
   
     features:         vk.PhysicalDeviceFeatures,  
     properties:       vk.PhysicalDeviceProperties,
@@ -173,7 +174,9 @@ PhysicalDeviceData :: #type struct{
     modes:            []vk.PresentModeKHR, 
 
     device:           vk.PhysicalDevice,
-    queues:           Queues
+    queues:           Queues,
+
+    uniqueQueueFamilies: []u32
 }
 
 Queues :: #type struct{

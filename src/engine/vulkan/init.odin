@@ -32,11 +32,19 @@ InitFromZero :: proc(data: ^t.VulkanData, loc := #caller_location) {
     instance.extensions = {
         vk.EXT_DEBUG_UTILS_EXTENSION_NAME,
         vk.KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME
+    }    
+    logical.extensions = {
+        vk.KHR_SWAPCHAIN_EXTENSION_NAME
     }
-    
+    logical.requestedFeatures = {
+        samplerAnisotropy = true
+    }
+     
     create.AppInfo(data) 
     create.Instance(data)
     create.Surface(data)
     create.PhysicalDeviceData(data)
+    create.LogicalDevice(data)
+    create.Swapchain(data)
 }
 

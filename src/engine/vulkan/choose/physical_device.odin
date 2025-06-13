@@ -65,7 +65,8 @@ PhysicalDevicesData :: proc(instance: vk.Instance, surface: vk.SurfaceKHR) -> (c
         props  := properties.properties
         limits := props.limits
         feats  := features.features
-        
+        caps   := capabilities.surfaceCapabilities
+
         type: string
         #partial switch(props.deviceType) {
             case .CPU:
@@ -88,11 +89,11 @@ PhysicalDevicesData :: proc(instance: vk.Instance, surface: vk.SurfaceKHR) -> (c
 
         queueFamiliesCount: u32 = 0
         queueFamilies:    []vk.QueueFamilyProperties2
-        queueIndices: t.QueueIndices = {
-            0xFFFFFFFF,
-            0xFFFFFFFF,
-            0xFFFFFFFF,
-            0xFFFFFFFF
+        queueIndices: t.QueueIndices = { 
+            ~u32(0),
+            ~u32(0),
+            ~u32(0),
+            ~u32(0),
         }
         
         vk.GetPhysicalDeviceQueueFamilyProperties2(h.device,  &queueFamiliesCount, nil)
@@ -192,7 +193,7 @@ PhysicalDevicesData :: proc(instance: vk.Instance, surface: vk.SurfaceKHR) -> (c
 
         fmt.eprintfln("\t Max Image Dimensions %d", limits.maxImageDimension2D)
         score += limits.maxImageDimension2D
-        
+       
         fmt.eprintfln("\t Max Image Array Layers %d", limits.maxImageArrayLayers)
         score += limits.maxImageArrayLayers
         
@@ -201,18 +202,56 @@ PhysicalDevicesData :: proc(instance: vk.Instance, surface: vk.SurfaceKHR) -> (c
 
         fmt.eprintfln("\t Max Push Constant Size %d", limits.maxPushConstantsSize)
 
-        mwgc  := limits.maxComputeWorkGroupCount
-        fmt.eprintfln("\t Max Work Group Count %dx%dx%d", mwgc.x, mwgc.y, mwgc.z) 
-
         mcwgs := limits.maxComputeWorkGroupSize
-        fmt.eprintfln("\t Max Work Group Size %dx%dx%d", mcwgs.x, mcwgs.y, mcwgs.z)
+        fmt.eprintfln("\t Max Work Group Size %d x %d x %d", mcwgs.x, mcwgs.y, mcwgs.z)
 
+        if !feats.samplerAnisotropy {
+            log.warn("Sampler Anisotropy not supported!")
+            score -= 10
+        }
 
-        log.info(score)
+        if !feats.tessellationShader {
+            log.warn("Tesselation Shader not supported!")
+            score -= 10
+        }
 
+        score += u32(len(devices) - i)
+         
+        fmt.eprintfln("\nDevice %d: %s (%s)", i, props.deviceName, type)
+        fmt.eprintfln("\tScore:\t%d\n", score)
+
+        data.type                = type
+        data.index               = int(i)
+        data.features            = feats
+        data.capabilities        = caps
+        data.properties          = props
+        data.device              = h.device
+        data.memoryProperties    = memoryProps.memoryProperties 
+        data.uniqueQueueFamilies = uniqueQueueFamilies
+
+        scores[score]  = i
+        devicesData[i] = data
     }
 
-    chosenPhysicalDeviceData = devicesData[0]
+    log.info("Scoring Physical Devices")
+    
+    maxScore:  int = -1
+    bestIndex: int = -1
+
+    for score, idx in scores {
+        log.debugf("score: %d, index: %d", score, idx)
+        if int(score) >= maxScore {
+            maxScore  = int(score)  
+            bestIndex = idx
+        }
+    }
+    
+    log.infof("Best Device Index: %d", bestIndex)
+    log.infof("Best Device Score: %d", maxScore)
+    if bestIndex == -1 {
+        log.panicf("No Physical Device Found!")
+    }
+    chosenPhysicalDeviceData = devicesData[bestIndex]
 
     return
 }

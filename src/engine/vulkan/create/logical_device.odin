@@ -49,7 +49,6 @@ LogicalDevice :: proc(data: ^t.VulkanData) -> () {
     if result != .SUCCESS {
         log.panic("Failed to create Logical Device")
     }
-    
 
     vk.GetDeviceQueue(logical.device, physical.queues.idx.graphics, 0, &physical.queues.graphics)
     vk.GetDeviceQueue(logical.device, physical.queues.idx.present,  0, &physical.queues.present)

@@ -154,3 +154,26 @@ SwapchainPresentMode :: proc(data: ^t.VulkanData) -> (presentMode: vk.PresentMod
 
     return
 }
+
+SwapchainDepthFormat :: proc(data: ^t.VulkanData) -> (found: vk.Format = .D32_SFLOAT_S8_UINT, good: bool = true) #optional_ok {
+    using data; 
+
+    log.debug("Getting depth format")
+    depthFormats: []vk.Format = { .D32_SFLOAT_S8_UINT, .D24_UNORM_S8_UINT, .D32_SFLOAT }
+
+    found, good = FindSupportedFormat(
+        data,
+        depthFormats,
+        .OPTIMAL,
+        { .DEPTH_STENCIL_ATTACHMENT }
+    )
+    if !good {
+        log.fatal("Failed to find suitable depth format!")
+    }
+
+    log.debugf("Found depth format: %s", found)
+
+    return
+}
+
+

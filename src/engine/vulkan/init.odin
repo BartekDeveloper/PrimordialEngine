@@ -46,5 +46,6 @@ InitFromZero :: proc(data: ^t.VulkanData, loc := #caller_location) {
     create.PhysicalDeviceData(data)
     create.LogicalDevice(data)
     create.Swapchain(data)
+    create.RenderPasses(data)
 }
 

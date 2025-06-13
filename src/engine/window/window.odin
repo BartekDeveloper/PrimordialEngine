@@ -1,6 +1,7 @@
 package window
 
 import "core:log"
+import "core:c"
 
 import sdl "vendor:sdl3"
 import vk  "vendor:vulkan"
@@ -123,3 +124,24 @@ VulkanCreateSurface :: proc(instance: ^vk.Instance, surface: ^vk.SurfaceKHR, dat
    
     return
 }
+
+GetFrameBufferSize_return :: proc(window: ^sdl.Window = defaultWindowData.ptr) -> (width, height: u32) {
+    width_int, height_int: c.int
+    sdl.GetWindowSizeInPixels(window, &width_int, &height_int)
+
+    width  = u32(width_int)
+    height = u32(height_int)
+
+    return
+}
+
+GetFrameBufferSize_modify :: proc(width, height: ^u32, window: ^sdl.Window = defaultWindowData.ptr) {
+    width^, height^ = GetFrameBufferSize_return(window)
+    return
+}
+
+GetFrameBufferSize :: proc{
+    GetFrameBufferSize_return,
+    GetFrameBufferSize_modify,
+}
+

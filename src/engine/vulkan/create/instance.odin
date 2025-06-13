@@ -34,21 +34,21 @@ Instance :: proc(data: ^t.VulkanData, loc := #caller_location) -> () {
 
     log.infof("\t%s", loc)
 
-    log.info("=*=*=*= VALIDATION LAYERS =*=*=*=")
+    fmt.eprintfln("=*=*=*= VALIDATION LAYERS =*=*=*=")
     for i := 0; i < int(len(instance.layers)); i += 1 {
-        log.infof("\t %s", instance.layers[i])
+        fmt.eprintfln("\t %s", instance.layers[i])
     }
-    log.info("=*=*=*= VALIDATION LAYERS =*=*=*=")
+    fmt.eprintfln("=*=*=*= VALIDATION LAYERS =*=*=*=")
     
     
     windowExt := win.GetInstanceExtensions()
     append(&instance.extensions, ..windowExt[:])
  
-    log.info("=*=*=*= INSTANCE EXTENSIONS =*=*=*=")
+    fmt.eprintfln("=*=*=*= INSTANCE EXTENSIONS =*=*=*=")
     for i := 0; i < int(len(instance.extensions)); i += 1 {
-        log.infof("\t %s", instance.extensions[i])
+        fmt.eprintfln("\t %s", instance.extensions[i])
     }
-    log.info("=*=*=*= INSTANCE EXTENSIONS =*=*=*=")
+    fmt.eprintfln("=*=*=*= INSTANCE EXTENSIONS =*=*=*=")
    
 
     log.debug("\t Instance Info")

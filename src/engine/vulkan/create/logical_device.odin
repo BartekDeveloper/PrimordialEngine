@@ -29,11 +29,11 @@ LogicalDevice :: proc(data: ^t.VulkanData) -> () {
     }
 
 
-    log.info("=*=*=*= Requested Device Extensions =*=*=*=")
+    fmt.eprintfln("=*=*=*= Requested Device Extensions =*=*=*=")
     for &e in logical.extensions {
-        log.infof("\t%s", e) 
+        fmt.eprintfln("\t%s", e) 
     }   
-    log.info("=*=*=*= Requested Device Extensions =*=*=*=")
+    fmt.eprintfln("=*=*=*= Requested Device Extensions =*=*=*=")
        
     logical.createInfo = {     
         sType                   = .DEVICE_CREATE_INFO,

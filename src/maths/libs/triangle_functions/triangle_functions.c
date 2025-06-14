@@ -8,13 +8,14 @@ extern const float TanTable[8192];
 extern const float SinTable[8192];
 extern const float CosTable[8192];
 
-const double PI = 3.14159265358979323846;
+const double PI  = 3.14159265358979323846;
+const double PI2 = 6.28318530717958647692;
 const int TABLE_SIZE = 8192;
 
 float MapAngleToTableIndex(float angle) {
    
-    const float TABLE_ANGLE_RANGE = 4.0f * PI;
-    const float TABLE_START_ANGLE = -2.0f * PI;
+    const float TABLE_ANGLE_RANGE =  PI2;
+    const float TABLE_START_ANGLE = -PI2;
 
     float normalized_angle = fmodf(angle, TABLE_ANGLE_RANGE);
     if (normalized_angle < TABLE_START_ANGLE) {
@@ -51,7 +52,7 @@ double SinD_Approx(double x) {
 // Find Approx or calculate sin(x) using buildin sin function
 float Sin(float x) {
    
-    if (x < -PI || x > PI) {
+    if (x < -PI2 || x > PI2) {
         return SinApprox(x);
     } else {
         return sinf(x);
@@ -60,7 +61,7 @@ float Sin(float x) {
 
 // Find Approx INT or calculate sin(x) (and cast to INT) using buildin sin function
 int SinI(float x) {
-    if (x < -PI || x > PI) {
+    if (x < -PI2 || x > PI2) {
         return (int)(SinApprox(x) * 1024.0f);
     } else {
         return (int)(sinf(x) * 1024.0f);
@@ -69,7 +70,7 @@ int SinI(float x) {
 
 // Find Approx or calculate sin(x) (and cast to INT) using buildin sin function
 double SinD(double x) {
-    if (x < -PI || x > PI) {
+    if (x < -PI2 || x > PI2) {
         return SinD_Approx(x);
     } else {
         return sin(x);
@@ -90,7 +91,7 @@ double CosD_Approx(double x) {
 }
 
 float Cos(float x) {
-    if (x >= -PI && x <= PI) {
+    if (x >= -PI2 && x <= PI2) {
         return cosf(x);
     } else {
         return CosApprox(x);
@@ -98,7 +99,7 @@ float Cos(float x) {
 }
 
 int CosI(float x) {
-    if (x >= -PI && x <= PI) {
+    if (x >= -PI2 && x <= PI) {
         return (int)(cosf(x) * 1024.0f);
     } else {
         return (int)(CosApprox(x) * 1024.0f);
@@ -106,7 +107,7 @@ int CosI(float x) {
 }
 
 double CosD(double x) {
-    if (x >= -PI && x <= PI) {
+    if (x >= -PI2 && x <= PI) {
         return cos(x);
     } else {
         return CosD_Approx(x);
@@ -127,7 +128,7 @@ double TanD_Approx(double x) {
 }
 
 float Tan(float x) {
-    if (x >= -PI && x <= PI) {
+    if (x >= -PI2 && x <= PI) {
         return tanf(x);
     } else {
         return TanApprox(x);
@@ -135,7 +136,7 @@ float Tan(float x) {
 }
 
 int TanI(float x) {
-    if (x >= -PI && x <= PI) {
+    if (x >= -PI2 && x <= PI) {
         return (int)(tanf(x) * 1024.0f);
     } else {
         return (int)(TanApprox(x) * 1024.0f);
@@ -143,7 +144,7 @@ int TanI(float x) {
 }
 
 double TanD(double x) {
-    if (x >= -PI && x <= PI) {
+    if (x >= -PI2 && x <= PI2) {
         return tan(x);
     } else {
         return TanD_Approx(x);

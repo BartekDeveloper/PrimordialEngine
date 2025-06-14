@@ -28,7 +28,7 @@ DescriptorSetLayouts :: proc(data: ^t.VulkanData) -> () {
 
         uboBindings: []vk.DescriptorSetLayoutBinding = { uboBind }
         uboLayoutInfo := LayoutInfo_1(uboBindings)
-        uboSetLayout  := descriptors["ubo"].setLayout
+        uboSetLayout: vk.DescriptorSetLayout
 
         good = DescriptorSetLayout( 
             data,
@@ -38,6 +38,13 @@ DescriptorSetLayouts :: proc(data: ^t.VulkanData) -> () {
         if !good {
             log.panic("Failed to create Descriptor Set Layout")
         }
+        
+        uboDescriptor := t.Descriptor{
+            setLayout = uboSetLayout,
+            poolName  = "global",
+            sets      = []vk.DescriptorSet{},
+        }
+        descriptors["ubo"] = uboDescriptor
     }
 
     return

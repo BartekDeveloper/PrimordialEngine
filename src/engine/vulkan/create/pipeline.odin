@@ -39,8 +39,8 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
         p := pipelines["light"]
         
         p.shaders = {
-            { "geometry_vert", .VERTEX },
-            { "geometry_frag", .FRAGMENT },
+            { "geometry.vert.spv", .VERTEX   },
+            { "geometry.frag.spv", .FRAGMENT },
         }
         p.stages = ShaderStages(data, load.GetModule, ..p.shaders)
         p.setLayouts = { descriptors["ubo"].setLayout }
@@ -96,6 +96,9 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
         if !good {
             log.panic("Failed to create Graphics Pipeline")
         }
+        log.info("Created `light` Graphics Pipeline")
+
+        pipelines["light"] = p
     }
 
     return

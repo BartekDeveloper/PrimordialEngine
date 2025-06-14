@@ -36,7 +36,7 @@ Image_return :: proc(
     height: u32                              = 0,
     memory: ^vk.DeviceMemory                 = nil,
     memoryProperties: vk.MemoryPropertyFlags = { .HOST_VISIBLE, .HOST_COHERENT },
-    format: vk.Format                        = vk.Format.R8G8B8A8_SINT,
+    format: vk.Format                        = .R8G8B8A8_SINT,
     usage: vk.ImageUsageFlags                = { .COLOR_ATTACHMENT },
     mipLevels:  u8                           = 1,
     arrayLayers: u16                         = 1,

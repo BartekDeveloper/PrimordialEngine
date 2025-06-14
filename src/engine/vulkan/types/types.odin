@@ -62,13 +62,16 @@ VulkanData :: #type struct {
     // Render Passes
     passes:    map[string]RenderPass,
     
-    // Pipelines
-    pipelines: map[string]Pipeline,
-
     // Descriptors
     descriptorPools: map[string]DescriptorPool,
     descriptors:     map[string]Descriptor,
+
+    // Pipelines
+    pipelines: map[string]Pipeline,
  
+    // Resources
+    gBuffers: map[string]GBuffer,
+
     // Commands
     commandPools: map[string]struct{
         createInfo: vk.CommandPoolCreateInfo,

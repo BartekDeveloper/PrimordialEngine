@@ -41,8 +41,7 @@ InitFromZero :: proc(data: ^t.VulkanData, loc := #caller_location) {
     }
 
     load.SetVulkanDataPointer(data)
-    load.Shaders()
-    load.RemoveVulkanDataPointer()
+    defer load.RemoveVulkanDataPointer()
 
     create.AppInfo(data) 
     create.Instance(data)
@@ -52,6 +51,9 @@ InitFromZero :: proc(data: ^t.VulkanData, loc := #caller_location) {
     create.Swapchain(data)
     create.RenderPasses(data)
     create.DescriptorSetLayouts(data)
+    load.Shaders()
     create.Pipelines(data)
+    create.Resources(data)
+    create.Framebuffers(data)
 }
 

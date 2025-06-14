@@ -88,25 +88,28 @@ CreateShaderModule :: proc(
     dir:    string       = "./assets/shaders"
 ) -> (module: vk.ShaderModule, good: bool = true) #optional_ok {
     module = vk.ShaderModule{}
-
     path := strings.join({ dir, name }, "/")
+    
+    fmt.eprintfln("Reading shader: %s", path)
     shaderCode, ok := os.read_entire_file_from_filename(path, context.temp_allocator)
     if shaderCode == nil {
         log.error("Failed to read shader code!")
         return
     }
-    log.infof("Read shader code: %s", name)
 
-    shaderCodeSize := len(shaderCode)
-    shaderCodePtr  := raw_data(shaderCode)
+    shaderCodeSize := len(shaderCode)    
+    fmt.eprintfln("Shader code size: %d", shaderCodeSize)
+
+    moduleInfo := vk.ShaderModuleCreateInfo{
+        sType    = .SHADER_MODULE_CREATE_INFO,
+        codeSize = shaderCodeSize,
+        pCode    = ([^]u32)(raw_data(shaderCode)),
+    }
+    assert(data.logical.device != nil, "Initialize Vulkan device first!")
 
     result := vk.CreateShaderModule(
         data.logical.device,
-        &vk.ShaderModuleCreateInfo{
-            sType    = .SHADER_MODULE_CREATE_INFO,
-            codeSize = shaderCodeSize,
-            pCode    = ([^]u32)(shaderCodePtr),
-        },
+        &moduleInfo,   
         nil,
         &module
     )

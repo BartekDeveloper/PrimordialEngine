@@ -66,17 +66,21 @@ VulkanData :: #type struct {
     pipelines: map[string]Pipeline,
 
     // Descriptors
-    descritporPoolCreateInfo: vk.DescriptorPoolCreateInfo,
-    descriptorPool:           vk.DescriptorPool,
-    
+    descriptorPools: map[string]DescriptorPool,
+    descriptors:     map[string]Descriptor,
+ 
     // Commands
     commandPools: map[string]struct{
         createInfo: vk.CommandPoolCreateInfo,
         this:       vk.CommandPool,
     },
-
     commandBuffers: map[string][]vk.CommandBuffer,
     
+    // View
+    viewports: map[string]vk.Viewport,
+    scissors:  map[string]vk.Rect2D,
+
+    // Sync Objects
     syncObjects: #type struct{
         semaphores: []struct{
             createInfo: vk.SemaphoreCreateInfo,
@@ -93,6 +97,17 @@ VulkanData :: #type struct {
 
     // Buffers
     uniformBuffers: []Buffer,
+}
+
+DescriptorPool :: #type struct{
+    createInfo: vk.DescriptorPoolCreateInfo,
+    pool:       vk.DescriptorPool,
+}
+
+Descriptor :: #type struct{
+    setLayout: vk.DescriptorSetLayout,
+    poolName:  string,
+    sets:      []vk.DescriptorSet,
 }
 
 RenderPass :: #type struct{
@@ -140,7 +155,7 @@ Pipeline :: #type struct{
     layout: vk.PipelineLayout,
     cache:  vk.PipelineCache,
     
-    createInfo: vk.PipelineCreateInfoKHR,
+    createInfo: PipelinesCreateInfos,
     pipeline: vk.Pipeline,
 }
 

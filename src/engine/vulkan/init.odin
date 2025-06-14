@@ -47,5 +47,7 @@ InitFromZero :: proc(data: ^t.VulkanData, loc := #caller_location) {
     create.LogicalDevice(data)
     create.Swapchain(data)
     create.RenderPasses(data)
+    create.DescriptorSetLayouts(data)
+    create.Pipelines(data)
 }
 

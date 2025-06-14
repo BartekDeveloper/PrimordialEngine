@@ -6,8 +6,10 @@ import vk "vendor:vulkan"
 
 import t "../types"
 
-AppInfo :: proc(data: ^t.VulkanData, loc := #caller_location) -> () {
+AppInfo :: proc(data: ^t.VulkanData) -> () {
+    loc := #location()
     log.infof("\t%s", loc)
+
 
     data.appInfo = {
         sType              = .APPLICATION_INFO,

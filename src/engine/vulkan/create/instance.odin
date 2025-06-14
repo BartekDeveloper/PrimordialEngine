@@ -1,5 +1,7 @@
 package vk_create
 
+ENABLE_VALIDATION_LAYERS : bool : true
+
 import "core:log"
 import "core:c"
 import "core:os"
@@ -11,8 +13,6 @@ import vk "vendor:vulkan"
 
 import t "../types"
 import win "../../window"
-
-ENABLE_VALIDATION_LAYERS : bool : true
 
 ctx: runtime.Context
 
@@ -27,10 +27,11 @@ VulkanDebugCallback :: proc "system" (
     return false
 }
 
-Instance :: proc(data: ^t.VulkanData, loc := #caller_location) -> () {
+Instance :: proc(data: ^t.VulkanData) -> () {
     using data;
     
     ctx = context
+    loc := #location()
 
     log.infof("\t%s", loc)
 

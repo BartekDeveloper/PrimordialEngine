@@ -4,8 +4,12 @@
 #include "cos.h" 
 #include "tan.h" 
 
+extern const float TanTable[8192];
+extern const float SinTable[8192];
+extern const float CosTable[8192];
+
 const double PI = 3.14159265358979323846;
-const int TABLE_SIZE = 4096;
+const int TABLE_SIZE = 8192;
 
 float MapAngleToTableIndex(float angle) {
    
@@ -28,9 +32,6 @@ float MapAngleToTableIndex(float angle) {
     }
     return index;
 }
-
-// Sin table declaration (assuming filled by header)
-extern const float SinTable[4096];
 
 // Approximation of sin(x) using a lookup table
 float SinApprox(float x) {
@@ -75,9 +76,6 @@ double SinD(double x) {
     }
 }
 
-// Cosine Table declaration (assuming filled by header)
-extern const float CosTable[4096];
-
 float CosApprox(float x) {
     int index = MapAngleToTableIndex(x);
     return CosTable[index];
@@ -114,9 +112,6 @@ double CosD(double x) {
         return CosD_Approx(x);
     }
 }
-
-// Tangent Table declaration (assuming filled by header)
-extern const float TanTable[4096];
 
 float TanApprox(float x) {
     int index = MapAngleToTableIndex(x);

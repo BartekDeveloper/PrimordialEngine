@@ -33,9 +33,9 @@ def extract_function_names(c_file_path):
 
 
 def main():
-    subprocess.run(["python3", "sintable.py"])
-    subprocess.run(["python3", "costable.py"])
-    subprocess.run(["python3", "tantable.py"])
+    subprocess.run(["python3", "sin.py"])
+    subprocess.run(["python3", "cos.py"])
+    subprocess.run(["python3", "tan.py"])
 
     c_file = "./triangle_functions.c"
     output_file = "functions.txt"

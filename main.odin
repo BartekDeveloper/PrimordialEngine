@@ -4,6 +4,7 @@ import "core:fmt"
 import "core:mem"
 
 import "src/engine"
+import "src/maths"
 
 main :: proc() {
     
@@ -20,7 +21,7 @@ main :: proc() {
             fmt.eprintln("* -=-=-=-> -------------- <-=-=-=- *");
         }
     }
-
+    
     engine.Init()
     engine.Start()
     defer engine.Destroy()

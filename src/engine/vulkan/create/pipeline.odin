@@ -9,6 +9,7 @@ import "base:runtime"
 
 import vk "vendor:vulkan"
 
+import "../load"
 import t "../types"
 import win "../../window"
 
@@ -37,15 +38,15 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
         log.debug("\t\t Creating Shaders")\
         p := pipelines["light"]
         
-        // p.shaders = {
-        //     { "geometry_vert", .VERTEX },
-        //     { "geometry_frag", .FRAGMENT },
-        // }
-        // p.stages = ShaderStages(data, GetModule, ..p.shaders)
+        p.shaders = {
+            { "geometry_vert", .VERTEX },
+            { "geometry_frag", .FRAGMENT },
+        }
+        p.stages = ShaderStages(data, load.GetModule, ..p.shaders)
         p.setLayouts = { descriptors["ubo"].setLayout }
 
         pVertexData:          PipelineVertexData = {{}, {}}
-
+        
         pDynamicStates:       [2]vk.DynamicState = {}
         pVertexInputInfo      := DefaultVertexInput(&pVertexData)
         pInputAssemblyInfo    := DefaultInputAssembly()

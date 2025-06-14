@@ -11,9 +11,9 @@ import "core:strconv"
 import th "core:thread"
 import vk "vendor:vulkan"
 
-import t "types"
+import "load"
 import "create"
-
+import t "types"
 import win "../window"
 
 InitFromZero :: proc(data: ^t.VulkanData, loc := #caller_location) {
@@ -39,7 +39,11 @@ InitFromZero :: proc(data: ^t.VulkanData, loc := #caller_location) {
     logical.requestedFeatures = {
         samplerAnisotropy = true
     }
-     
+
+    load.SetVulkanDataPointer(data)
+    load.Shaders()
+    load.RemoveVulkanDataPointer()
+
     create.AppInfo(data) 
     create.Instance(data)
     create.Surface(data)

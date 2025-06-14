@@ -145,8 +145,13 @@ PipelinesCreateInfos :: #type union #no_nil{
     vk.GraphicsPipelineShaderGroupsCreateInfoNV,
 }
 
+ShaderReference :: #type struct{
+    name: string,
+    stage: vk.ShaderStageFlag, 
+}
+
 Pipeline :: #type struct{
-    shaders: []any,
+    shaders: []ShaderReference,
     stages:  []vk.PipelineShaderStageCreateInfo,
     
     setLayouts: []vk.DescriptorSetLayout,
@@ -209,3 +214,9 @@ QueueIndices :: #type struct{
     transfer: u32
 }
 
+GetModuleProc :: #type proc(pName: string) -> (module: vk.ShaderModule)
+
+ShaderLang :: enum u8 {
+    GLSL,
+    SPIRV,
+}

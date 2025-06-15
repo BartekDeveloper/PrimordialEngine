@@ -168,7 +168,7 @@ SwapchainDepthFormat :: proc(data: ^t.VulkanData) -> (found: vk.Format = .D32_SF
         { .DEPTH_STENCIL_ATTACHMENT }
     )
     if !good {
-        log.fatal("Failed to find suitable depth format!")
+        log.panic("Failed to find suitable depth format!")
     }
 
     log.debugf("Found depth format: %s", found)

@@ -36,7 +36,6 @@ GetModule :: proc(
 
 Shaders :: proc(
     dir:  string = "./assets/shaders",
-    lang: t.ShaderLang = .GLSL
 ) -> () {
     handle: os.Handle
     err:    os.Error
@@ -69,7 +68,7 @@ Shaders :: proc(
         log.infof("Found shader: %s", name)
         
         ok: bool = false
-        shaderModules[name], ok = CreateShaderModule(name, lang, dir)
+        shaderModules[name], ok = CreateShaderModule(name, dir)
         if ok {
             exists[name] = true
         } else {
@@ -84,7 +83,6 @@ Shaders :: proc(
 
 CreateShaderModule :: proc(
     name:   string       = "shader",
-    lang:   t.ShaderLang = .GLSL,
     dir:    string       = "./assets/shaders"
 ) -> (module: vk.ShaderModule, good: bool = true) #optional_ok {
     module = vk.ShaderModule{}

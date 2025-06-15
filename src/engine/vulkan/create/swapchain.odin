@@ -17,21 +17,29 @@ SwapchainImages :: proc(data: ^t.VulkanData) -> () {
     ctx = context
     using data;
 
+    good: bool = true
+
     log.debug("Requesting swapchain images")
     swapchain.images = make([dynamic]vk.Image,     swapchain.imageCount, allocator=context.temp_allocator)
     vk.GetSwapchainImagesKHR(logical.device, swapchain.swapchain, &swapchain.imageCount, raw_data(swapchain.images))
+    if len(swapchain.images) == 0 {
+        log.panic("Failed to get swapchain images!")
+    }
 
-    log.debug("Creating swpachain image views")
+    log.debug("Creating swapchain image views")
     swapchain.views  = make([dynamic]vk.ImageView, swapchain.imageCount, allocator=context.temp_allocator)
     for &img, i in swapchain.images {
-        good: bool = true
-        swapchain.views[i], good = ImageView(data, img, swapchain.formats.surface.format)
+        swapchain.views[i], good = ImageView(
+            data,
+            img,
+            swapchain.formats.surface.format
+        )
         if !good {
-            log.error("Failed to create Swapchain Views!")
+            log.panic("Failed to create Swapchain Views!")
         }
     }
 
-    i: int = 0
+    i: int = 0 
     for &view in swapchain.views {
         // Add label here <- . ->
         i += 1

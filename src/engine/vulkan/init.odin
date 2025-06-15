@@ -14,11 +14,15 @@ import vk "vendor:vulkan"
 import "load"
 import "create"
 import t "types"
+import s "../../shared"
 import win "../window"
 
-InitFromZero :: proc(data: ^t.VulkanData, loc := #caller_location) {
+InitFromZero :: proc(
+    data: ^t.VulkanData, rData: ^s.RenderData
+) -> () {
     using data;
 
+    loc := #location()
     log.infof("%s", loc)
     log.info("Initializing from zero")
     
@@ -43,17 +47,21 @@ InitFromZero :: proc(data: ^t.VulkanData, loc := #caller_location) {
     load.SetVulkanDataPointer(data)
     defer load.RemoveVulkanDataPointer()
 
-    create.AppInfo(data) 
+    create.AppInfo(data)
     create.Instance(data)
     create.Surface(data)
     create.PhysicalDeviceData(data)
     create.LogicalDevice(data)
+    load.Shaders()
     create.Swapchain(data)
     create.RenderPasses(data)
     create.DescriptorSetLayouts(data)
-    load.Shaders()
     create.Pipelines(data)
     create.Resources(data)
     create.Framebuffers(data)
+    create.CommandPools(data)
+
+    // <...>
+    create.SyncObjects(data, rData)
 }
 

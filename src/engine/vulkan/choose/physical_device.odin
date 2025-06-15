@@ -134,7 +134,7 @@ PhysicalDevicesData :: proc(instance: vk.Instance, surface: vk.SurfaceKHR) -> (c
             }
 
             result = vk.GetPhysicalDeviceSurfaceSupportKHR(h.device, u32(idx), surface, &found.present)
-            if result != .SUCCESS do log.fatalf("Failed to acquire Physical Device Surface Support: %s", result)
+            if result != .SUCCESS do log.panicf("Failed to acquire Physical Device Surface Support: %s", result)
             if !found.present {
                 fmt.eprintfln("Present queue found: %d", idx)
                 present = u32(idx)

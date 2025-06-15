@@ -8,9 +8,9 @@ import t "types"
 
 vkData: t.VulkanData = {}
 
-Init :: proc(data: ^s.RenderData) {
+Init :: proc(rData: ^s.RenderData) {
 
-    InitFromZero(&vkData)  
+    InitFromZero(&vkData, rData)  
     return
 }
 

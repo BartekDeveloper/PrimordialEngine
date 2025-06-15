@@ -89,7 +89,7 @@ RenderPasses :: proc(data: ^t.VulkanData) -> () {
         log.debug("\t\t Creating Render Pass")
         good := RenderPass(data, &lightPass.createInfo, &lightPass.renderPass)
         if !good {
-            log.fatal("Failed to create Render Pass!")
+            log.panic("Failed to create Render Pass!")
         }
         
         passes["light"] = lightPass

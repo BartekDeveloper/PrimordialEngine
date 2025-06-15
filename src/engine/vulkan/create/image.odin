@@ -77,7 +77,7 @@ Image_return :: proc(
     memType: u32  = 0
     good = choose.MemoryType(data.physical.device, memoryRequirements.memoryTypeBits, memoryProperties, &memType)
     if !good {
-        log.fatal("Failed to find suitable memory type!")
+        log.panic("Failed to find suitable memory type!")
     }
 
     memoryAllocateInfo: vk.MemoryAllocateInfo

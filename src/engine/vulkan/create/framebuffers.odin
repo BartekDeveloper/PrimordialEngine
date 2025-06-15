@@ -31,7 +31,7 @@ Framebuffers :: proc(data: ^t.VulkanData) -> () {
 
             framebufferCreateInfo: vk.FramebufferCreateInfo = {
                 sType           = .FRAMEBUFFER_CREATE_INFO,
-                renderPass      = lightPass.renderPass,
+                renderPass      = renderPass,
                 attachmentCount = u32(len(attachments)),
                 pAttachments    = raw_data(attachments),
                 width           = screen.width,

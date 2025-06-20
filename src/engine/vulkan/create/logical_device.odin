@@ -34,7 +34,7 @@ LogicalDevice :: proc(data: ^t.VulkanData) -> () {
         fmt.eprintfln("\t%s", e) 
     }   
     fmt.eprintfln("=*=*=*= Requested Device Extensions =*=*=*=")
-       
+    
     logical.createInfo = {     
         sType                   = .DEVICE_CREATE_INFO,
         queueCreateInfoCount    = u32(len(logical.queueCreateInfos)),
@@ -47,8 +47,10 @@ LogicalDevice :: proc(data: ^t.VulkanData) -> () {
     }
     result := vk.CreateDevice(physical.device, &logical.createInfo, nil, &logical.device)
     if result != .SUCCESS {
-        log.panic("Failed to create Logical Device")
+        panic("Failed to create Logical Device")
     }
+
+    vk.load_proc_addresses(logical.device)
 
     vk.GetDeviceQueue(logical.device, physical.queues.idx.graphics, 0, &physical.queues.graphics)
     vk.GetDeviceQueue(logical.device, physical.queues.idx.present,  0, &physical.queues.present)

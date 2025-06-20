@@ -40,7 +40,7 @@ SwapchainFormat :: proc(data: ^t.VulkanData) -> (surfaceFormat: vk.SurfaceFormat
         nil
     )
     if result != .SUCCESS {
-        log.panic("Failed to get physical device surface formats!")
+        panic("Failed to get physical device surface formats!")
     }
 
     swapchainFormats: []vk.SurfaceFormatKHR
@@ -52,7 +52,7 @@ SwapchainFormat :: proc(data: ^t.VulkanData) -> (surfaceFormat: vk.SurfaceFormat
         raw_data(swapchainFormats)
     )
     if result != .SUCCESS {
-        log.panic("Failed to get physical device surface formats!")
+        panic("Failed to get physical device surface formats!")
     }
 
     fmt.eprintfln("=*=*=*= Wanted Formats =*=*=*=")
@@ -107,7 +107,7 @@ SwapchainPresentMode :: proc(data: ^t.VulkanData) -> (presentMode: vk.PresentMod
         nil
     )
     if result != .SUCCESS {
-        log.panic("Failed to get physical device surface present modes!")
+        panic("Failed to get physical device surface present modes!")
     }
 
     presentModes: []vk.PresentModeKHR
@@ -119,7 +119,7 @@ SwapchainPresentMode :: proc(data: ^t.VulkanData) -> (presentMode: vk.PresentMod
         raw_data(presentModes)
     )
     if result != .SUCCESS {
-        log.panic("Failed to get physical device surface present modes!")
+        panic("Failed to get physical device surface present modes!")
     }
 
     fmt.eprintfln("=*=*=*= Wanted Present Modes =*=*=*=")
@@ -168,7 +168,7 @@ SwapchainDepthFormat :: proc(data: ^t.VulkanData) -> (found: vk.Format = .D32_SF
         { .DEPTH_STENCIL_ATTACHMENT }
     )
     if !good {
-        log.panic("Failed to find suitable depth format!")
+        panic("Failed to find suitable depth format!")
     }
 
     log.debugf("Found depth format: %s", found)

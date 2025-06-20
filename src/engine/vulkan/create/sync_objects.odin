@@ -16,21 +16,26 @@ import s "../../../shared"
 SyncObjects :: proc(data: ^t.VulkanData, render: ^s.RenderData) {
     using data;
     log.info("Creating sync objects")
+    
     log.assert(render != nil, "Render data is nil, provide a correct render data struct")
     log.assert(data   != nil, "Vulkan Data is nil, provide a correct vulkan data struct")
+    
+    syncObjects.semaphores = make([]t.SemaphoresObjects, swapchain.imageCount)
+    syncObjects.fences     = make([]t.FenceObject,       swapchain.imageCount)
 
-    for i := 0; i < int(render.MAX_FRAMES_IN_FLIGHT); i += 1 { 
+    for i := 0; i < int(swapchain.imageCount); i += 1 { 
         using syncObjects
 
-        semaphores[i].createInfo = {
+        semaphores[i].createInfo = {    
             sType = .SEMAPHORE_CREATE_INFO,
             pNext = nil,
-            flags = {},
+            flags =  {},
         }
+
         fences[i].createInfo = {
             sType = .FENCE_CREATE_INFO,
             pNext = nil,
-            flags = {},
+            flags = { .SIGNALED },
         }
         
         result := vk.CreateSemaphore(
@@ -40,7 +45,7 @@ SyncObjects :: proc(data: ^t.VulkanData, render: ^s.RenderData) {
             &semaphores[i].image
         )
         if result != .SUCCESS {
-            log.panic("Failed to create semaphore!")
+            panic("Failed to create semaphore!")
         }
 
         result = vk.CreateSemaphore(
@@ -50,7 +55,7 @@ SyncObjects :: proc(data: ^t.VulkanData, render: ^s.RenderData) {
             &semaphores[i].render
         )
         if result != .SUCCESS {
-            log.panic("Failed to create semaphore!")
+            panic("Failed to create semaphore!")
         }
 
         result = vk.CreateFence(
@@ -60,7 +65,7 @@ SyncObjects :: proc(data: ^t.VulkanData, render: ^s.RenderData) {
             &fences[i].this
         )
         if result != .SUCCESS {
-            log.panic("Failed to create fence!")
+            panic("Failed to create fence!")
         }
     }
 

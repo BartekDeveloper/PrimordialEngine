@@ -18,9 +18,10 @@ import s "../../shared"
 import win "../window"
 
 InitFromZero :: proc(
-    data: ^t.VulkanData, rData: ^s.RenderData
+    data: ^t.VulkanData = nil, rData: ^s.RenderData = nil
 ) -> () {
     using data;
+    data.renderData = rData^
 
     loc := #location()
     log.infof("%s", loc)
@@ -54,14 +55,20 @@ InitFromZero :: proc(
     create.LogicalDevice(data)
     load.Shaders()
     create.Swapchain(data)
-    create.RenderPasses(data)
+    create.RenderPasses(data)    
     create.DescriptorSetLayouts(data)
     create.Pipelines(data)
     create.Resources(data)
     create.Framebuffers(data)
     create.CommandPools(data)
-
-    // <...>
+    create.CommandBuffers(data)
+    create.UniformBuffers(data)
+    create.DescriptorPools(data)
+    create.Samplers(data)
+    create.DescriptorSets(data)
     create.SyncObjects(data, rData)
+    create.AdditionalData(data)
+
+    return
 }
 

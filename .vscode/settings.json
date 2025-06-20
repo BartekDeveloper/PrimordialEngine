@@ -55,5 +55,10 @@
   "C_Cpp_Runner.useLeakSanitizer": false,
   "C_Cpp_Runner.showCompilationTime": false,
   "C_Cpp_Runner.useLinkTimeOptimization": false,
-  "C_Cpp_Runner.msvcSecureNoWarnings": false
+"C_Cpp_Runner.msvcSecureNoWarnings": false,
+"Codegeex.CommitMessage.LanguagePreference": "中文",
+"Codegeex.Comment.LanguagePreference": "English",
+"Codegeex.Chat.LanguagePreference": "English",
+"Codegeex.GenerationPreference": "automatic",
+"Codegeex.RepoIndex": true
 }

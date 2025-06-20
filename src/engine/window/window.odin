@@ -2,6 +2,8 @@ package window
 
 import "core:log"
 import "core:c"
+import "core:fmt"
+import "base:runtime"
 
 import sdl "vendor:sdl3"
 import vk  "vendor:vulkan"
@@ -11,7 +13,7 @@ WindowData :: #type struct {
     title:         cstring,
     closing:       bool,
     ptr:           ^sdl.Window,
-    event:         ^sdl.Event
+    event:         sdl.Event
 }
 defaultWD: WindowData = {
     width   = 1280,
@@ -36,7 +38,7 @@ Init :: proc(
 
     log.info("\t SDL Initialization")
     if !sdl.Init(windowInitFlags) {
-        log.panic("SDL3 Initialization failed!:\n\t %s", sdl.GetError())
+        log.panicf("SDL3 Initialization failed!:\n\t %s", sdl.GetError())
     }
     log.info("\t SDL Finished Initialization")     
 
@@ -75,20 +77,26 @@ Init :: proc(
 Running :: proc(
     data: ^WindowData = defaultWindowData
 ) -> bool {
-   return (data.closing == false)
+    return (data.closing == false)
 }
 
-Poll :: proc(
-    data: ^WindowData = defaultWindowData
-) {
-    if !sdl.PollEvent(data.event) == false || data.event == nil {
-        return
-    }
-    
-    log.info(data.event)
+Poll :: proc(data: ^WindowData = defaultWindowData) -> (result: string = "", good: bool = true) #optional_ok {
+    sdl.PumpEvents()
 
-    if (data.event.type == .QUIT) {
-        data.closing = true
+    for sdl.PollEvent(&data.event) {
+        // result = fmt.tprintf("%s\t%s", result, "poll")
+
+        if data.event.type == .QUIT {
+            // result = fmt.tprintf("%s\t%s", result, "quit")
+            data.closing = true
+
+        } else if data.event.type == .WINDOW_CLOSE_REQUESTED {
+            // result = fmt.tprintf("%s\t%s", result, "window close requested")
+            data.closing = true
+
+        } else {
+            // result = fmt.tprintf("%s\tunhandled event:\t%s", result, data.event.type)
+        }
     }
 
     return
@@ -121,7 +129,7 @@ VulkanCreateSurface :: proc(instance: ^vk.Instance, surface: ^vk.SurfaceKHR, dat
     if !sdl.Vulkan_CreateSurface(data.ptr, instance^, nil, surface) {
         panic("SDL3 Failed to create Vulkan Surface")
     }
-   
+
     return
 }
 

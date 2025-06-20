@@ -29,8 +29,6 @@ VulkanDebugCallback :: proc "system" (
 
 Instance :: proc(data: ^t.VulkanData) -> () {
     using data;
-    
-    ctx = context
     loc := #location()
 
     log.infof("\t%s", loc)

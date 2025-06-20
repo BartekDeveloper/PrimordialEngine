@@ -16,7 +16,7 @@ PhysicalDevicesData :: proc(instance: vk.Instance, surface: vk.SurfaceKHR) -> (c
     count: u32 = 0
     result := vk.EnumeratePhysicalDevices(instance, &count, nil)
     if result != .SUCCESS do log.panicf("Failed to enumerate Physical Devices: %s", result)
-    if count  == 0        do log.panic("Count of Physical Devices is equal to 0!")
+    if count  == 0        do panic("Count of Physical Devices is equal to 0!")
 
     devices := make([]vk.PhysicalDevice, count)
     result = vk.EnumeratePhysicalDevices(instance, &count, raw_data(devices))
@@ -27,7 +27,6 @@ PhysicalDevicesData :: proc(instance: vk.Instance, surface: vk.SurfaceKHR) -> (c
     for i := 0; i < int(count); i += 1 {
         devicesData[i] = t.PhysicalDeviceData{ device = devices[i], index = i }
     }
-
 
     scores: map[u32]int = {}
     // defer delete(scores)
@@ -84,7 +83,7 @@ PhysicalDevicesData :: proc(instance: vk.Instance, surface: vk.SurfaceKHR) -> (c
             case:
                 type = "UNKNOWN"
         }
-         log.infof("%s:\t %s", type, props.deviceName)
+        log.infof("%s:\t %s", type, props.deviceName)
         
 
         queueFamiliesCount: u32 = 0
@@ -137,7 +136,7 @@ PhysicalDevicesData :: proc(instance: vk.Instance, surface: vk.SurfaceKHR) -> (c
             if result != .SUCCESS do log.panicf("Failed to acquire Physical Device Surface Support: %s", result)
             if !found.present {
                 fmt.eprintfln("Present queue found: %d", idx)
-                present = u32(idx)
+                present = u32(idx) - 2
                 found.present = true
             }
 

@@ -37,7 +37,7 @@ Resources :: proc(data: ^t.VulkanData) -> () {
             { .COLOR }
         )
         if !good {
-            log.panic("Failed to create Color Buffer!")
+            panic("Failed to create Color Buffer!")
         }
         gBuffers["light.color"] = colorBuffer
     }
@@ -56,7 +56,7 @@ Resources :: proc(data: ^t.VulkanData) -> () {
             { .DEPTH }
         )
         if !good {
-            log.panic("Failed to create Depth Buffer!")
+            panic("Failed to create Depth Buffer!")
         }
         gBuffers["light.depth"] = depthBuffer
     }
@@ -76,7 +76,6 @@ GBuffer :: proc(
     aspectMask: vk.ImageAspectFlags      = {},
 ) -> (good: bool = true) {
     using data;
-    context = ctx
     log.debug("Creating GBuffer")
 
     gBuffer.img, good = Image(
@@ -88,7 +87,7 @@ GBuffer :: proc(
         usage
     )
     if !good {
-        log.panic("Failed to create GBuffer!")
+        panic("Failed to create GBuffer!")
     }
 
     gBuffer.view, good = ImageView(
@@ -98,7 +97,7 @@ GBuffer :: proc(
         aspectMask
     )
     if !good {
-        log.panic("Failed to create GBuffer View!")
+        panic("Failed to create GBuffer View!")
     }
 
     return

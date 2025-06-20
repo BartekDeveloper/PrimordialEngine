@@ -14,34 +14,35 @@ import t   "../types"
 import win "../../window"
 
 SwapchainImages :: proc(data: ^t.VulkanData) -> () {
-    ctx = context
     using data;
 
     good: bool = true
 
     log.debug("Requesting swapchain images")
-    swapchain.images = make([dynamic]vk.Image,     swapchain.imageCount, allocator=context.temp_allocator)
+    swapchain.images = make([dynamic]vk.Image,     swapchain.imageCount)
     vk.GetSwapchainImagesKHR(logical.device, swapchain.swapchain, &swapchain.imageCount, raw_data(swapchain.images))
     if len(swapchain.images) == 0 {
-        log.panic("Failed to get swapchain images!")
+        panic("Failed to get swapchain images!")
     }
 
     log.debug("Creating swapchain image views")
-    swapchain.views  = make([dynamic]vk.ImageView, swapchain.imageCount, allocator=context.temp_allocator)
-    for &img, i in swapchain.images {
-        swapchain.views[i], good = ImageView(
+    swapchain.views = make([dynamic]vk.ImageView, swapchain.imageCount)
+    for &view, i in swapchain.views  {
+        view, good = ImageView(
             data,
-            img,
+            swapchain.images[i],
             swapchain.formats.surface.format
         )
         if !good {
-            log.panic("Failed to create Swapchain Views!")
+            panic("Failed to create Swapchain Views!")
         }
     }
 
     i: int = 0 
     for &view in swapchain.views {
         // Add label here <- . ->
+        fmt.eprintfln("View %d", view)
+        log.assertf(view != {}, "Swapchain View #%d is nil!", i)
         i += 1
     }
 
@@ -50,7 +51,6 @@ SwapchainImages :: proc(data: ^t.VulkanData) -> () {
 
 Swapchain :: proc(data: ^t.VulkanData) -> () {
     using data;
-    ctx = context
 
     log.debug("Swapchain data initializing")
     swapchain.extent          = choose.SwapchainExtent(data)
@@ -66,14 +66,17 @@ Swapchain :: proc(data: ^t.VulkanData) -> () {
         swapchain.imageCount = physical.capabilities.maxImageCount
     }
     if swapchain.imageCount == 0 {
-        log.panic("Swapchain max image count is equal to 0!")
+        panic("Swapchain max image count is equal to 0!")
     }
     log.infof("Swapchain image count: %d", swapchain.imageCount)
 
     log.debug("Swapchain Create Info")
     preTransform := physical.capabilities.currentTransform
-    indices: []u32 = physical.uniqueQueueFamilies
+    indices: []u32 = { physical.queues.idx.present, physical.queues.idx.graphics }
 
+    log.debug(swapchain.formats.surface.colorSpace)
+    log.debug(swapchain.formats.surface.format)
+    log.info(swapchain.formats.surface)
     swapchain.createInfo = {
         sType                 = .SWAPCHAIN_CREATE_INFO_KHR,
         surface               = surface,
@@ -91,7 +94,7 @@ Swapchain :: proc(data: ^t.VulkanData) -> () {
         presentMode           = swapchain.presentMode,
         clipped               = true,
     }
-    if indices[0] != indices[1] || indices[2] != indices[3] || indices[1] != indices[2] {
+    if indices[0] != indices[1] {
         swapchain.createInfo.imageSharingMode = .CONCURRENT
         swapchain.createInfo.queueFamilyIndexCount = u32(len(indices))
         swapchain.createInfo.pQueueFamilyIndices   = raw_data(indices)

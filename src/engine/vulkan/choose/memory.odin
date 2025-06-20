@@ -19,7 +19,7 @@ MemoryType_return :: proc(
         }
     }
 
-    log.panic("Failed to find suitable memory type")
+    panic("Failed to find suitable memory type")
 }
 
 MemoryType_modify :: proc(

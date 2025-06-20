@@ -15,7 +15,6 @@ import win "../../window"
 
 RenderPasses :: proc(data: ^t.VulkanData) -> () {
     using data;
-    ctx = context
 
     swapchain.formats.depth = choose.SwapchainDepthFormat(data)
 
@@ -89,9 +88,24 @@ RenderPasses :: proc(data: ^t.VulkanData) -> () {
         log.debug("\t\t Creating Render Pass")
         good := RenderPass(data, &lightPass.createInfo, &lightPass.renderPass)
         if !good {
-            log.panic("Failed to create Render Pass!")
+            panic("Failed to create Render Pass!")
         }
         
+        lightPass.clearValues = make([]vk.ClearValue, 2)
+        lightPass.clearValues = {
+            {
+                color = { float32 = {
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                }},
+            },
+            {
+                depthStencil = { depth = 0.0, stencil = 0 },
+            }
+        }
+
         passes["light"] = lightPass
     }
 
@@ -162,8 +176,6 @@ RenderPass :: proc(
     createInfo: ^vk.RenderPassCreateInfo = nil,
     renderPass: ^vk.RenderPass           = nil
 ) -> (good: bool = true) {
-    context = ctx
-
     result := vk.CreateRenderPass(data.logical.device, createInfo, nil, renderPass)
     if result != .SUCCESS {
         good = false

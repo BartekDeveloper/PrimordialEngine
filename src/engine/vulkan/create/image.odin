@@ -48,8 +48,6 @@ Image_return :: proc(
     depth: u32                               = 1,
 
 ) -> (image: vk.Image, good: bool = true) #optional_ok {
-    context = ctx
-
     imageCreateInfo: vk.ImageCreateInfo = {
         sType           = .IMAGE_CREATE_INFO,
         imageType       = imageType,
@@ -77,7 +75,7 @@ Image_return :: proc(
     memType: u32  = 0
     good = choose.MemoryType(data.physical.device, memoryRequirements.memoryTypeBits, memoryProperties, &memType)
     if !good {
-        log.panic("Failed to find suitable memory type!")
+        panic("Failed to find suitable memory type!")
     }
 
     memoryAllocateInfo: vk.MemoryAllocateInfo
@@ -120,7 +118,6 @@ Image_modify :: proc(
     msaaSamples: vk.SampleCountFlags         = { ._1 },
     depth: u32                               = 1,
 ) -> (good: bool = true) {
-    context = ctx
 
     image^, good = Image_return(
         data,

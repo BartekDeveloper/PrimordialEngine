@@ -14,7 +14,12 @@ main :: proc() {
         context.allocator = mem.tracking_allocator(&trace)
 
         defer {
-            fmt.eprintfln("* -=-=-=-> $%v Not freed! <-=-=-=- *", len(trace.allocation_map));
+            total_not_deallocated := 0
+            for k, v in trace.allocation_map {
+                total_not_deallocated += v.size
+            }
+
+            fmt.eprintfln("* -=-=-=-> %v ($%v) Not freed! <-=-=-=- *", len(trace.allocation_map), total_not_deallocated);
             for _, entry in trace.allocation_map {
                 fmt.eprintfln("\t $%v  -\n\t\t %s", entry.size, entry.location);
             }
@@ -26,4 +31,4 @@ main :: proc() {
     engine.Start()
     defer engine.Destroy()
 }
-  
+

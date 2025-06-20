@@ -45,5 +45,5 @@ FindSupportedFormat :: proc(
         }
     }
 
-    log.panic("Faield to find supported format!")
+    panic("Faield to find supported format!")
 }

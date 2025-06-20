@@ -15,20 +15,18 @@ import win "../../window"
 
 Pipelines :: proc(data: ^t.VulkanData) -> () {
     using data;
-    ctx = context
     good: bool = true
 
-
     viewports["global"] = {
-        x        = 0,
-        y        = 0,
-        minDepth = 0,
-        maxDepth = 1,
+        x        = 0.0,
+        y        = 0.0,
+        minDepth = 0.0,
+        maxDepth = 1.0,
         width    = (f32)(swapchain.extent.width),
         height   = (f32)(swapchain.extent.height),
     }
     scissors["global"] = {
-        offset = { x = 0, y = 0, },
+        offset = { x = 0.0, y = 0.0 },
         extent = swapchain.extent,
     }
 
@@ -75,13 +73,32 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
         )
         good = PipelineLayout(data, &pPipelineLayoutCreateInfo, &p.layout)
         if !good {
-            log.panic("Failed to create Pipeline Layout")
+            panic("Failed to create Pipeline Layout")
         }
 
         pCacheCreateInfo := DefaultPipelineEmptyCacheCreateInfo()
         good = PipelineCache(data, &pCacheCreateInfo, &p.cache)
         if !good {
-            log.panic("Failed to create Pipeline Cache")
+            panic("Failed to create Pipeline Cache")
+        }
+
+        p.createInfo = vk.GraphicsPipelineCreateInfo{
+            sType                   = .GRAPHICS_PIPELINE_CREATE_INFO,
+            stageCount              = u32(len(p.stages)),
+            pStages                 = raw_data(p.stages),
+            pVertexInputState       = &pVertexInputInfo,
+            pInputAssemblyState     = &pInputAssemblyInfo,
+            pViewportState          = &pViewportState,
+            pRasterizationState     = &pRasterizationInfo,
+            pMultisampleState       = &pMultisampleState,
+            pDepthStencilState      = &pDepthStencil,
+            pColorBlendState        = &pColorBlending,
+            pDynamicState           = &pDynamicState,
+            layout                  = p.layout,
+            renderPass              = passes["light"].renderPass,
+            subpass                 = 0,
+            basePipelineHandle      = 0,
+            basePipelineIndex       = 0,
         }
 
         good = GraphicsPipeline(
@@ -94,9 +111,11 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
             }
         )
         if !good {
-            log.panic("Failed to create Graphics Pipeline")
+            panic("Failed to create Graphics Pipeline")
         }
         log.info("Created `light` Graphics Pipeline")
+
+        assert(p.pipeline != {}, "Pipeline is nil!")
 
         pipelines["light"] = p
     }
@@ -487,7 +506,6 @@ PipelineLayout :: proc(
     layout:   ^vk.PipelineLayout          = nil,
 ) -> (ok: bool = true) {
     using data;
-    context = ctx
     log.debug("Creating Pipeline Layout")
     result := vk.CreatePipelineLayout(logical.device, info, nil, layout)
     if result != .SUCCESS {
@@ -504,6 +522,16 @@ PipelineCache :: proc(
     info:     ^vk.PipelineCacheCreateInfo = nil,
     cache:    ^vk.PipelineCache           = nil,
 ) -> (ok: bool = true) {
+    using data;
+    log.debug("Creating Pipeline Cache")
+    result := vk.CreatePipelineCache(logical.device, info, nil, cache)
+    if result != .SUCCESS {
+        log.error("Failed to create pipeline cache!")
+        ok = false
+        return
+    }
+    log.debug("Created Pipeline Cache")
+
     return
 }
 
@@ -512,6 +540,17 @@ GraphicsPipeline :: proc(
     pipeline: ^vk.Pipeline         = nil,
     gpData:   GraphicsPipelineData = {}
 ) -> (ok: bool = true) {
+    using data;
+
+    log.debug("Creating Graphics Pipeline")
+    result := vk.CreateGraphicsPipelines(logical.device, gpData.cache^, gpData.infoCount, gpData.info, nil, pipeline)
+    if result != .SUCCESS {
+        log.error("Failed to create graphics pipeline!")
+        ok = false
+        return
+    }
+    log.debug("Created Graphics Pipeline")
+
     return
 }
 

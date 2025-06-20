@@ -18,34 +18,61 @@ Framebuffers :: proc(data: ^t.VulkanData) -> () {
     log.debug("Creating Framebuffers")
 
     screen    := swapchain.extent
+    screen3D  := vk.Extent3D{ width = screen.width, height = screen.height, depth = 1 }
     lightPass := passes["light"]
-    {
-        using lightPass;
-        
-        frameBuffers = make([]vk.Framebuffer, swapchain.imageCount)
+    {  
+        frameBuffers := make([]vk.Framebuffer, swapchain.imageCount)
+
         for i := 0; i < int(swapchain.imageCount); i += 1 {
+            fmt.eprintfln("`Light` Framebuffer: %d", i)
+
+            log.assertf(swapchain.views[i]           != {}, "Swapchain View #%d is nil!", i)
+            log.assertf(gBuffers["light.depth"].view != {}, "Light Depth Buffer View is nil!")
+
             attachments: []vk.ImageView = {
                 swapchain.views[i],
                 gBuffers["light.depth"].view,
             }
 
-            framebufferCreateInfo: vk.FramebufferCreateInfo = {
-                sType           = .FRAMEBUFFER_CREATE_INFO,
-                renderPass      = renderPass,
-                attachmentCount = u32(len(attachments)),
-                pAttachments    = raw_data(attachments),
-                width           = screen.width,
-                height          = screen.height,
-                layers          = 1,
-            }
+            FrameBuffer(
+                data,
+                screen3D,
+                lightPass,
+                &attachments,
+                &frameBuffers[i]
+            )
+            fmt.eprintfln("Created `light` Framebuffer #%d", i) 
 
-            result := vk.CreateFramebuffer(logical.device, &framebufferCreateInfo, nil, &frameBuffers[i])
-            if result != .SUCCESS {
-                log.error("Failed to create framebuffer!")
-            }
-            fmt.eprintln("Created `light` Framebuffer #%d", i) 
+            lightPass.frameBuffers = frameBuffers
+            passes["light"] = lightPass
+            fmt.eprintfln("Total created `light` Framebuffer count: %d", len(lightPass.frameBuffers))  
         }
     }
 
     return  
+}
+
+FrameBuffer :: proc(
+    data:        ^t.VulkanData   = nil,
+    size:        vk.Extent3D     = {},
+    renderPass:  t.RenderPass    = {},
+    attachments: ^[]vk.ImageView = nil,
+    frameBuffer: ^vk.Framebuffer = nil,
+) -> () {
+    createInfo: vk.FramebufferCreateInfo = {
+        sType           = .FRAMEBUFFER_CREATE_INFO,
+        renderPass      = renderPass.renderPass,
+        attachmentCount = u32(len(attachments)),
+        pAttachments    = raw_data(attachments^),
+        width           = size.width,
+        height          = size.height,
+        layers          = size.depth,
+    }
+
+    result := vk.CreateFramebuffer(data.logical.device, &createInfo, nil, frameBuffer)
+    if result != .SUCCESS {
+        panic("Failed to create framebuffer!")
+    }
+
+    return
 }

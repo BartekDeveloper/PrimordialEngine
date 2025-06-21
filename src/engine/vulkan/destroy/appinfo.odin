@@ -13,11 +13,9 @@ import vk "vendor:vulkan"
 
 import t "../types"
 
-AppInfo :: #force_inline proc "fastcall" (
-    data: ^t.VulkanData = nil,
-    ctx: rn.Context = {}
+AppInfo :: #force_inline proc(
+    data: ^t.VulkanData = nil
 ) -> () {
-    context = ctx
 
     data.appInfo = {}
     assert(data.appInfo == {}, "Could not destroy AppInfo!")

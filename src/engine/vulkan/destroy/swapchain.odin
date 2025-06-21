@@ -14,22 +14,9 @@ import vk "vendor:vulkan"
 import t "../types"
 
 Swapchain :: proc(
-    data: ^t.VulkanData = nil,
-    ctx: rn.Context = {}
+    data: ^t.VulkanData = nil
 ) -> () {
-    context = ctx
-
-    GBuffer(
-        data,
-        &data.gBuffers["light.depth"],
-        context
-    )
-
-    GBuffer(
-        data,
-        &data.gBuffers["light.color"],
-        context
-    )
+    Resources(data)
 
     log.debug("Destroying Swapchain Images")
     for &view in data.swapchain.views {

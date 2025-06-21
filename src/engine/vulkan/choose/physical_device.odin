@@ -24,6 +24,7 @@ PhysicalDevicesData :: proc(instance: vk.Instance, surface: vk.SurfaceKHR) -> (c
     log.assert(len(devices) != 0, "Physical Devices array is empty!")
 
     devicesData := make([]t.PhysicalDeviceData, count)
+    defer delete(devicesData)
     for i := 0; i < int(count); i += 1 {
         devicesData[i] = t.PhysicalDeviceData{ device = devices[i], index = i }
     }

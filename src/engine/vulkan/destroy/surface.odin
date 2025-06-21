@@ -13,11 +13,9 @@ import vk "vendor:vulkan"
 
 import t "../types"
 
-Surface :: proc "fastcall" (
-    data: ^t.VulkanData = nil,
-    ctx: rn.Context = {}
+Surface :: proc(
+    data: ^t.VulkanData = nil
 ) -> () {
-    context = ctx
     log.debug("Destroying Surface")
     
     if data.surface != {} {

@@ -118,6 +118,7 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
         assert(p.pipeline != {}, "Pipeline is nil!")
 
         pipelines["light"] = p
+        defer p = {}
     }
 
     return

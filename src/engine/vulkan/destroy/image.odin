@@ -13,12 +13,11 @@ import vk "vendor:vulkan"
 
 import t "../types"
 
-Image :: #force_inline proc "fastcall" (
+Image :: #force_inline proc(
     data: ^t.VulkanData = nil,
     image: ^vk.Image    = nil,
     ctx: rn.Context     = {}
 ) -> () {
-    context = ctx
     vk.DestroyImage(
         data.logical.device,
         image^,

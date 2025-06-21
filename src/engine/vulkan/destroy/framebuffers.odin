@@ -13,11 +13,10 @@ import vk "vendor:vulkan"
 
 import t "../types"
 
-FrameBuffers :: proc "fastcall" (
+FrameBuffers :: proc(
     data: ^t.VulkanData = nil,
     ctx: rn.Context     = {}
 ) -> () {
-    context = ctx
     
     log.debug("\tDestroying Framebuffers")
     for _, &pass in data.passes {

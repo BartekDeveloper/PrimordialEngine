@@ -7,6 +7,7 @@ import "core:os"
 import "core:fmt"
 import "core:strings"
 import "core:strconv"
+import rn "base:runtime"
 
 import vk "vendor:vulkan"
 
@@ -16,5 +17,6 @@ AdditionalData :: proc(
     data: ^t.VulkanData = nil
 ) -> () {
 
+    log.debug("\tDestroying Additional Data")
     return
 }

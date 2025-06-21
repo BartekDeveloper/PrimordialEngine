@@ -14,21 +14,18 @@ import vk "vendor:vulkan"
 import t "../types"
 
 Pipelines :: proc(
-    data: ^t.VulkanData = nil,
-    ctx: rn.Context = {}
+    data: ^t.VulkanData = nil
 ) -> () {
     
     for _, &pipeline in data.pipelines {
         Pipeline(
             data,
-            &pipeline,
-            ctx
+            &pipeline
         )
 
         PipelineLayout(
             data,
-            &pipeline.layout,
-            ctx
+            &pipeline.layout
         )
     }
 
@@ -37,8 +34,7 @@ Pipelines :: proc(
 
 PipelineLayout :: proc(
     data: ^t.VulkanData = nil,
-    pipelineLayout: ^vk.PipelineLayout = nil,
-    ctx: rn.Context = {}
+    pipelineLayout: ^vk.PipelineLayout = nil
 ) -> () {
     if pipelineLayout != {} {
         vk.DestroyPipelineLayout(
@@ -52,8 +48,7 @@ PipelineLayout :: proc(
 
 Pipeline :: proc(
     data: ^t.VulkanData = nil,
-    pipeline: ^t.Pipeline = nil,
-    ctx: rn.Context = {}
+    pipeline: ^t.Pipeline = nil
 ) -> () {
     if pipeline.pipeline != {} {
         vk.DestroyPipeline(
@@ -62,5 +57,25 @@ Pipeline :: proc(
             data.allocations
         )
     }
+    pipeline.createInfo = {}
+
+    if pipeline.cache != {} {
+        vk.DestroyPipelineCache(
+            data.logical.device,
+            pipeline.cache,
+            data.allocations
+        )
+    }
+
+    // if pipeline.shaders != nil {
+    //     delete(pipeline.shaders)
+    // }
+    if pipeline.stages != nil {
+        delete(pipeline.stages)
+    }
+    if pipeline.states != nil {
+        delete(pipeline.states)
+    }
+
     return
 }

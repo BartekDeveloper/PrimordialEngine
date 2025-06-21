@@ -13,11 +13,9 @@ import vk "vendor:vulkan"
 
 import t "../types"
 
-SyncObjects :: proc "fastcall" (
-    data: ^t.VulkanData = nil,
-    ctx: rn.Context = {}
+SyncObjects :: proc(
+    data: ^t.VulkanData = nil
 ) -> () {
-    context = ctx
 
     log.debug("Destroying Sync Objects")
 

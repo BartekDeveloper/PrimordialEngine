@@ -1,13 +1,13 @@
 package vk_load
 
+import path "core:path/filepath"
 import "core:log"
 import "core:c"
 import "core:os"
 import "core:mem"
 import "core:fmt"
 import "core:strings"
-import path "core:path/filepath"
-import "base:runtime"
+import rn "base:runtime"
 
 import vk "vendor:vulkan"
 import t "../types"
@@ -119,5 +119,18 @@ CreateShaderModule :: proc(
     }
     log.infof("Created shader module: %s", name)
 
+    return
+}
+
+CleanUpShaderModules :: proc() -> () {
+    for k, &module in shaderModules {
+        vk.DestroyShaderModule(
+            data.logical.device,
+            module,
+            data.allocations
+        )
+        shaderModules[k] = {}
+        exists[k] = false
+    }
     return
 }

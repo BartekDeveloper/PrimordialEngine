@@ -21,11 +21,8 @@ Framebuffers :: proc(data: ^t.VulkanData) -> () {
     screen3D  := vk.Extent3D{ width = screen.width, height = screen.height, depth = 1 }
     lightPass := passes["light"]
     {  
-        frameBuffers := make([]vk.Framebuffer, swapchain.imageCount)
-
-        for i := 0; i < int(swapchain.imageCount); i += 1 {
-            fmt.eprintfln("`Light` Framebuffer: %d", i)
-
+        lightPass.frameBuffers = make([]vk.Framebuffer, swapchain.imageCount)
+        for &fb, i in lightPass.frameBuffers {
             log.assertf(swapchain.views[i]           != {}, "Swapchain View #%d is nil!", i)
             log.assertf(gBuffers["light.depth"].views[i] != {}, "Light Depth Buffer View is nil!")
 
@@ -39,14 +36,13 @@ Framebuffers :: proc(data: ^t.VulkanData) -> () {
                 screen3D,
                 lightPass,
                 &attachments,
-                &frameBuffers[i]
+                &fb
             )
             fmt.eprintfln("Created `light` Framebuffer #%d", i) 
-
-            lightPass.frameBuffers = frameBuffers
             passes["light"] = lightPass
-            fmt.eprintfln("Total created `light` Framebuffer count: %d", len(lightPass.frameBuffers))  
         }
+        
+        fmt.eprintfln("Total created `light` Framebuffer count: %d", len(lightPass.frameBuffers))  
     }
 
     return  

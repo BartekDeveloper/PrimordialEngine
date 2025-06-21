@@ -14,8 +14,7 @@ import vk "vendor:vulkan"
 import t "../types"
 
 DescriptorSetLayouts :: proc(
-    data: ^t.VulkanData = nil,
-    ctx: rn.Context = {}
+    data: ^t.VulkanData = nil
 ) -> () {
     
     for _, &descriptor in data.descriptors {
@@ -29,10 +28,8 @@ DescriptorSetLayouts :: proc(
 }
 
 DescriptorPools :: proc(
-    data: ^t.VulkanData = nil,
-    ctx: rn.Context = {}
+    data: ^t.VulkanData = nil
 ) -> () {
-    context = ctx
     
     log.debug("\tDestroying Descriptor Pools")
     for k, &pool in data.descriptorPools {

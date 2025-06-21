@@ -215,29 +215,29 @@ Wait :: proc() {
 Clean :: proc(data: ^s.RenderData) {
     using data;
 
+    load.SetVulkanDataPointer(&vkData)
+    defer load.RemoveVulkanDataPointer()
+
     //? Vulkan Data Cleaning functions
     destroy.AdditionalData(&vkData)
-    destroy.SyncObjects(&vkData, context)
-    // destroy.DescriptorSets(&vkData, context)
+    destroy.SyncObjects(&vkData)
     destroy.Samplers(&vkData)
-    destroy.DescriptorPools(&vkData, context)
-    destroy.UniformBuffers(&vkData, context)
-    // destroy.CommandBuffers(&vkData, context)
+    destroy.DescriptorPools(&vkData)
+    destroy.UniformBuffers(&vkData)
     destroy.CommandPools(&vkData)
     destroy.FrameBuffers(&vkData)
-    destroy.Resources(&vkData)
     destroy.Pipelines(&vkData)
-    destroy.DescriptorSetLayouts(&vkData, context)
+    destroy.DescriptorSetLayouts(&vkData)
     destroy.RenderPasses(&vkData)    
-    destroy.Swapchain(&vkData, context)
+    destroy.Swapchain(&vkData)
+    load.CleanUpShaderModules()
     destroy.LogicalDevice(&vkData)
     destroy.PhysicalDeviceData(&vkData)
     destroy.Surface(&vkData)
     destroy.Instance(&vkData)
-    destroy.AppInfo(&vkData, context)
+    destroy.AppInfo(&vkData)
 
     // Loaded Vulkan Data Cleaning functions
-    //// load.CleanUp()
 
     //* Now LETS SET ALL OF THE DATA(Vulkan Data) free
     //* and then set them to nil pointers

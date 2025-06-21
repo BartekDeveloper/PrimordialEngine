@@ -13,12 +13,11 @@ import vk "vendor:vulkan"
 
 import t "../types"
 
-Memory :: #force_inline proc "fastcall" (
+Memory :: #force_inline proc(
     data: ^t.VulkanData      = nil,
     memory: ^vk.DeviceMemory = nil,
     ctx: rn.Context          = {}
 ) -> () {
-    context = ctx
     
     vk.FreeMemory(
         data.logical.device,

@@ -13,11 +13,9 @@ import vk "vendor:vulkan"
 
 import t "../types"
 
-Instance :: proc "fastcall" (
-    data: ^t.VulkanData = nil,
-    ctx: rn.Context = {}
+Instance :: proc(
+    data: ^t.VulkanData = nil
 ) -> () {
-    context = ctx
     log.debug("Destroying Instance")
 
     if data.instance.messenger != {} {

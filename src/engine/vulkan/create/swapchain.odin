@@ -41,7 +41,6 @@ SwapchainImages :: proc(data: ^t.VulkanData) -> () {
     i: int = 0 
     for &view in swapchain.views {
         // Add label here <- . ->
-        fmt.eprintfln("View %d", view)
         log.assertf(view != {}, "Swapchain View #%d is nil!", i)
         i += 1
     }
@@ -74,9 +73,6 @@ Swapchain :: proc(data: ^t.VulkanData) -> () {
     preTransform := physical.capabilities.currentTransform
     indices: []u32 = { physical.queues.idx.present, physical.queues.idx.graphics }
 
-    log.debug(swapchain.formats.surface.colorSpace)
-    log.debug(swapchain.formats.surface.format)
-    log.info(swapchain.formats.surface)
     swapchain.createInfo = {
         sType                 = .SWAPCHAIN_CREATE_INFO_KHR,
         surface               = surface,

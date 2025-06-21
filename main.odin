@@ -28,7 +28,7 @@ main :: proc() {
     }
     
     engine.Init()
-    engine.Start()
     defer engine.Destroy()
+    engine.Start()
 }
 

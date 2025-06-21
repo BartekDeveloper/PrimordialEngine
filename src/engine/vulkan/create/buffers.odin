@@ -46,6 +46,7 @@ UniformBuffers :: proc(data: ^t.VulkanData) -> () {
         }
 
         uniformBuffers["ubo"] = uboBuffers
+        defer uboBuffers = {}
     }
 
     return

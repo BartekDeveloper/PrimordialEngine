@@ -17,32 +17,41 @@ Resources :: proc(
     data: ^t.VulkanData = nil
 ) -> () {
 
+    log.debug("\tDestroying Resources")
+    log.debug("\t\tGBuffers")
+    for k, &gBuffer in data.gBuffers {
+        
+        log.debugf("\t\t\t * %s", k)
+        GBuffer(
+            data,
+            &gBuffer
+        )
+    }
     return
 }
 
-GBuffer :: proc "fastcall" (
+GBuffer :: proc(
     data: ^t.VulkanData = nil,
-    gBuffer: ^t.GBuffer = nil,
-    ctx: rn.Context     = {}
+    gBuffer: ^t.GBuffer = nil
 ) -> () {
 
     for i := 0; i < int(data.swapchain.imageCount); i += 1 {
         Image(
             data,
             &gBuffer.images[i],
-            ctx
+            context
         )
 
         ImageView(
             data,
             &gBuffer.views[i],
-            ctx
+            context
         )
         
         Memory(
             data,
             &gBuffer.mems[i],
-            ctx
+            context
         )
     }
 

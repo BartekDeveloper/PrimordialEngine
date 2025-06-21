@@ -13,11 +13,10 @@ import vk "vendor:vulkan"
 
 import t "../types"
 
-UniformBuffers :: proc "fastcall" (
+UniformBuffers :: proc(
     data: ^t.VulkanData = nil,
     ctx: rn.Context     = {}
 ) -> () {
-    context = ctx
 
     for _, &buffers in data.uniformBuffers {
         Buffers(

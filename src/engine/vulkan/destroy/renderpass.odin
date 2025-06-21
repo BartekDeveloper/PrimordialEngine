@@ -7,6 +7,7 @@ import "core:os"
 import "core:fmt"
 import "core:strings"
 import "core:strconv"
+import rn "base:runtime"
 
 import vk "vendor:vulkan"
 
@@ -15,14 +16,15 @@ import t "../types"
 RenderPasses :: proc(
     data: ^t.VulkanData = nil
 ) -> () {
+    log.debug("\tDestroying Render Passes")
+    for k, &renderPass in data.passes {
 
-    for _, &renderPass in data.passes {
+        log.debugf("\t\t * %s", k)
         RenderPass(
             data,
-            &renderPass,
+            &renderPass
         )
     }
-
     return
 }
 

@@ -13,11 +13,9 @@ import vk "vendor:vulkan"
 
 import t "../types"
 
-LogicalDevice :: proc "fastcall" (
-    data: ^t.VulkanData = nil,
-    ctx: rn.Context = {}
+LogicalDevice :: proc(
+    data: ^t.VulkanData = nil
 ) -> () {
-    context = ctx
     log.debug("Destroying Logical Device")
 
     vk.DestroyDevice(

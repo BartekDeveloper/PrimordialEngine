@@ -7,14 +7,42 @@ import "core:os"
 import "core:fmt"
 import "core:strings"
 import "core:strconv"
+import rn "base:runtime"
 
 import vk "vendor:vulkan"
 
 import t "../types"
 
-FrameBuffers :: proc(
-    data: ^t.VulkanData = nil
+FrameBuffers :: proc "fastcall" (
+    data: ^t.VulkanData = nil,
+    ctx: rn.Context     = {}
 ) -> () {
+    context = ctx
+    
+    log.debug("\tDestroying Framebuffers")
+    for _, &pass in data.passes {
+        for &fb in pass.frameBuffers {
+            FrameBuffer(
+                data,
+                &fb
+            )
+        }
+    }
+    
+    return
+}
 
+FrameBuffer :: proc(
+    data: ^t.VulkanData = nil,
+    fb: ^vk.Framebuffer = nil
+) -> () {
+    if fb != {} {
+        vk.DestroyFramebuffer(
+            data.logical.device,
+            fb^,
+            data.allocations
+        )
+    }
+    assert(fb != nil, "Framebuffer is not destroyed!")
     return
 }

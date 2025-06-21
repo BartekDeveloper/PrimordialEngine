@@ -7,14 +7,47 @@ import "core:os"
 import "core:fmt"
 import "core:strings"
 import "core:strconv"
+import rn "base:runtime"
 
 import vk "vendor:vulkan"
 
 import t "../types"
 
 Swapchain :: proc(
-    data: ^t.VulkanData = nil
+    data: ^t.VulkanData = nil,
+    ctx: rn.Context = {}
 ) -> () {
+    context = ctx
+
+    GBuffer(
+        data,
+        &data.gBuffers["light.depth"],
+        context
+    )
+
+    GBuffer(
+        data,
+        &data.gBuffers["light.color"],
+        context
+    )
+
+    log.debug("Destroying Swapchain Images")
+    for &view in data.swapchain.views {
+        vk.DestroyImageView(
+            data.logical.device,
+            view,
+            data.allocations
+        )
+        assert(view != {}, "Swapchain View is not nil!")
+    }
+
+    log.debug("Destroying Swapchain")
+    vk.DestroySwapchainKHR(
+        data.logical.device,
+        data.swapchain.swapchain,
+        data.allocations
+    )
+    assert(data.swapchain.swapchain != {}, "Swapchain is not nil!")
 
     return
 }

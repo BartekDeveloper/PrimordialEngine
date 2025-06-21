@@ -125,8 +125,8 @@ GetInstanceExtensions :: proc() -> (ext: []cstring) {
 
 ProcAddr := sdl.Vulkan_GetVkGetInstanceProcAddr 
 
-VulkanCreateSurface :: proc(instance: ^vk.Instance, surface: ^vk.SurfaceKHR, data: ^WindowData = defaultWindowData) -> () {
-    if !sdl.Vulkan_CreateSurface(data.ptr, instance^, nil, surface) {
+VulkanCreateSurface :: proc(instance: ^vk.Instance, surface: ^vk.SurfaceKHR, data: ^WindowData = defaultWindowData, allocations: ^vk.AllocationCallbacks = nil) -> () {
+    if !sdl.Vulkan_CreateSurface(data.ptr, instance^, allocations, surface) {
         panic("SDL3 Failed to create Vulkan Surface")
     }
 

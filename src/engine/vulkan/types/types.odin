@@ -50,12 +50,15 @@ VulkanData :: #type struct {
 
 	// Sync Objects
 	syncObjects:     SyncObjects,
-	
-    // Buffers
+
+	// Buffers
 	uniformBuffers:  map[string]Buffers,
 
-    // Utils
-    frameBufferResized: bool
+	// Utils
+	frameResized:    bool,
+
+	// Memory Utils
+	allocations:     ^vk.AllocationCallbacks,
 }
 
 Instance :: #type struct {
@@ -201,9 +204,10 @@ Buffers :: #type struct {
 }
 
 GBuffer :: #type struct {
-	img:  vk.Image,
-	view: vk.ImageView,
-	mem:  vk.DeviceMemory,
+	images: []vk.Image,
+	views:  []vk.ImageView,
+	mems:   []vk.DeviceMemory,
+    format: vk.Format,
 }
 
 vkad :: #type vk.AttachmentDescription

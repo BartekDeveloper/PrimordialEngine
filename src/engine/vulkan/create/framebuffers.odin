@@ -27,11 +27,11 @@ Framebuffers :: proc(data: ^t.VulkanData) -> () {
             fmt.eprintfln("`Light` Framebuffer: %d", i)
 
             log.assertf(swapchain.views[i]           != {}, "Swapchain View #%d is nil!", i)
-            log.assertf(gBuffers["light.depth"].view != {}, "Light Depth Buffer View is nil!")
+            log.assertf(gBuffers["light.depth"].views[i] != {}, "Light Depth Buffer View is nil!")
 
             attachments: []vk.ImageView = {
                 swapchain.views[i],
-                gBuffers["light.depth"].view,
+                gBuffers["light.depth"].views[i],
             }
 
             FrameBuffer(
@@ -69,7 +69,12 @@ FrameBuffer :: proc(
         layers          = size.depth,
     }
 
-    result := vk.CreateFramebuffer(data.logical.device, &createInfo, nil, frameBuffer)
+    result := vk.CreateFramebuffer(
+        data.logical.device,
+        &createInfo,
+        data.allocations,
+        frameBuffer
+    )
     if result != .SUCCESS {
         panic("Failed to create framebuffer!")
     }

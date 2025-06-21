@@ -45,7 +45,7 @@ LogicalDevice :: proc(data: ^t.VulkanData) -> () {
         ppEnabledExtensionNames = raw_data(logical.extensions),
         pEnabledFeatures        = &logical.requestedFeatures
     }
-    result := vk.CreateDevice(physical.device, &logical.createInfo, nil, &logical.device)
+    result := vk.CreateDevice(physical.device, &logical.createInfo, allocations, &logical.device)
     if result != .SUCCESS {
         panic("Failed to create Logical Device")
     }

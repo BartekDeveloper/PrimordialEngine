@@ -68,7 +68,7 @@ GBuffer :: proc(
     data:       ^t.VulkanData            = nil,
     gBuffer:    ^t.GBuffer               = nil,
     format:     vk.Format                = .R8G8B8A8_SINT,
-    width:      u32                      = 0,
+    width:      u32                       = 0,
     height:     u32                      = 0,
     tiling:     vk.ImageTiling           = .OPTIMAL,
     usage:      vk.ImageUsageFlags       = {},
@@ -78,26 +78,32 @@ GBuffer :: proc(
     using data;
     log.debug("Creating GBuffer")
 
-    gBuffer.img, good = Image(
-        data,
-        width, height,
-        &gBuffer.mem,
-        memoryFlags,
-        format,
-        usage
-    )
-    if !good {
-        panic("Failed to create GBuffer!")
-    }
+    gBuffer.images = make([]vk.Image, data.swapchain.imageCount)
+    gBuffer.views  = make([]vk.ImageView, data.swapchain.imageCount)
+    gBuffer.mems   = make([]vk.DeviceMemory, data.swapchain.imageCount)
 
-    gBuffer.view, good = ImageView(
-        data,
-        gBuffer.img,
-        format,
-        aspectMask
-    )
-    if !good {
-        panic("Failed to create GBuffer View!")
+    for i := 0; i < int(data.swapchain.imageCount); i += 1 {
+        gBuffer.images[i], good = Image(
+            data,
+            width, height,
+            &gBuffer.mems[i],
+            memoryFlags,
+            format,
+            usage
+        )
+        if !good {
+            panic("Failed to create GBuffer!")
+        }
+
+        gBuffer.views[i], good = ImageView(
+            data,
+            gBuffer.images[i],
+            format,
+            aspectMask
+        )
+        if !good {
+            panic("Failed to create GBuffer View!")
+        }
     }
 
     return

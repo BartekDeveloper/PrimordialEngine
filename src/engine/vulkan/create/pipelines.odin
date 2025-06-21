@@ -458,11 +458,8 @@ AddAttribute :: proc{
     AddAttributes_3,
 }
 
-
-
 /*
     Graphics Pipeline States
-  
     @input vertex
     @input assembly
     @input viewport
@@ -507,7 +504,7 @@ PipelineLayout :: proc(
 ) -> (ok: bool = true) {
     using data;
     log.debug("Creating Pipeline Layout")
-    result := vk.CreatePipelineLayout(logical.device, info, nil, layout)
+    result := vk.CreatePipelineLayout(logical.device, info, allocations, layout)
     if result != .SUCCESS {
         log.error("Failed to create pipeline layout!")
         ok = false
@@ -524,7 +521,7 @@ PipelineCache :: proc(
 ) -> (ok: bool = true) {
     using data;
     log.debug("Creating Pipeline Cache")
-    result := vk.CreatePipelineCache(logical.device, info, nil, cache)
+    result := vk.CreatePipelineCache(logical.device, info, allocations, cache)
     if result != .SUCCESS {
         log.error("Failed to create pipeline cache!")
         ok = false
@@ -543,7 +540,7 @@ GraphicsPipeline :: proc(
     using data;
 
     log.debug("Creating Graphics Pipeline")
-    result := vk.CreateGraphicsPipelines(logical.device, gpData.cache^, gpData.infoCount, gpData.info, nil, pipeline)
+    result := vk.CreateGraphicsPipelines(logical.device, gpData.cache^, gpData.infoCount, gpData.info, allocations, pipeline)
     if result != .SUCCESS {
         log.error("Failed to create graphics pipeline!")
         ok = false

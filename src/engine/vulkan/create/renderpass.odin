@@ -176,7 +176,7 @@ RenderPass :: proc(
     createInfo: ^vk.RenderPassCreateInfo = nil,
     renderPass: ^vk.RenderPass           = nil
 ) -> (good: bool = true) {
-    result := vk.CreateRenderPass(data.logical.device, createInfo, nil, renderPass)
+    result := vk.CreateRenderPass(data.logical.device, createInfo, data.allocations, renderPass)
     if result != .SUCCESS {
         good = false
     }

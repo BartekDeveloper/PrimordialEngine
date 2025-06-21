@@ -63,7 +63,7 @@ Image_return :: proc(
         flags           = {},
     }
     
-    result := vk.CreateImage(data.logical.device, &imageCreateInfo, nil, &image)
+    result := vk.CreateImage(data.logical.device, &imageCreateInfo, data.allocations, &image)
     if result != .SUCCESS {
         good = false
         log.error("Failed to create image!")
@@ -85,7 +85,7 @@ Image_return :: proc(
         memoryTypeIndex = memType,
     }
 
-    result = vk.AllocateMemory(data.logical.device, &memoryAllocateInfo, nil, memory)
+    result = vk.AllocateMemory(data.logical.device, &memoryAllocateInfo, data.allocations, memory)
     if result != .SUCCESS {
         good = false
         log.error("Failed to allocate memory!")

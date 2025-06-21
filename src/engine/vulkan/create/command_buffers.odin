@@ -13,7 +13,9 @@ import "../choose"
 import t   "../types"
 import win "../../window"
 
-CommandBuffers :: proc(data: ^t.VulkanData) -> () {
+CommandBuffers :: proc(
+    data: ^t.VulkanData
+) -> () {
     using data;
     log.debug("Creating Command Buffers")
 
@@ -32,7 +34,11 @@ CommandBuffers :: proc(data: ^t.VulkanData) -> () {
         }
         globalCmdBuffer.this = make([]vk.CommandBuffer, imageCount)
 
-        good := CommandBuffer(data, &globalCmdBuffer.createInfo, raw_data(globalCmdBuffer.this))
+        good := CommandBuffer(
+            data,
+            &globalCmdBuffer.createInfo,
+            raw_data(globalCmdBuffer.this)
+        )
         if !good {
             panic("Failed to create Command Buffer!")
         }
@@ -50,7 +56,11 @@ CommandBuffer :: proc(
 ) -> (good: bool = true) {
     using data;
 
-    result := vk.AllocateCommandBuffers(logical.device, createInfo, cmdBuffer_s)
+    result := vk.AllocateCommandBuffers(
+        logical.device,
+        createInfo,
+        cmdBuffer_s
+    )
     if result != .SUCCESS {
         good = false
     }

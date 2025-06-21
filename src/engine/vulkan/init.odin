@@ -44,6 +44,7 @@ InitFromZero :: proc(
     logical.requestedFeatures = {
         samplerAnisotropy = true
     }
+    allocations = nil
 
     load.SetVulkanDataPointer(data)
     defer load.RemoveVulkanDataPointer()
@@ -53,7 +54,7 @@ InitFromZero :: proc(
     create.Surface(data)
     create.PhysicalDeviceData(data)
     create.LogicalDevice(data)
-    load.Shaders()
+    load.Shaders(allocations=allocations)
     create.Swapchain(data)
     create.RenderPasses(data)    
     create.DescriptorSetLayouts(data)

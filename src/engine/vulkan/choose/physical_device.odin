@@ -192,7 +192,7 @@ PhysicalDevicesData :: proc(instance: vk.Instance, surface: vk.SurfaceKHR) -> (c
 
         fmt.eprintfln("\t Max Image Dimensions %d", limits.maxImageDimension2D)
         score += limits.maxImageDimension2D
-       
+    
         fmt.eprintfln("\t Max Image Array Layers %d", limits.maxImageArrayLayers)
         score += limits.maxImageArrayLayers
         

@@ -68,7 +68,7 @@ Buffer_return :: proc(
         sharingMode = .EXCLUSIVE,
     }
 
-    result := vk.CreateBuffer(logical.device, &createInfo, nil, &buffer)
+    result := vk.CreateBuffer(logical.device, &createInfo, allocations, &buffer)
     if result != .SUCCESS {
         panic("Failed to create buffer!")
     }
@@ -88,7 +88,7 @@ Buffer_return :: proc(
         memoryTypeIndex = memType
     }
 
-    result = vk.AllocateMemory(logical.device, &memoryAllocateInfo, nil, memory)
+    result = vk.AllocateMemory(logical.device, &memoryAllocateInfo, allocations, memory)
     if result != .SUCCESS {
         panic("Failed to allocate buffer memory!")
     }
@@ -161,6 +161,12 @@ MapMemory :: proc(
     size:   vk.DeviceSize     = 0,
     flags:  vk.MemoryMapFlags = {},
 ) -> (result: vk.Result = .SUCCESS) {
-    result = vk.MapMemory(data.logical.device, buffer.mem, 0, size, flags, &buffer.ptr)
+    result = vk.MapMemory(
+        data.logical.device,
+        buffer.mem,
+        0, size,
+        flags,
+        &buffer.ptr
+    )
     return
 }

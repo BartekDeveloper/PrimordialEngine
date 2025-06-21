@@ -59,15 +59,16 @@ Render :: proc(
         using emath;
         
         ubo: s.UBO = {
-            cameraPos = {0, 0, 0},
-            cameraUp  = {0, 1, 0},
-            worldUp   = {0, 1, 0},
+            cameraPos = { 0, 0, 0 },
+            cameraUp  = { 0, 1, 0 },
+            worldUp   = { 0, 1, 0 },
+            
             worldTime = 0,
+            deltaTime = rData.deltaTime_f32,
             // proj      = Perspective(45.0, 1.0, 0.1, 128.0),
             // iProj     = Inverse(Perspective(88.0, 1.0, 0.1, 100.0)),
             // view      = LookAt({0, 0, 5}, {0, 0, 0}, {0, 1, 0}),
             // iView     = Inverse(LookAt({0, 0, 5}, {0, 0, 0}, {0, 1, 0})),
-            deltaTime = rData.deltaTime_f32,
         }
 
         uboBuffer.ptr = mem.copy(uboBuffer.ptr, rawptr(&ubo), size_of(s.UBO))
@@ -216,24 +217,24 @@ Clean :: proc(data: ^s.RenderData) {
 
     //? Vulkan Data Cleaning functions
     destroy.AdditionalData(&vkData)
-    destroy.SyncObjects(&vkData)
-    destroy.DescriptorSets(&vkData)
+    destroy.SyncObjects(&vkData, context)
+    // destroy.DescriptorSets(&vkData, context)
     destroy.Samplers(&vkData)
-    destroy.DescriptorPools(&vkData)
-    destroy.UniformBuffers(&vkData)
-    destroy.CommandBuffers(&vkData)
+    destroy.DescriptorPools(&vkData, context)
+    destroy.UniformBuffers(&vkData, context)
+    // destroy.CommandBuffers(&vkData, context)
     destroy.CommandPools(&vkData)
     destroy.FrameBuffers(&vkData)
     destroy.Resources(&vkData)
     destroy.Pipelines(&vkData)
-    destroy.DescriptorSetLayouts(&vkData)
+    destroy.DescriptorSetLayouts(&vkData, context)
     destroy.RenderPasses(&vkData)    
-    destroy.Swapchain(&vkData)
+    destroy.Swapchain(&vkData, context)
     destroy.LogicalDevice(&vkData)
     destroy.PhysicalDeviceData(&vkData)
     destroy.Surface(&vkData)
     destroy.Instance(&vkData)
-    destroy.AppInfo(&vkData)
+    destroy.AppInfo(&vkData, context)
 
     // Loaded Vulkan Data Cleaning functions
     //// load.CleanUp()

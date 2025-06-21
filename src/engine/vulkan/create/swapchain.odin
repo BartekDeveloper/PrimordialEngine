@@ -103,7 +103,7 @@ Swapchain :: proc(data: ^t.VulkanData) -> () {
     }
 
     log.debug("Creating Swapchain")
-    result := vk.CreateSwapchainKHR(logical.device, &swapchain.createInfo, nil, &swapchain.swapchain)
+    result := vk.CreateSwapchainKHR(logical.device, &swapchain.createInfo, allocations, &swapchain.swapchain)
     if result != .SUCCESS {
         log.error("Failed to create swapchain!")
     }

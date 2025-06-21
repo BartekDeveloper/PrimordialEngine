@@ -16,5 +16,26 @@ RenderPasses :: proc(
     data: ^t.VulkanData = nil
 ) -> () {
 
+    for _, &renderPass in data.passes {
+        RenderPass(
+            data,
+            &renderPass,
+        )
+    }
+
+    return
+}
+
+RenderPass :: proc(
+    data: ^t.VulkanData = nil,
+    renderPass: ^t.RenderPass = nil
+) -> () {
+    if renderPass != {} {
+        vk.DestroyRenderPass(
+            data.logical.device,
+            renderPass.renderPass,
+            data.allocations
+        )
+    }
     return
 }

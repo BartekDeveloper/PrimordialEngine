@@ -13,7 +13,9 @@ import t "../types"
 import win "../../window"
 import s "../../../shared"
 
-DescriptorSetLayouts :: proc(data: ^t.VulkanData) -> () {
+DescriptorSetLayouts :: proc(
+    data: ^t.VulkanData
+) -> () {
     using data;
     good: bool = true
 
@@ -99,6 +101,8 @@ DescriptorPools :: proc(data: ^t.VulkanData) -> () {
     return
 }
 
+
+
 DescriptorSets :: proc(data: ^t.VulkanData) -> () {
     using data;
     log.debug("Creating Descriptor Sets")
@@ -134,12 +138,13 @@ DescriptorSets :: proc(data: ^t.VulkanData) -> () {
         }
     }
 
-    uboDescriptor = descriptors["ubo"]
 
-    uboBuffers := uniformBuffers["ubo"].this
+
     log.debug("\t Updating")
     {
         log.debug("\t\t UBO")
+        uboDescriptor = descriptors["ubo"]
+        uboBuffers := uniformBuffers["ubo"].this
         {
             using uboDescriptor;
 
@@ -166,6 +171,7 @@ DescriptorSets :: proc(data: ^t.VulkanData) -> () {
             descriptors["ubo"] = uboDescriptor
         }
     }
+
 
     return
 }
@@ -208,7 +214,6 @@ DescriptorWrite :: proc(
         pImageInfo       = imageInfo,
         pTexelBufferView = texelBufferView,
     }
-
     return
 }
 
@@ -235,7 +240,11 @@ DescriptorAllocate :: proc(
     sets: [^]vk.DescriptorSet                = nil
 ) -> (ok: bool = true) {
     log.debug("Allocating Descriptor Sets")
-    result := vk.AllocateDescriptorSets(data.logical.device, allocInfo, sets)
+    result := vk.AllocateDescriptorSets(
+        data.logical.device,
+        allocInfo,
+        sets
+    )
     if result != .SUCCESS {
         log.error("Failed to allocate descriptor sets!")
         ok = false
@@ -270,7 +279,12 @@ DescriptorPool :: proc(
     pool: ^t.DescriptorPool,
 ) -> (result: vk.Result = .SUCCESS) {
     log.debug("Creating Descriptor Pool")
-    result = vk.CreateDescriptorPool(data.logical.device, &pool.createInfo, nil, &pool.this)
+    result = vk.CreateDescriptorPool(
+        data.logical.device,
+        &pool.createInfo,
+        data.allocations,
+        &pool.this
+    )
     return
 }
 
@@ -315,17 +329,16 @@ LayoutBinding :: proc{
 }
 
 LayoutInfo_1 :: proc(
-    bindigns: []vk.DescriptorSetLayoutBinding = {}
+    bindings: []vk.DescriptorSetLayoutBinding = {}
 ) -> (layoutInfo: vk.DescriptorSetLayoutCreateInfo) {
 
     layoutInfo = {
         sType        = .DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
         pNext        = nil,
         flags        = {},
-        bindingCount = u32(len(bindigns)),
-        pBindings    = raw_data(bindigns),
+        bindingCount = u32(len(bindings)),
+        pBindings    = raw_data(bindings),
     }
-
     return
 }
 
@@ -341,7 +354,6 @@ LayoutInfo_2 :: proc(
         bindingCount = u32(len(binding)),
         pBindings    = raw_data(binding),
     }
-    
     return
 }
 
@@ -358,7 +370,7 @@ DescriptorSetLayout :: proc(
     using data;
 
     log.debug("Creating Descriptor Set Layout")
-    result := vk.CreateDescriptorSetLayout(logical.device, info, nil, setLayout)
+    result := vk.CreateDescriptorSetLayout(logical.device, info, allocations, setLayout)
     if result != .SUCCESS {
         log.error("Failed to create descriptor set layout!")
         ok = false

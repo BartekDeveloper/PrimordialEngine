@@ -43,7 +43,7 @@ ImageView_return :: proc(
         flags = flags
     }
     
-    result := vk.CreateImageView(data.logical.device, &viewCreateInfo, nil, &imageView)
+    result := vk.CreateImageView(data.logical.device, &viewCreateInfo, data.allocations, &imageView)
     if result != .SUCCESS {
         log.error("Failed to create image view!")
         good = false
@@ -68,7 +68,20 @@ ImageView_modify :: proc(
     flags: vk.ImageViewCreateFlags  = {},
 ) -> (good: bool = true) {
 
-    imageView^, good = ImageView_return(data, image, format, aspectMask, mipLevels, arrayLayers, tiling, baseMipLevel, baseArrayLayer, components, viewType, flags)
+    imageView^, good = ImageView_return(
+        data,
+        image,
+        format,
+        aspectMask,
+        mipLevels,
+        arrayLayers,
+        tiling,
+        baseMipLevel,
+        baseArrayLayer,
+        components,
+        viewType,
+        flags
+    )
     return
 }
 

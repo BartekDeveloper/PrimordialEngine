@@ -41,7 +41,7 @@ SyncObjects :: proc(data: ^t.VulkanData, render: ^s.RenderData) {
         result := vk.CreateSemaphore(
             logical.device,
             &semaphores[i].createInfo,
-            nil,
+            allocations,
             &semaphores[i].image
         )
         if result != .SUCCESS {
@@ -51,7 +51,7 @@ SyncObjects :: proc(data: ^t.VulkanData, render: ^s.RenderData) {
         result = vk.CreateSemaphore(
             logical.device,
             &semaphores[i].createInfo,
-            nil,
+            allocations,
             &semaphores[i].render
         )
         if result != .SUCCESS {
@@ -61,7 +61,7 @@ SyncObjects :: proc(data: ^t.VulkanData, render: ^s.RenderData) {
         result = vk.CreateFence(
             logical.device,
             &fences[i].createInfo,
-            nil,
+            allocations,
             &fences[i].this
         )
         if result != .SUCCESS {

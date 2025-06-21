@@ -36,6 +36,7 @@ GetModule :: proc(
 
 Shaders :: proc(
     dir:  string = "./assets/shaders",
+    allocations: ^vk.AllocationCallbacks = nil
 ) -> () {
     handle: os.Handle
     err:    os.Error
@@ -68,7 +69,7 @@ Shaders :: proc(
         log.infof("Found shader: %s", name)
         
         ok: bool = false
-        shaderModules[name], ok = CreateShaderModule(name, dir)
+        shaderModules[name], ok = CreateShaderModule(name, dir, allocations)
         if ok {
             exists[name] = true
         } else {
@@ -82,8 +83,9 @@ Shaders :: proc(
 }
 
 CreateShaderModule :: proc(
-    name:   string       = "shader",
-    dir:    string       = "./assets/shaders"
+    name: string                          = "shader",
+    dir: string                           = "./assets/shaders",
+    allocations: ^vk.AllocationCallbacks  = nil
 ) -> (module: vk.ShaderModule, good: bool = true) #optional_ok {
     module = vk.ShaderModule{}
     path := strings.join({ dir, name }, "/")
@@ -108,7 +110,7 @@ CreateShaderModule :: proc(
     result := vk.CreateShaderModule(
         data.logical.device,
         &moduleInfo,   
-        nil,
+        allocations,
         &module
     )
     if result != .SUCCESS {

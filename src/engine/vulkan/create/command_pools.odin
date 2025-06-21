@@ -27,7 +27,11 @@ CommandPools :: proc(data: ^t.VulkanData) -> () {
             queueFamilyIndex = physical.queues.idx.graphics
         }
 
-        good := CommandPool(data, &globalPool.createInfo, &globalPool.this)
+        good := CommandPool(
+            data,
+            &globalPool.createInfo,
+            &globalPool.this
+        )
         if !good {
             panic("Fai led to create Command Pool!")
         }
@@ -39,12 +43,17 @@ CommandPools :: proc(data: ^t.VulkanData) -> () {
 }
 
 CommandPool :: proc(
-    data:       ^t.VulkanData            = nil,
+    data:       ^t.VulkanData             = nil,
     createInfo: ^vk.CommandPoolCreateInfo = nil,
     pool:       ^vk.CommandPool           = nil
 ) -> (good: bool = true) {
 
-    result := vk.CreateCommandPool(data.logical.device, createInfo, nil, pool)
+    result := vk.CreateCommandPool(
+        data.logical.device,
+        createInfo,
+        data.allocations,
+        pool
+    )
     if result != .SUCCESS {
         good = false
     }

@@ -23,7 +23,26 @@ VulkanDebugCallback :: proc "system" (
 	pUserData: rawptr,
 ) -> b32 {
 	context = ctx
-	fmt.eprintfln("! %s\n", pCallbackData.pMessage)
+
+    switch(messageSeverity) {
+        case { .INFO }:
+            /* FOR NOW NOT NEEDED */
+            // fmt.eprintfln("! %s\n", pCallbackData.pMessage)
+            break
+        case { .WARNING }:
+            fmt.eprintfln("! %s\n", pCallbackData.pMessage)
+            break
+        case { .ERROR }:
+            fmt.eprintfln("! %s\n", pCallbackData.pMessage)
+            break
+        case { .VERBOSE }:
+            /* REMBEMBER(me): Verbose is too much verbose */
+            // fmt.eprintfln("! %s\n", pCallbackData.pMessage)
+            break
+        case:
+            break
+    }
+
 	return false
 }
 

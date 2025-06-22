@@ -16,7 +16,8 @@ import "vulkan"
 
 Init :: proc() {
     context.logger = log.create_console_logger(.Debug)
-
+    defer log.destroy_console_logger(context.logger)
+    
     log.info("Setting up Render Data");
     renderData.MAX_FRAMES_IN_FLIGHT = 2
     log.infof("\tMAX FRAMES IN FLIGHT: %d", renderData.MAX_FRAMES_IN_FLIGHT)
@@ -70,6 +71,8 @@ Destroy :: proc() {
 
     log.info("Destroying window")
     window.Clean()
+
+    log.destroy_console_logger(context.logger)
     return
 }
 

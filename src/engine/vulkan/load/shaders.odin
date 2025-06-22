@@ -27,11 +27,7 @@ GetModule :: proc(
         return shaderModules[pName]
     }
 
-    when ODIN_DEBUG {
-        panic("Shader module not found!")
-    } else {
-        return
-    }
+    panic("Shader module not found!")
 }
 
 Shaders :: proc(
@@ -45,12 +41,16 @@ Shaders :: proc(
     fmt.eprintln("\n\n")
 
     handle, err = os.open(dir)
+    defer os.close(handle)
+
     if err != nil {
         log.error("Failed to open shaders directory!")
         return
     }
 
     files, err = os.read_dir(handle, -1)
+    defer delete(files)
+
     if err != nil {
         log.error("Failed to read shaders directory!")
         return
@@ -63,6 +63,8 @@ Shaders :: proc(
 
         name := f.name
         ext  := strings.to_lower(path.ext(name))
+        defer delete(ext)
+        
         if ext != ".spv" {
             continue
         }
@@ -133,7 +135,6 @@ CleanUpShaderModules :: proc() -> () {
         shaderModules[k] = {}
         exists[k] = false
     }
-    
     delete(shaderModules)
     delete(exists)
 

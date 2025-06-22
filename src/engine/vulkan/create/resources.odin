@@ -20,45 +20,42 @@ Resources :: proc(data: ^t.VulkanData) -> () {
     swapchain.formats.color = swapchain.formats.surface.format
     screen := swapchain.extent
     
-    lightPass := passes["light"]
+    gBuffers["light.color"] = {}
+    gBuffers["light.depth"] = {}
     
+    lightPass   := &passes["light"]
+    colorBuffer := &gBuffers["light.color"]
+    depthBuffer := &gBuffers["light.depth"]
+
     log.debug("Creating Resources")
     log.debug("\t Color Buffer")
-    {
-        colorBuffer: t.GBuffer = {}
-        good = GBuffer(
-            data,
-            &colorBuffer,
-            swapchain.formats.color,
-            screen.width, screen.height,
-            .OPTIMAL,
-            { .COLOR_ATTACHMENT },
-            { .DEVICE_LOCAL },
-            { .COLOR }
-        )
-        if !good {
-            panic("Failed to create Color Buffer!")
-        }
-        gBuffers["light.color"] = colorBuffer
+    good = GBuffer(
+        data,
+        colorBuffer,
+        swapchain.formats.color,
+        screen.width, screen.height,
+        .OPTIMAL,
+        { .COLOR_ATTACHMENT },
+        { .DEVICE_LOCAL },
+        { .COLOR }
+    )
+    if !good {
+        panic("Failed to create Color Buffer!")
     }
 
     log.debug("\t Depth Buffer")
-    {
-        depthBuffer: t.GBuffer = {}
-        good = GBuffer(
-            data,
-            &depthBuffer,
-            swapchain.formats.depth,
-            screen.width, screen.height,
-            .OPTIMAL,
-            { .DEPTH_STENCIL_ATTACHMENT },
-            { .DEVICE_LOCAL },
-            { .DEPTH }
-        )
-        if !good {
-            panic("Failed to create Depth Buffer!")
-        }
-        gBuffers["light.depth"] = depthBuffer
+    good = GBuffer(
+        data,
+        depthBuffer,
+        swapchain.formats.depth,
+        screen.width, screen.height,
+        .OPTIMAL,
+        { .DEPTH_STENCIL_ATTACHMENT },
+        { .DEVICE_LOCAL },
+        { .DEPTH }
+    )
+    if !good {
+        panic("Failed to create Depth Buffer!")
     }
 
     return

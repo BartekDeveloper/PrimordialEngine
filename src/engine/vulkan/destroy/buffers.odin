@@ -17,13 +17,15 @@ UniformBuffers :: proc(
     data: ^t.VulkanData = nil,
     ctx: rn.Context     = {}
 ) -> () {
-
     for _, &buffers in data.uniformBuffers {
         Buffers(
             data,
             &buffers
         )
+        delete(buffers.this)
     }
+    delete(data.uniformBuffers)
+
     return
 }
 
@@ -39,11 +41,13 @@ Buffer :: proc(
         )
     }
 
-    vk.FreeMemory(
-        data.logical.device,
-        buffer.mem,
-        data.allocations
-    )
+    if buffer.mem != {} {
+        vk.FreeMemory(
+            data.logical.device,
+            buffer.mem,
+            data.allocations
+        )
+    }
 
     buffer.ptr = nil
 

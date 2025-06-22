@@ -12,8 +12,6 @@ import vk "vendor:vulkan"
 import t "../types"
 import win "../../window"
 
-// ctx: ^runtime.Context
-
 LogicalDevice :: proc(data: ^t.VulkanData) -> () {
     using data;
 

@@ -13,16 +13,16 @@ import vk "vendor:vulkan"
 
 import t "../types"
 
-LogicalDevice :: proc(
+CommandBuffers :: proc(
     data: ^t.VulkanData = nil
 ) -> () {
-    log.debug("Destroying Logical Device")
+    log.debug("\tDestroying Command Buffers")
 
-    vk.DestroyDevice(
-        data.logical.device,
-        data.allocations
-    )
-    delete(data.logical.queueCreateInfos)
+    for _, &cmd in data.commandBuffers {
+        delete(cmd.this)
+    }
+
+    delete(data.commandBuffers)
 
     return
 }

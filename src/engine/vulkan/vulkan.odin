@@ -225,6 +225,7 @@ Clean :: proc(data: ^s.RenderData) {
     destroy.DescriptorPools(&vkData)
     destroy.UniformBuffers(&vkData)
     destroy.CommandPools(&vkData)
+    destroy.CommandBuffers(&vkData)
     destroy.FrameBuffers(&vkData)
     destroy.Pipelines(&vkData)
     destroy.DescriptorSetLayouts(&vkData)

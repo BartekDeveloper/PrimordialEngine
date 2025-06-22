@@ -22,7 +22,12 @@ DescriptorSetLayouts :: proc(
             data,
             &descriptor
         )
+        
+        delete(descriptor.bindings)
+        delete(descriptor.sets)
+        delete(descriptor.setsLayouts)
     }
+    delete(data.descriptors)
 
     return
 }
@@ -40,6 +45,7 @@ DescriptorPools :: proc(
             &pool
         )
     }
+    delete(data.descriptorPools)
 
     return
 }

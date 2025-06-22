@@ -25,6 +25,8 @@ CommandPools :: proc(
             &pool
         )
     }
+    delete(data.commandPools)
+
     return
 }
 

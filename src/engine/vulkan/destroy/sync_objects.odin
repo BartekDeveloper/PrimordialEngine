@@ -31,6 +31,7 @@ SyncObjects :: proc(
             data.allocations
         )
     }
+    delete(data.syncObjects.semaphores)
 
     for &sync in data.syncObjects.fences {
         vk.DestroyFence(
@@ -39,6 +40,7 @@ SyncObjects :: proc(
             data.allocations
         )
     }
+    delete(data.syncObjects.fences)
 
     return
 }

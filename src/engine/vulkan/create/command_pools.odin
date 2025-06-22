@@ -19,7 +19,8 @@ CommandPools :: proc(data: ^t.VulkanData) -> () {
 
     log.debug("\t Global Graphics Command Pool")
     {
-        globalPool := commandPools["global"]
+        commandPools["global"] = {}
+        globalPool := &commandPools["global"]
         
         globalPool.createInfo = vk.CommandPoolCreateInfo{
             sType            = .COMMAND_POOL_CREATE_INFO,
@@ -35,8 +36,6 @@ CommandPools :: proc(data: ^t.VulkanData) -> () {
         if !good {
             panic("Fai led to create Command Pool!")
         }
-
-        commandPools["global"] = globalPool
     }
     
     return

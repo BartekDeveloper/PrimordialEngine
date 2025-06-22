@@ -27,6 +27,8 @@ Resources :: proc(
             &gBuffer
         )
     }
+    delete(data.gBuffers)
+
     return
 }
 
@@ -54,6 +56,10 @@ GBuffer :: proc(
             context
         )
     }
+
+    delete(gBuffer.images)
+    delete(gBuffer.views)
+    delete(gBuffer.mems)
 
     return
 }

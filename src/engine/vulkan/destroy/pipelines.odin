@@ -16,8 +16,7 @@ import t "../types"
 Pipelines :: proc(
     data: ^t.VulkanData = nil
 ) -> () {
-    
-    for _, &pipeline in data.pipelines {
+    for k, &pipeline in data.pipelines {
         Pipeline(
             data,
             &pipeline
@@ -28,6 +27,12 @@ Pipelines :: proc(
             &pipeline.layout
         )
     }
+    delete(data.pipelines)
+
+    // NOTE(me): Idk should I  move it to other file?
+    // Prob i should, but i am too lazy to do it now
+    delete(data.viewports)
+    delete(data.scissors)
 
     return
 }

@@ -16,25 +16,31 @@ import t "../types"
 Swapchain :: proc(
     data: ^t.VulkanData = nil
 ) -> () {
+    using data;
+    
     Resources(data)
 
-    log.debug("Destroying Swapchain Images")
-    for &view in data.swapchain.views {
+    log.debug("Destroying Swapchain Image Views")
+    for &view in swapchain.views {
         vk.DestroyImageView(
-            data.logical.device,
+            logical.device,
             view,
-            data.allocations
+            allocations
         )
         assert(view != {}, "Swapchain View is not nil!")
     }
+    delete(swapchain.views)
 
+    log.debug("Destroying Swapchain Images")
+    delete(swapchain.images)
+    
     log.debug("Destroying Swapchain")
     vk.DestroySwapchainKHR(
-        data.logical.device,
-        data.swapchain.swapchain,
-        data.allocations
+        logical.device,
+        swapchain.swapchain,
+        allocations
     )
-    assert(data.swapchain.swapchain != {}, "Swapchain is not nil!")
+    assert(swapchain.swapchain != {}, "Swapchain is not nil!")
 
     return
 }

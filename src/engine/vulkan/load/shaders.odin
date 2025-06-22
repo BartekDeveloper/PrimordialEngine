@@ -21,7 +21,7 @@ SetVulkanDataPointer    :: proc(pData: ^t.VulkanData) { data = pData }
 RemoveVulkanDataPointer :: proc() { data = nil }
 
 GetModule :: proc(
-    pName: string
+    pName: string 
 ) -> (module: vk.ShaderModule) {   
     if shaderModules[pName] != {} {
         return shaderModules[pName]
@@ -89,7 +89,8 @@ CreateShaderModule :: proc(
 ) -> (module: vk.ShaderModule, good: bool = true) #optional_ok {
     module = vk.ShaderModule{}
     path := strings.join({ dir, name }, "/")
-    
+    defer delete(path)
+
     fmt.eprintfln("Reading shader: %s", path)
     shaderCode, ok := os.read_entire_file_from_filename(path, context.temp_allocator)
     if shaderCode == nil {
@@ -132,5 +133,9 @@ CleanUpShaderModules :: proc() -> () {
         shaderModules[k] = {}
         exists[k] = false
     }
+    
+    delete(shaderModules)
+    delete(exists)
+
     return
 }

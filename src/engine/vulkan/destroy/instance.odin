@@ -35,5 +35,12 @@ Instance :: proc(
         )
     }
 
+    if len(data.instance.extensions) > 0 { 
+        delete(data.instance.extensions)
+    }
+    if len(data.instance.layers) > 0 {
+        delete(data.instance.layers)
+    }
+
     return
 }

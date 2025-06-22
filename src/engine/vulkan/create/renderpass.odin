@@ -69,7 +69,7 @@ RenderPasses :: proc(data: ^t.VulkanData) -> () {
         }
 
         log.debug("\t\t Attachments")
-        attachments: []vk.AttachmentDescription = {
+        lightPass.attachments = []vk.AttachmentDescription{
             lightPass.color.attachments[0],
             lightPass.depth.attachment
         }
@@ -77,8 +77,8 @@ RenderPasses :: proc(data: ^t.VulkanData) -> () {
         log.debug("\t\t Create Info")
         lightPass.createInfo = {
             sType           = .RENDER_PASS_CREATE_INFO,
-            attachmentCount = u32(len(attachments)),
-            pAttachments    = raw_data(attachments),
+            attachmentCount = u32(len(lightPass.attachments)),
+            pAttachments    = raw_data(lightPass.attachments),
             subpassCount    = u32(len(lightPass.subpasses)),
             pSubpasses      = raw_data(lightPass.subpasses),
             dependencyCount = u32(len(lightPass.dependencies)),
@@ -91,21 +91,6 @@ RenderPasses :: proc(data: ^t.VulkanData) -> () {
             panic("Failed to create Render Pass!")
         }
         
-        lightPass.clearValues = make([]vk.ClearValue, 2)
-        lightPass.clearValues = {
-            {
-                color = { float32 = {
-                    0.0,
-                    0.0,
-                    0.0,
-                    1.0
-                }},
-            },
-            {
-                depthStencil = { depth = 0.0, stencil = 0 },
-            }
-        }
-
         passes["light"] = lightPass
     }
 

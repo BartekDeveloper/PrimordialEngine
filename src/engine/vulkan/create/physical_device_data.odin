@@ -18,6 +18,6 @@ PhysicalDeviceData :: proc(data: ^t.VulkanData) -> () {
 
     chosen := choose.PhysicalDevicesData(instance.instance, surface)
     assert(chosen.device != nil, "Selected handle is nil!")
-    
+
     physical = chosen
 }

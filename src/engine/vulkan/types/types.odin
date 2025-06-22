@@ -103,9 +103,14 @@ DescriptorPool :: #type struct {
 }
 
 Descriptor :: #type struct {
-	setLayout:   vk.DescriptorSetLayout,
 	poolName:    string,
-	setsLayouts: []vk.DescriptorSetLayout,
+
+    setLayout:   vk.DescriptorSetLayout,
+	
+    bindings:    []vk.DescriptorSetLayoutBinding,
+    layoutInfo:  vk.DescriptorSetLayoutCreateInfo,
+    
+    setsLayouts: []vk.DescriptorSetLayout,
 	sets:        []vk.DescriptorSet,
 }
 
@@ -126,6 +131,7 @@ RenderPass :: #type struct {
 	depth:        DepthPass,
 	subpasses:    []vk.SubpassDescription,
 	dependencies: []vk.SubpassDependency,
+    attachments:  []vk.AttachmentDescription,
 	createInfo:   vk.RenderPassCreateInfo,
 	renderPass:   vk.RenderPass,
 	clearValues:  []vk.ClearValue,

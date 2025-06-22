@@ -20,13 +20,20 @@ FrameBuffers :: proc(
     
     log.debug("\tDestroying Framebuffers")
     for _, &pass in data.passes {
+        
         for &fb in pass.frameBuffers {
             FrameBuffer(
                 data,
                 &fb
             )
         }
+
+        delete(pass.frameBuffers)
+        if len(pass.clearValues) > 0 {
+            delete(pass.clearValues)
+        }
     }
+    delete(data.passes)
     
     return
 }

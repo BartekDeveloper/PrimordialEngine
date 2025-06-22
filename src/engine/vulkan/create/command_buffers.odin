@@ -22,28 +22,28 @@ CommandBuffers :: proc(
     globalPool := commandPools["global"]
     imageCount := u32(swapchain.imageCount)
 
-    log.debug("\t Global Graphics Command Buffer")
     {
-        globalCmdBuffer := commandBuffers["global"]
+        log.debug("\t Global Graphics Command Buffer")
 
-        globalCmdBuffer.createInfo = vk.CommandBufferAllocateInfo{
+        commandBuffers["global"] = {}
+        cmd := &commandBuffers["global"]
+
+        cmd.createInfo = vk.CommandBufferAllocateInfo{
             sType              = .COMMAND_BUFFER_ALLOCATE_INFO,
             commandPool        = globalPool.this,
             level              = .PRIMARY,
             commandBufferCount = imageCount,
         }
-        globalCmdBuffer.this = make([]vk.CommandBuffer, imageCount)
+        cmd.this = make([]vk.CommandBuffer, imageCount)
 
         good := CommandBuffer(
             data,
-            &globalCmdBuffer.createInfo,
-            raw_data(globalCmdBuffer.this)
+            &cmd.createInfo,
+            raw_data(cmd.this)
         )
         if !good {
             panic("Failed to create Command Buffer!")
         }
-
-        commandBuffers["global"] = globalCmdBuffer
     }
     
     return

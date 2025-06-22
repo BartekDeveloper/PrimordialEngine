@@ -15,6 +15,15 @@ import t "../types"
 PhysicalDeviceData :: proc(
     data: ^t.VulkanData = nil
 ) -> () {
+    using data;
+    
+    physical.capabilities     = {}
+    physical.properties       = {}
+    physical.memoryProperties = {}
+    physical.formats          = {}
+    physical.modes            = {}
+    physical.device           = {}
+    delete(physical.uniqueQueueFamilies)
 
     return
 }

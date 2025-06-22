@@ -41,7 +41,8 @@ Instance :: proc(data: ^t.VulkanData) {
 
 
 	windowExt := win.GetInstanceExtensions()
-	append(&instance.extensions, ..windowExt[:])
+    defer delete(windowExt)
+    append(&instance.extensions, ..windowExt[:])
 
 	fmt.eprintfln("=*=*=*= INSTANCE EXTENSIONS =*=*=*=")
 	for i := 0; i < int(len(instance.extensions)); i += 1 {

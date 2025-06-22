@@ -34,27 +34,31 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
     log.debug("\t Light")
     {
         log.debug("\t\t Creating Shaders")\
-        p := pipelines["light"]
-        
-        p.shaders = {
+        pipelines["light"] = {}
+        light := &pipelines["light"]
+
+        light.shaders = {
             { "geometry.vert.spv", .VERTEX   },
             { "geometry.frag.spv", .FRAGMENT },
         }
-        p.stages = ShaderStages(data, load.GetModule, ..p.shaders)
-        p.setLayouts = { descriptors["ubo"].setLayout }
+        light.stages = ShaderStages(data, load.GetModule, ..light.shaders)
+        light.setLayouts = { descriptors["ubo"].setLayout }
 
         pVertexData:          PipelineVertexData = {{}, {}}
         
         pDynamicStates:       [2]vk.DynamicState = {}
-        pVertexInputInfo      := DefaultVertexInput(&pVertexData)
-        pInputAssemblyInfo    := DefaultInputAssembly()
-        pViewportState        := DefaultViewportState(1, 1)
-        pRasterizationInfo    := DefaultRasterization()
-        pMultisampleState     := DefaultMultisample()
-        pDepthStencil         := DefaultDepthStencil(depthTestEnable = false)
-        pColorBlendAttachment := DefaultFillColorBlendAttachments(1, blendEnable = false)[0]  
-        pColorBlending        := DefaultColorBlending(1, &pColorBlendAttachment)
-        pDynamicState         := DefaultDynamicStates(&pDynamicStates)
+        pVertexInputInfo       := DefaultVertexInput(&pVertexData)
+        pInputAssemblyInfo     := DefaultInputAssembly()
+        pViewportState         := DefaultViewportState(1, 1)
+        pRasterizationInfo     := DefaultRasterization()
+        pMultisampleState      := DefaultMultisample()
+        pDepthStencil          := DefaultDepthStencil(depthTestEnable = false)
+        pColorBlendAttachments := DefaultFillColorBlendAttachments(1, blendEnable = false)
+        pColorBlendAttachment  := pColorBlendAttachments[0]
+        pColorBlending         := DefaultColorBlending(1, &pColorBlendAttachment)
+        pDynamicState          := DefaultDynamicStates(&pDynamicStates)
+        
+        defer delete(pColorBlendAttachments)
 
         pStates: GraphicsInfoStates = {
             vertex        = &pVertexInputInfo,
@@ -68,24 +72,24 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
         }
 
         pPipelineLayoutCreateInfo := DefaultPipelineLayoutCreateInfo(
-            u32(len(p.setLayouts)),
-            raw_data(p.setLayouts)
+            u32(len(light.setLayouts)),
+            raw_data(light.setLayouts)
         )
-        good = PipelineLayout(data, &pPipelineLayoutCreateInfo, &p.layout)
+        good = PipelineLayout(data, &pPipelineLayoutCreateInfo, &light.layout)
         if !good {
             panic("Failed to create Pipeline Layout")
         }
 
         pCacheCreateInfo := DefaultPipelineEmptyCacheCreateInfo()
-        good = PipelineCache(data, &pCacheCreateInfo, &p.cache)
+        good = PipelineCache(data, &pCacheCreateInfo, &light.cache)
         if !good {
             panic("Failed to create Pipeline Cache")
         }
 
-        p.createInfo = vk.GraphicsPipelineCreateInfo{
+        light.createInfo = vk.GraphicsPipelineCreateInfo{
             sType                   = .GRAPHICS_PIPELINE_CREATE_INFO,
-            stageCount              = u32(len(p.stages)),
-            pStages                 = raw_data(p.stages),
+            stageCount              = u32(len(light.stages)),
+            pStages                 = raw_data(light.stages),
             pVertexInputState       = &pVertexInputInfo,
             pInputAssemblyState     = &pInputAssemblyInfo,
             pViewportState          = &pViewportState,
@@ -94,7 +98,7 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
             pDepthStencilState      = &pDepthStencil,
             pColorBlendState        = &pColorBlending,
             pDynamicState           = &pDynamicState,
-            layout                  = p.layout,
+            layout                  = light.layout,
             renderPass              = passes["light"].renderPass,
             subpass                 = 0,
             basePipelineHandle      = 0,
@@ -103,11 +107,11 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
 
         good = GraphicsPipeline(
             data,
-            &p.pipeline,
+            &light.pipeline,
             GraphicsPipelineData{
-                cache     = &p.cache,
+                cache     = &light.cache,
                 infoCount = 1,
-                info      = &p.createInfo.(vk.GraphicsPipelineCreateInfo),
+                info      = &light.createInfo.(vk.GraphicsPipelineCreateInfo),
             }
         )
         if !good {
@@ -115,14 +119,12 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
         }
         log.info("Created `light` Graphics Pipeline")
 
-        assert(p.pipeline != {}, "Pipeline is nil!")
-
-        pipelines["light"] = p
-        defer p = {}
+        assert(light.pipeline != {}, "Pipeline is nil!")
     }
 
     return
 }
+
 
 DefaultVertexInput :: proc(
     data: ^PipelineVertexData

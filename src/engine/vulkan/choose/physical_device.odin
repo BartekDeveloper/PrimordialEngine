@@ -24,13 +24,12 @@ PhysicalDevicesData :: proc(instance: vk.Instance, surface: vk.SurfaceKHR) -> (c
     log.assert(len(devices) != 0, "Physical Devices array is empty!")
 
     devicesData := make([]t.PhysicalDeviceData, count)
-    defer delete(devicesData)
     for i := 0; i < int(count); i += 1 {
         devicesData[i] = t.PhysicalDeviceData{ device = devices[i], index = i }
     }
 
     scores: map[u32]int = {}
-    // defer delete(scores)
+    defer delete(scores)
 
     for h, i in devicesData {
         score: u32                  = 0
@@ -147,6 +146,7 @@ PhysicalDevicesData :: proc(instance: vk.Instance, surface: vk.SurfaceKHR) -> (c
                 found.transfer = true
             }
         }
+        delete(queueFamilies)
         
         fmt.eprintln("Found:\n")
         fmt.eprintfln("\t graphics? %s", "yes" if found.graphics else "no")
@@ -170,6 +170,7 @@ PhysicalDevicesData :: proc(instance: vk.Instance, surface: vk.SurfaceKHR) -> (c
 
         uniqueQueueFamilies: []u32      = {}
         unique:              map[u32]b8 = {}
+        defer delete(unique)
         values := []u32{
             data.queues.idx.graphics,
             data.queues.idx.present,
@@ -181,7 +182,7 @@ PhysicalDevicesData :: proc(instance: vk.Instance, surface: vk.SurfaceKHR) -> (c
                 unique[v] = true
             }
         }
-        uniqueQueueFamilies = make([]u32, len(unique))
+        uniqueQueueFamilies = make([]u32, len(unique))        
         j := 0
         for ui, _ in unique {
             uniqueQueueFamilies[j] = ui 
@@ -216,7 +217,7 @@ PhysicalDevicesData :: proc(instance: vk.Instance, surface: vk.SurfaceKHR) -> (c
         }
 
         score += u32(len(devices) - i)
-         
+        
         fmt.eprintfln("\nDevice %d: %s (%s)", i, props.deviceName, type)
         fmt.eprintfln("\tScore:\t%d\n", score)
 
@@ -241,7 +242,7 @@ PhysicalDevicesData :: proc(instance: vk.Instance, surface: vk.SurfaceKHR) -> (c
     for score, idx in scores {
         log.debugf("score: %d, index: %d", score, idx)
         if int(score) >= maxScore {
-            maxScore  = int(score)  
+            maxScore  = int(score)
             bestIndex = idx
         }
     }
@@ -252,6 +253,13 @@ PhysicalDevicesData :: proc(instance: vk.Instance, surface: vk.SurfaceKHR) -> (c
         log.panicf("No Physical Device Found!")
     }
     chosenPhysicalDeviceData = devicesData[bestIndex]
+
+    for &data in devicesData {
+        delete(data.formats)
+        delete(data.modes)
+    }
+    delete(devicesData)
+    delete(devices)
 
     return
 }

@@ -16,7 +16,6 @@ SwapchainExtent :: proc(data: ^t.VulkanData) -> (extent: vk.Extent2D = {}) {
     using data;
 
     width, height := win.GetFrameBufferSize()
-
     extent.width  = width
     extent.height = height
 
@@ -68,6 +67,8 @@ SwapchainFormat :: proc(data: ^t.VulkanData) -> (surfaceFormat: vk.SurfaceFormat
     fmt.eprintfln("=*=*=*= Found Formats =*=*=*=")
 
     formatsScores: map[vk.SurfaceFormatKHR]int = {}
+    defer delete(formatsScores)
+    
     for w, i in wanted {
         for a, _ in swapchainFormats {
             if a == w {
@@ -84,6 +85,8 @@ SwapchainFormat :: proc(data: ^t.VulkanData) -> (surfaceFormat: vk.SurfaceFormat
             surfaceFormat = format
         }
     }
+
+    delete(swapchainFormats)
 
     return
 }
@@ -135,6 +138,8 @@ SwapchainPresentMode :: proc(data: ^t.VulkanData) -> (presentMode: vk.PresentMod
     fmt.eprintfln("=*=*=*= Found Present Modes =*=*=*=")
 
     presentModesScores: map[vk.PresentModeKHR]int = {}
+    defer delete(presentModesScores)
+
     for w, i in wanted {
         for a, _ in presentModes {
             if a == w {
@@ -151,6 +156,8 @@ SwapchainPresentMode :: proc(data: ^t.VulkanData) -> (presentMode: vk.PresentMod
             presentMode = mode
         }
     }
+
+    delete(presentModes)
 
     return
 }

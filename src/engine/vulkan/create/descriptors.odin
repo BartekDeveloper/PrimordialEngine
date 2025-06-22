@@ -24,42 +24,37 @@ DescriptorSetLayouts :: proc(
     log.debug("Creating Descriptor Set Layouts")
     log.debug("\t UBO")
     {
-        uboBind := LayoutBinding_2(
+        descriptors["ubo"] = {}
+        descriptor := &descriptors["ubo"]
+        descriptor.poolName = "global"
+        descriptor.sets = make([]vk.DescriptorSet, MAX_FRAMES_IN_FLIGHT)
+
+        descriptor.bindings = make([]vk.DescriptorSetLayoutBinding, 1)
+        descriptor.bindings[0] = LayoutBinding_2(
             0,
             .UNIFORM_BUFFER,
             { .VERTEX, .FRAGMENT }
         )
 
-        uboBindings: []vk.DescriptorSetLayoutBinding = { uboBind }
-        uboLayoutInfo := LayoutInfo_1(uboBindings)
-        uboSetLayout: vk.DescriptorSetLayout
+        descriptor.layoutInfo = LayoutInfo_1(descriptor.bindings)
 
         good = DescriptorSetLayout( 
             data,
-        &uboLayoutInfo,
-            &uboSetLayout
+        &descriptor.layoutInfo,
+            &descriptor.setLayout
         )
         if !good {
             panic("Failed to create Descriptor Set Layout")
         }
-        assert(uboSetLayout != 0x0, "UBO descriptor set layout is nil!")
+        assert(descriptor.setLayout != 0x0, "UBO descriptor set layout is nil!")
         
-        uboSetLayouts := make([]vk.DescriptorSetLayout, MAX_FRAMES_IN_FLIGHT)
-        for &l in uboSetLayouts do l = uboSetLayout
-
-        uboDescriptor := t.Descriptor{
-            setLayout   = uboSetLayout,
-            poolName    = "global",
-            sets        = make([]vk.DescriptorSet, MAX_FRAMES_IN_FLIGHT),
-            setsLayouts = uboSetLayouts
-        }
-
-        assert(uboDescriptor.sets           != nil, "UBO descriptor is nil!")
-        assert(uboDescriptor.setLayout      != 0x0, "UBO descriptor set layout is nil!")
-        assert(uboDescriptor.setsLayouts    != nil, "UBO descriptor layouts is nil!")
-        assert(uboDescriptor.setsLayouts[0] != 0x0, "UBO descriptor layout is nil!")
+        descriptor.setsLayouts = make([]vk.DescriptorSetLayout, MAX_FRAMES_IN_FLIGHT)
+        for &l in descriptor.setsLayouts do l = descriptor.setLayout
         
-        descriptors["ubo"] = uboDescriptor
+        assert(descriptor.sets           != nil, "UBO descriptor is nil!")
+        assert(descriptor.setLayout      != 0x0, "UBO descriptor set layout is nil!")
+        assert(descriptor.setsLayouts    != nil, "UBO descriptor layouts is nil!")
+        assert(descriptor.setsLayouts[0] != 0x0, "UBO descriptor layout is nil!")
     }
 
     return

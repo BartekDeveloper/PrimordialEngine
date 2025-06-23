@@ -69,6 +69,7 @@ odin run .
 
 ## USED LIBRARIES
 - Vulkan
+- SDL3
 - (W.I.P)
 
 

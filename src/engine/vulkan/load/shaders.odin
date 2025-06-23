@@ -48,9 +48,7 @@ Shaders :: proc(
         return
     }
 
-    files, err = os.read_dir(handle, -1)
-    defer delete(files)
-
+    files, err = os.read_dir(handle, -1, context.temp_allocator)
     if err != nil {
         log.error("Failed to read shaders directory!")
         return
@@ -62,8 +60,9 @@ Shaders :: proc(
         }
 
         name := f.name
-        ext  := strings.to_lower(path.ext(name))
-        defer delete(ext)
+        ext := path.ext(name)
+        ext = strings.to_lower(ext, context.temp_allocator)
+
         
         if ext != ".spv" {
             continue
@@ -94,7 +93,7 @@ CreateShaderModule :: proc(
     defer delete(path)
 
     fmt.eprintfln("Reading shader: %s", path)
-    shaderCode, ok := os.read_entire_file_from_filename(path, context.temp_allocator)
+    shaderCode, ok := os.read_entire_file_from_filename(path)
     if shaderCode == nil {
         log.error("Failed to read shader code!")
         return
@@ -109,6 +108,7 @@ CreateShaderModule :: proc(
         pCode    = ([^]u32)(raw_data(shaderCode)),
     }
     assert(data.logical.device != nil, "Initialize Vulkan device first!")
+    defer delete(shaderCode)
 
     result := vk.CreateShaderModule(
         data.logical.device,

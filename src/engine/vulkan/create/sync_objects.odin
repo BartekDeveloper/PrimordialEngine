@@ -3,7 +3,7 @@ package vk_create
 import "core:log"
 import "core:mem"
 import "core:c"
-import "core:os"
+
 import "core:fmt"
 import "core:strings"
 import "core:strconv"

@@ -1,5 +1,5 @@
 package engine_math
-import "core:os"
+
 import "core:c"
 
 foreign import triangle_functions "triangle_functions.o"

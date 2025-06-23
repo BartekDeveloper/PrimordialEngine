@@ -6,7 +6,7 @@ import "base:runtime"
 import "core:strings"
 import "core:mem"
 import "core:fmt"
-import "core:os"
+
 import "core:io"
 import "core:c"
 
@@ -36,31 +36,30 @@ Init :: proc() {
 }
 
 Start :: proc() {
-    log.info("Starting timer")
-
-    start := time.now()._nsec
-    end   := time.now()._nsec
-
     log.info("Window is running")
+    log.info("Starting timer")    
+    
+    start := time.now()._nsec
     for window.Running() {
-        end = time.now()._nsec
-
+        end := time.now()._nsec
         renderData.deltaTime = end - start
-        renderData.deltaTime_f32 = f32(f64(renderData.deltaTime) / f64(1_000_000_000.00))
+        start = end
+
+        renderData.deltaTime_f32 = f32(renderData.deltaTime) / f32(1_000_000_000.00)
         if renderData.deltaTime_f32 <= 0.0 {
-            renderData.deltaTime_f32 = 0.01
+            renderData.deltaTime_f32 = 0.001
         }
 
         window.Poll()
         vulkan.Render(&renderData)
 
-        time.sleep(time.Millisecond * 100)
-        fps := f32(1.0/(renderData.deltaTime_f32))
-        // fmt.eprintf("FPS: %.4f\t", fps)
+        // fps := f32(1.0/(renderData.deltaTime_f32))
+        // fmt.eprintf("\t  FPS: %.1f \t\t", fps)
     } 
+
     log.info("Window closed");
-    
     log.info("Waiting for vulkan to finish")
+    
     vulkan.Wait()
     return
 }

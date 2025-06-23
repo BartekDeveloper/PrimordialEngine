@@ -2,7 +2,7 @@ package vulkan_renderer
 
 import "core:log"
 import "core:c"
-import "core:os"
+
 import "core:fmt"
 import "core:mem"
 import "base:runtime"
@@ -31,6 +31,7 @@ Init :: proc(rData: ^s.RenderData) {
 Render :: proc(
     rData: ^s.RenderData = nil
 ) -> () {
+    defer free_all(context.temp_allocator)
     using vkData;
 
     currentFrame := rData.currentFrame

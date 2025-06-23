@@ -8,6 +8,7 @@ import "src/maths"
 
 main :: proc() {
     
+    defer free_all(context.temp_allocator)
     when ODIN_DEBUG {
         trace: mem.Tracking_Allocator
         mem.tracking_allocator_init(&trace, context.allocator);

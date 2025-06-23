@@ -2,7 +2,7 @@ package vk_create
 
 import "core:log"
 import "core:c"
-import "core:os"
+
 import "core:mem"
 import "core:fmt"
 import "base:runtime"

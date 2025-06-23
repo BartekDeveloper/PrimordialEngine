@@ -14,7 +14,7 @@ import t   "../types"
 import win "../../window"
 
 PhysicalDeviceData :: proc(data: ^t.VulkanData) -> () {
-    using data;
+    using data
 
     chosen := choose.PhysicalDevicesData(instance.instance, surface)
     assert(chosen.device != nil, "Selected handle is nil!")

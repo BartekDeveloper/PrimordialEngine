@@ -13,7 +13,7 @@ import t "../types"
 import win "../../window"
 
 AdditionalData :: proc(data: ^t.VulkanData) -> () {
-    using data;
+    using data
     log.debug("Creating Additional Data")
 
     return

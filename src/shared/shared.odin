@@ -4,7 +4,7 @@ import emath "../maths"
 
 RenderData :: #type struct {
     deltaTime:            i64,
-    deltaTime_f32:        f32,
+    deltaTime_f64:        f64,
     currentFrame:         int,
 
     MAX_FRAMES_IN_FLIGHT: int,
@@ -17,6 +17,10 @@ UniformBufferObject :: #type struct {
     view:      emath.Mat4,
     iView:     emath.Mat4,
     deltaTime: f32,
+
+    // Window
+    winWidth:  f32,
+    winHeight: f32,
 
     // Camera
     cameraPos: emath.Vec3,

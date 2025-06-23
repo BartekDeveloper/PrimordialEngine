@@ -13,43 +13,8 @@ import "../choose"
 import t   "../types"
 import win "../../window"
 
-SwapchainImages :: proc(data: ^t.VulkanData) -> () {
-    using data;
-
-    good: bool = true
-
-    log.debug("Requesting swapchain images")
-    swapchain.images = make([dynamic]vk.Image,     swapchain.imageCount)
-    vk.GetSwapchainImagesKHR(logical.device, swapchain.swapchain, &swapchain.imageCount, raw_data(swapchain.images))
-    if len(swapchain.images) == 0 {
-        panic("Failed to get swapchain images!")
-    }
-
-    log.debug("Creating swapchain image views")
-    swapchain.views = make([dynamic]vk.ImageView, swapchain.imageCount)
-    for &view, i in swapchain.views  {
-        view, good = ImageView(
-            data,
-            swapchain.images[i],
-            swapchain.formats.surface.format
-        )
-        if !good {
-            panic("Failed to create Swapchain Views!")
-        }
-    }
-
-    i: int = 0 
-    for &view in swapchain.views {
-        // Add label here <- . ->
-        log.assertf(view != {}, "Swapchain View #%d is nil!", i)
-        i += 1
-    }
-
-    return
-}
-
 Swapchain :: proc(data: ^t.VulkanData) -> () {
-    using data;
+    using data
 
     log.debug("Swapchain data initializing")
     swapchain.extent          = choose.SwapchainExtent(data)
@@ -68,6 +33,7 @@ Swapchain :: proc(data: ^t.VulkanData) -> () {
         panic("Swapchain max image count is equal to 0!")
     }
     log.infof("Swapchain image count: %d", swapchain.imageCount)
+
 
     log.debug("Swapchain Create Info")
     preTransform := physical.capabilities.currentTransform
@@ -106,5 +72,40 @@ Swapchain :: proc(data: ^t.VulkanData) -> () {
     log.debug("Swapchain created!")
 
     SwapchainImages(data)
+    return
+}
+
+SwapchainImages :: proc(data: ^t.VulkanData) -> () {
+    using data
+
+    good: bool = true
+
+    log.debug("Requesting swapchain images")
+    swapchain.images = make([dynamic]vk.Image,     swapchain.imageCount)
+    vk.GetSwapchainImagesKHR(logical.device, swapchain.swapchain, &swapchain.imageCount, raw_data(swapchain.images))
+    if len(swapchain.images) == 0 {
+        panic("Failed to get swapchain images!")
+    }
+
+    log.debug("Creating swapchain image views")
+    swapchain.views = make([dynamic]vk.ImageView, len(swapchain.images))
+    for &view, i in swapchain.views  {
+        view, good = ImageView(
+            data,
+            swapchain.images[i],
+            swapchain.formats.surface.format
+        )
+        if !good {
+            panic("Failed to create Swapchain Views!")
+        }
+    }
+
+    i: int = 0 
+    for &view in swapchain.views {
+        // Add label here <- . ->
+        log.assertf(view != {}, "Swapchain View #%d is nil!", i)
+        i += 1
+    }
+
     return
 }

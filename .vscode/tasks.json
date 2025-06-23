@@ -1,0 +1,16 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build_odin_debug",
+            "type": "process",
+            "command": "odin",
+            "args": [
+                "build",
+                ".",
+                "-debug"
+            ],
+            "group": "build"
+        }
+    ]
+}

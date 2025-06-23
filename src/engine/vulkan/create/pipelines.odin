@@ -14,7 +14,7 @@ import t "../types"
 import win "../../window"
 
 Pipelines :: proc(data: ^t.VulkanData) -> () {
-    using data;
+    using data
     good: bool = true
 
     viewports["global"] = {
@@ -129,7 +129,7 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
 DefaultVertexInput :: proc(
     data: ^PipelineVertexData
 ) -> (vertexInput: vk.PipelineVertexInputStateCreateInfo) {
-    using data;
+    using data
 
     vertexInput = {
         sType                           = .PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
@@ -505,7 +505,7 @@ PipelineLayout :: proc(
     info:     ^vk.PipelineLayoutCreateInfo = nil,
     layout:   ^vk.PipelineLayout          = nil,
 ) -> (ok: bool = true) {
-    using data;
+    using data
     log.debug("Creating Pipeline Layout")
     result := vk.CreatePipelineLayout(logical.device, info, allocations, layout)
     if result != .SUCCESS {
@@ -522,7 +522,7 @@ PipelineCache :: proc(
     info:     ^vk.PipelineCacheCreateInfo = nil,
     cache:    ^vk.PipelineCache           = nil,
 ) -> (ok: bool = true) {
-    using data;
+    using data
     log.debug("Creating Pipeline Cache")
     result := vk.CreatePipelineCache(logical.device, info, allocations, cache)
     if result != .SUCCESS {
@@ -540,7 +540,7 @@ GraphicsPipeline :: proc(
     pipeline: ^vk.Pipeline         = nil,
     gpData:   GraphicsPipelineData = {}
 ) -> (ok: bool = true) {
-    using data;
+    using data
 
     log.debug("Creating Graphics Pipeline")
     result := vk.CreateGraphicsPipelines(logical.device, gpData.cache^, gpData.infoCount, gpData.info, allocations, pipeline)

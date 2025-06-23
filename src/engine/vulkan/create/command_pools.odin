@@ -14,7 +14,7 @@ import t "../types"
 import win "../../window"
 
 CommandPools :: proc(data: ^t.VulkanData) -> () {
-    using data;
+    using data
     log.debug("Creating Command Pools")
 
     log.debug("\t Global Graphics Command Pool")

@@ -28,6 +28,7 @@ Init :: proc(rData: ^s.RenderData) {
     return
 }
 
+ii: u32 = 0 /* Image Index */
 Render :: proc(
     rData: ^s.RenderData = nil
 ) -> () {
@@ -36,12 +37,10 @@ Render :: proc(
 
     currentFrame := rData.currentFrame
     fence        := &syncObjects.fences[currentFrame].this
-
     vk.WaitForFences(logical.device, 1, fence, true, ~u64(0)-1)
 
     imageSem     := &syncObjects.semaphores[currentFrame].image
     
-    ii: u32 = 0 /* Image Index */
     result := vk.AcquireNextImageKHR(
         logical.device,
         swapchain.swapchain,
@@ -57,19 +56,62 @@ Render :: proc(
 
     uboBuffer := uniformBuffers["ubo"].this[currentFrame]
     {
-        using emath;
+        using emath
         
-        ubo: s.UBO = {
-            cameraPos = { 0, 0, 0 },
-            cameraUp  = { 0, 1, 0 },
-            worldUp   = { 0, 1, 0 },
+        /*
+            ! UniformBufferObject :: #type struct {
+                ? Important
+                * proj:      emath.Mat4,
+                * iProj:     emath.Mat4,
+                * view:      emath.Mat4,
+                * iView:     emath.Mat4,
+                * deltaTime: f32,
+
+                ? Window
+                * winWidth:  f32,
+                * winHeight: f32,
+
+                ? Camera
+                * cameraPos: emath.Vec3,
+                * cameraUp:  emath.Vec3,
+                
+                ? World
+                * worldUp:   emath.Vec3,
+                * worldTime: int,
+            }
+        */
+
+        proj := Perspective(45.0, 1.0, 0.1, 128.0)
+        view := LookAt({0, 0, 5}, {0, 0, 0}, {0, 1, 0})
+        
+        invProj := Inverse(proj)
+        invView := Inverse(view)
+
+        WORLD_UP :: emath.Vec3{ 0, 1, 0 }
+        
+        CameraPos := Vec3{ 0, 0, 0 }
+        CameraUp  := Vec3{ 0, 1, 0 }
+        
+        winWidth  := f32(swapchain.extent.width)
+        winHeight := f32(swapchain.extent.height)
+        worldTime := 0
+        deltaTime := f32(rData.deltaTime_f64)
+
+        ubo := s.UBO{
+            proj      = proj,
+            iProj     = invProj,
+            view      = view,
+            iView     = invView,
+            deltaTime = deltaTime,
+
+            winWidth  = winWidth,
+            winHeight = winHeight,
+
+            cameraPos = CameraPos,
+            cameraUp  = CameraUp,
             
-            worldTime = 0,
-            deltaTime = rData.deltaTime_f32,
-            // proj      = Perspective(45.0, 1.0, 0.1, 128.0),
-            // iProj     = Inverse(Perspective(88.0, 1.0, 0.1, 100.0)),
-            // view      = LookAt({0, 0, 5}, {0, 0, 0}, {0, 1, 0}),
-            // iView     = Inverse(LookAt({0, 0, 5}, {0, 0, 0}, {0, 1, 0})),
+            worldUp   = WORLD_UP,
+            worldTime = worldTime,
         }
 
         uboBuffer.ptr = mem.copy(uboBuffer.ptr, rawptr(&ubo), size_of(s.UBO))
@@ -127,7 +169,7 @@ Render :: proc(
     )
     {
         vk.CmdSetViewport(gcbc^, 0, 1, &viewports["global"])
-        vk.CmdSetScissor( gcbc^, 0, 1, &scissors["global"])
+        vk.CmdSetScissor(gcbc^, 0, 1, &scissors["global"])
         
         vk.CmdBindPipeline(gcbc^, .GRAPHICS, pipelines["light"].pipeline)
         
@@ -204,7 +246,8 @@ Render :: proc(
         }
     }
 
-    rData.currentFrame = (rData.currentFrame + 1) % rData.MAX_FRAMES_IN_FLIGHT
+    rData.currentFrame += 1
+    rData.currentFrame %= rData.MAX_FRAMES_IN_FLIGHT
     return
 }
 
@@ -214,7 +257,7 @@ Wait :: proc() {
 }
 
 Clean :: proc(data: ^s.RenderData) {
-    using data;
+    using data
 
     load.SetVulkanDataPointer(&vkData)
     defer load.RemoveVulkanDataPointer()

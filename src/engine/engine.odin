@@ -18,8 +18,9 @@ Init :: proc() {
     context.logger = log.create_console_logger(.Debug)
     defer log.destroy_console_logger(context.logger)
     
-    log.info("Setting up Render Data");
     renderData.MAX_FRAMES_IN_FLIGHT = 2
+
+    log.info("Setting up Render Data");
     log.infof("\tMAX FRAMES IN FLIGHT: %d", renderData.MAX_FRAMES_IN_FLIGHT)
 
     log.info("Loading models...")
@@ -39,15 +40,18 @@ Start :: proc() {
     log.info("Window is running")
     log.info("Starting timer")    
     
+    renderData.currentFrame = 0
+    assert(renderData.MAX_FRAMES_IN_FLIGHT > 0)
+    
     start := time.now()._nsec
     for window.Running() {
         end := time.now()._nsec
         renderData.deltaTime = end - start
         start = end
 
-        renderData.deltaTime_f32 = f32(renderData.deltaTime) / f32(1_000_000_000.00)
-        if renderData.deltaTime_f32 <= 0.0 {
-            renderData.deltaTime_f32 = 0.001
+        renderData.deltaTime_f64 = f64(f64(renderData.deltaTime) / f64(1_000_000_000.00))
+        if renderData.deltaTime_f64 <= 0.0 {
+            renderData.deltaTime_f64 = 0.1
         }
 
         window.Poll()

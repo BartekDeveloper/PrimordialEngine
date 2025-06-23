@@ -76,4 +76,3 @@ Vec2h_Z_AXIS :: linalg.VECTOR3F16_Z_AXIS
 Vec2_Z_AXIS  :: linalg.VECTOR3F32_Z_AXIS    
 Vec2d_Z_AXIS :: linalg.VECTOR3F64_Z_AXIS
 
-Normalize :: linalg.normalize

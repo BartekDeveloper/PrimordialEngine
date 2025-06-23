@@ -16,7 +16,7 @@ import s "../../../shared"
 DescriptorSetLayouts :: proc(
     data: ^t.VulkanData
 ) -> () {
-    using data;
+    using data
     good: bool = true
 
     MAX_FRAMES_IN_FLIGHT := u32(renderData.MAX_FRAMES_IN_FLIGHT)
@@ -61,7 +61,7 @@ DescriptorSetLayouts :: proc(
 }
 
 DescriptorPools :: proc(data: ^t.VulkanData) -> () {
-    using data;
+    using data
     log.debug("Creating Descriptor Pools")
 
     MAX_FRAMES_IN_FLIGHT := u32(renderData.MAX_FRAMES_IN_FLIGHT)
@@ -99,7 +99,7 @@ DescriptorPools :: proc(data: ^t.VulkanData) -> () {
 
 
 DescriptorSets :: proc(data: ^t.VulkanData) -> () {
-    using data;
+    using data
     log.debug("Creating Descriptor Sets")
     MAX_FRAMES_IN_FLIGHT := u32(renderData.MAX_FRAMES_IN_FLIGHT)
 
@@ -362,7 +362,7 @@ DescriptorSetLayout :: proc(
     info: ^vk.DescriptorSetLayoutCreateInfo = nil,
     setLayout: ^vk.DescriptorSetLayout      = nil
 ) -> (ok: bool = true) {
-    using data;
+    using data
 
     log.debug("Creating Descriptor Set Layout")
     result := vk.CreateDescriptorSetLayout(logical.device, info, allocations, setLayout)

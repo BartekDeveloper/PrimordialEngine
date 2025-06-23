@@ -14,7 +14,7 @@ import t "../types"
 import win "../../window"
 
 Framebuffers :: proc(data: ^t.VulkanData) -> () {
-    using data;
+    using data
     log.debug("Creating Framebuffers")
 
     screen    := swapchain.extent

@@ -14,7 +14,7 @@ import t "../types"
 import win "../../window"
 
 Resources :: proc(data: ^t.VulkanData) -> () {
-    using data;
+    using data
     good: bool = true
 
     swapchain.formats.color = swapchain.formats.surface.format
@@ -72,11 +72,11 @@ GBuffer :: proc(
     memoryFlags: vk.MemoryPropertyFlags  = {},
     aspectMask: vk.ImageAspectFlags      = {},
 ) -> (good: bool = true) {
-    using data;
+    using data
     log.debug("Creating GBuffer")
 
-    gBuffer.images = make([]vk.Image, data.swapchain.imageCount)
-    gBuffer.views  = make([]vk.ImageView, data.swapchain.imageCount)
+    gBuffer.images = make([]vk.Image,        data.swapchain.imageCount)
+    gBuffer.views  = make([]vk.ImageView,    data.swapchain.imageCount)
     gBuffer.mems   = make([]vk.DeviceMemory, data.swapchain.imageCount)
 
     for i := 0; i < int(data.swapchain.imageCount); i += 1 {

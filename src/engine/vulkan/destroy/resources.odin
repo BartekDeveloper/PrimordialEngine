@@ -36,7 +36,6 @@ GBuffer :: proc(
     data: ^t.VulkanData = nil,
     gBuffer: ^t.GBuffer = nil
 ) -> () {
-
     for i := 0; i < int(data.swapchain.imageCount); i += 1 {
         Image(
             data,

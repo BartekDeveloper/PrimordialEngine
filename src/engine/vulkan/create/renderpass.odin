@@ -14,7 +14,7 @@ import t "../types"
 import win "../../window"
 
 RenderPasses :: proc(data: ^t.VulkanData) -> () {
-    using data;
+    using data
 
     swapchain.formats.depth = choose.SwapchainDepthFormat(data)
 

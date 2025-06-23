@@ -13,7 +13,7 @@ import t "../types"
 import win "../../window"
 
 LogicalDevice :: proc(data: ^t.VulkanData) -> () {
-    using data;
+    using data
 
     queuePriority: f32 = 1.0
     logical.queueCreateInfos = make([]vk.DeviceQueueCreateInfo, len(data.physical.uniqueQueueFamilies))

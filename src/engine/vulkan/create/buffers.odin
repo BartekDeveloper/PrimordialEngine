@@ -15,11 +15,11 @@ import win "../../window"
 import s "../../../shared"
 
 UniformBuffers :: proc(data: ^t.VulkanData) -> () {
-    using data;
+    using data
     good: bool = true
 
     uboBuffers := uniformBuffers["ubo"]
-    imageCount := u32(swapchain.imageCount) 
+    imageCount := u32(data.renderData.MAX_FRAMES_IN_FLIGHT)
 
     log.debug("Creating `UBO` Uniform Buffers")
     {
@@ -60,7 +60,7 @@ Buffer_return :: proc(
     properties:  vk.MemoryPropertyFlags = {},
     memory:      ^vk.DeviceMemory       = nil,
 ) -> (buffer: vk.Buffer, good: bool = true) #optional_ok {
-    using data;
+    using data
 
     createInfo: vk.BufferCreateInfo = {
         sType       = .BUFFER_CREATE_INFO,
@@ -109,7 +109,7 @@ Buffer_modify :: proc(
     usage:       vk.BufferUsageFlags    = {},
     properties:  vk.MemoryPropertyFlags = {},
 ) -> (good: bool = true) {
-    using data;
+    using data
 
     createInfo: vk.BufferCreateInfo = {
         sType       = .BUFFER_CREATE_INFO,

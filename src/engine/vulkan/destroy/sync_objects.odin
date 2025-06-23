@@ -16,27 +16,26 @@ import t "../types"
 SyncObjects :: proc(
     data: ^t.VulkanData = nil
 ) -> () {
-
     log.debug("Destroying Sync Objects")
 
-    for &sync in data.syncObjects.semaphores {
+    for &sem in data.syncObjects.semaphores {
         vk.DestroySemaphore(
             data.logical.device,
-            sync.image,
+            sem.image,
             data.allocations
         )
         vk.DestroySemaphore(
             data.logical.device,
-            sync.render,
+            sem.render,
             data.allocations
         )
     }
     delete(data.syncObjects.semaphores)
 
-    for &sync in data.syncObjects.fences {
+    for &fence in data.syncObjects.fences {
         vk.DestroyFence(
             data.logical.device,
-            sync.this,
+            fence.this,
             data.allocations
         )
     }

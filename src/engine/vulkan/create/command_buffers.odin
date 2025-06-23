@@ -16,11 +16,11 @@ import win "../../window"
 CommandBuffers :: proc(
     data: ^t.VulkanData
 ) -> () {
-    using data;
+    using data
     log.debug("Creating Command Buffers")
 
     globalPool := commandPools["global"]
-    imageCount := u32(swapchain.imageCount)
+    MAX_FRAMES_IN_FLIGHT := u32(data.renderData.MAX_FRAMES_IN_FLIGHT)
 
     {
         log.debug("\t Global Graphics Command Buffer")
@@ -32,9 +32,9 @@ CommandBuffers :: proc(
             sType              = .COMMAND_BUFFER_ALLOCATE_INFO,
             commandPool        = globalPool.this,
             level              = .PRIMARY,
-            commandBufferCount = imageCount,
+            commandBufferCount = MAX_FRAMES_IN_FLIGHT,
         }
-        cmd.this = make([]vk.CommandBuffer, imageCount)
+        cmd.this = make([]vk.CommandBuffer, MAX_FRAMES_IN_FLIGHT)
 
         good := CommandBuffer(
             data,
@@ -54,7 +54,7 @@ CommandBuffer :: proc(
     createInfo:  ^vk.CommandBufferAllocateInfo = nil,
     cmdBuffer_s: [^]vk.CommandBuffer           = nil 
 ) -> (good: bool = true) {
-    using data;
+    using data
 
     result := vk.AllocateCommandBuffers(
         logical.device,

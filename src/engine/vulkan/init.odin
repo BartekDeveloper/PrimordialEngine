@@ -20,7 +20,7 @@ import win "../window"
 InitFromZero :: proc(
     data: ^t.VulkanData = nil, rData: ^s.RenderData = nil
 ) -> () {
-    using data;
+    using data
     data.renderData = rData^
 
     loc := #location()

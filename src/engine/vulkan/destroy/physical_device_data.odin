@@ -15,7 +15,7 @@ import t "../types"
 PhysicalDeviceData :: proc(
     data: ^t.VulkanData = nil
 ) -> () {
-    using data;
+    using data
     
     physical.capabilities     = {}
     physical.properties       = {}

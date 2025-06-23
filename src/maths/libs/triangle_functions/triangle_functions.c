@@ -13,7 +13,7 @@ const double PI2 = 6.28318530717958647692;
 const int TABLE_SIZE = 8192;
 
 float MapAngleToTableIndex(float angle) {
-   
+
     const float TABLE_ANGLE_RANGE =  PI2;
     const float TABLE_START_ANGLE = -PI2;
 

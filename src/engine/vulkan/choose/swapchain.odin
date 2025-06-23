@@ -13,7 +13,7 @@ import t "../types"
 import win "../../window"
 
 SwapchainExtent :: proc(data: ^t.VulkanData) -> (extent: vk.Extent2D = {}) {
-    using data;
+    using data
 
     width, height := win.GetFrameBufferSize()
     extent.width  = width
@@ -23,7 +23,7 @@ SwapchainExtent :: proc(data: ^t.VulkanData) -> (extent: vk.Extent2D = {}) {
 }
 
 SwapchainFormat :: proc(data: ^t.VulkanData) -> (surfaceFormat: vk.SurfaceFormatKHR) {
-    using data;
+    using data
     surfaceFormat = { colorSpace = .SRGB_NONLINEAR, format = .UNDEFINED }
 
     wanted: []vk.SurfaceFormatKHR = {
@@ -92,7 +92,7 @@ SwapchainFormat :: proc(data: ^t.VulkanData) -> (surfaceFormat: vk.SurfaceFormat
 }
 
 SwapchainPresentMode :: proc(data: ^t.VulkanData) -> (presentMode: vk.PresentModeKHR) {
-    using data;
+    using data
     presentMode = .FIFO
 
     wanted: []vk.PresentModeKHR = {
@@ -163,7 +163,7 @@ SwapchainPresentMode :: proc(data: ^t.VulkanData) -> (presentMode: vk.PresentMod
 }
 
 SwapchainDepthFormat :: proc(data: ^t.VulkanData) -> (found: vk.Format = .D32_SFLOAT_S8_UINT, good: bool = true) #optional_ok {
-    using data; 
+    using data 
 
     log.debug("Getting depth format")
     depthFormats: []vk.Format = { .D32_SFLOAT_S8_UINT, .D24_UNORM_S8_UINT, .D32_SFLOAT }

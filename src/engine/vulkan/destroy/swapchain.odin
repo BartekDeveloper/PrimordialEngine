@@ -16,7 +16,7 @@ import t "../types"
 Swapchain :: proc(
     data: ^t.VulkanData = nil
 ) -> () {
-    using data;
+    using data
     
     Resources(data)
 

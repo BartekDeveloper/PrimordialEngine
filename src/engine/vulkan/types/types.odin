@@ -112,6 +112,8 @@ Descriptor :: #type struct {
     
     setsLayouts: []vk.DescriptorSetLayout,
 	sets:        []vk.DescriptorSet,
+
+    writes:      []vk.WriteDescriptorSet
 }
 
 ColorPass :: #type struct {

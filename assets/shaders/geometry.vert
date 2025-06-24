@@ -17,18 +17,15 @@ layout(binding=0) uniform UBO {
     int worldTime;
 } ubo;
 
-vec2 positions[6] = vec2[](
-    /* Screen Quad */
-    // T1
-    vec2(-1.0, -1.0),
-    vec2( 1.0, -1.0),
-    vec2(-1.0,  1.0),
-    // T2
-    vec2(-1.0,  1.0),
-    vec2( 1.0, -1.0),
-    vec2( 1.0,  1.0)
-);
+layout(location = 0) in vec3 pos;
+layout(location = 1) in vec3 norm;
+layout(location = 2) in vec2 uv;
+
+layout(location = 0) out vec3 oPos;
+layout(location = 1) out vec3 oNorm;
+layout(location = 2) out vec2 oUV;
 
 void main() {
-    gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);
+    mat4 worldPos = ubo.proj * ubo.view;
+    gl_Position = worldPos * vec4(pos, 1.0);
 }

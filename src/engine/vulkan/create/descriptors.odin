@@ -134,36 +134,42 @@ DescriptorSets :: proc(data: ^t.VulkanData) -> () {
     }
 
 
-
     log.debug("\t Updating")
     {
         log.debug("\t\t UBO")
-        uboDescriptor = descriptors["ubo"]
-        uboBuffers := uniformBuffers["ubo"].this
+        uboDescriptor := &descriptors["ubo"]
+        uboBuffers    := (&uniformBuffers["ubo"]).this
+
+        uboDescriptor.writes = make([]vk.WriteDescriptorSet, MAX_FRAMES_IN_FLIGHT)
         {
             using uboDescriptor;
 
-            for i := 0; i < int(MAX_FRAMES_IN_FLIGHT); i += 1 {
+            for _, i in uboBuffers {
                 log.assert(uboBuffers[i] != {}, "UBO Buffer is nil")
                 us := &uboDescriptor.sets[i]
 
-                bufferInfo: vk.DescriptorBufferInfo
+                bufferInfo: vk.DescriptorBufferInfo = {}
                 BufferInfo(
                     &bufferInfo,
                     uboBuffers[i],
                     size_of(s.UBO)
                 )
 
-                uboWrite: vk.WriteDescriptorSet
                 DescriptorWrite(
-                    &uboWrite,
+                    &uboDescriptor.writes[i],
                     us,
                     .UNIFORM_BUFFER,
                     bufferInfo = &bufferInfo
                 )
-
             }
-            descriptors["ubo"] = uboDescriptor
+            
+            vk.UpdateDescriptorSets(
+                logical.device,
+                u32(len(uboDescriptor.writes)),
+                raw_data(uboDescriptor.writes),
+                0,
+                nil
+            )
         }
     }
 

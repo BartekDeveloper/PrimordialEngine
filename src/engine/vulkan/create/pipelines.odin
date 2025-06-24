@@ -12,6 +12,7 @@ import vk "vendor:vulkan"
 import "../load"
 import t "../types"
 import win "../../window"
+import s "../../../shared"
 
 Pipelines :: proc(data: ^t.VulkanData) -> () {
     using data
@@ -31,6 +32,126 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
     }
 
     log.debug("Creating Pipelines")
+    log.debug("\t Geometry")
+    {
+        pipelines["geometry"] = {}
+        geometry := &pipelines["geometry"]
+
+        log.debug("\t\t Creating Shaders")
+        geometry.shaders = {
+            { "geometry.vert.spv", .VERTEX },
+            { "geometry.frag.spv", .FRAGMENT },
+        }
+        geometry.stages = ShaderStages(data, load.GetModule, ..geometry.shaders)
+        geometry.setLayouts = { descriptors["ubo"].setLayout }
+
+        pVertexData: PipelineVertexData = {}
+        AddBinding(
+            &pVertexData,
+            t.vibd{
+                binding = 0,
+                stride = size_of(s.Vertex),
+                inputRate = .VERTEX,
+            }
+        )
+        AddAttribute(
+            &pVertexData,
+            t.viad{
+                location = 0,
+                binding = 0,
+                format = .R32G32B32_SFLOAT,
+                offset = u32(offset_of(s.Vertex, pos)),
+            },
+            t.viad{
+                location = 1,
+                binding = 0,
+                format = .R32G32B32_SFLOAT,
+                offset = u32(offset_of(s.Vertex, norm)),
+            },
+            t.viad{
+                location = 2,
+                binding = 0,
+                format = .R32G32_SFLOAT,
+                offset = u32(offset_of(s.Vertex, uv0)),
+            }
+        )
+        defer CleanPipelineVertexData(&pVertexData)
+
+        pDynamicStates: [2]vk.DynamicState = {}
+        pVertexInputInfo := DefaultVertexInput(&pVertexData)
+        pInputAssemblyInfo := DefaultInputAssembly()
+        pViewportState := DefaultViewportState(1, 1)
+        pRasterizationInfo := DefaultRasterization()
+        pMultisampleState := DefaultMultisample()
+        pDepthStencil := DefaultDepthStencil(depthTestEnable = true)
+
+        pColorBlendAttachments := DefaultFillColorBlendAttachments(3, blendEnable = false)
+        pColorBlending := DefaultColorBlending(3, raw_data(pColorBlendAttachments))
+        pDynamicState := DefaultDynamicStates(&pDynamicStates)
+
+        defer delete(pColorBlendAttachments)
+
+        pStates: GraphicsInfoStates = {
+            vertex = &pVertexInputInfo,
+            assembly = &pInputAssemblyInfo,
+            viewport = &pViewportState,
+            raster = &pRasterizationInfo,
+            multisample = &pMultisampleState,
+            depthStencil = &pDepthStencil,
+            colorBlend = &pColorBlending,
+            dynamics = &pDynamicState,
+        }
+
+        pPipelineLayoutCreateInfo := DefaultPipelineLayoutCreateInfo(
+            u32(len(geometry.setLayouts)),
+            raw_data(geometry.setLayouts)
+        )
+        good = PipelineLayout(data, &pPipelineLayoutCreateInfo, &geometry.layout)
+        if !good {
+            panic("Failed to create Pipeline Layout")
+        }
+
+        pCacheCreateInfo := DefaultPipelineEmptyCacheCreateInfo()
+        good = PipelineCache(data, &pCacheCreateInfo, &geometry.cache)
+        if !good {
+            panic("Failed to create Pipeline Cache")
+        }
+
+        geometry.createInfo = vk.GraphicsPipelineCreateInfo{
+            sType = .GRAPHICS_PIPELINE_CREATE_INFO,
+            stageCount = u32(len(geometry.stages)),
+            pStages = raw_data(geometry.stages),
+            pVertexInputState = &pVertexInputInfo,
+            pInputAssemblyState = &pInputAssemblyInfo,
+            pViewportState = &pViewportState,
+            pRasterizationState = &pRasterizationInfo,
+            pMultisampleState = &pMultisampleState,
+            pDepthStencilState = &pDepthStencil,
+            pColorBlendState = &pColorBlending,
+            pDynamicState = &pDynamicState,
+            layout = geometry.layout,
+            renderPass = passes["geometry"].renderPass,
+            subpass = 0,
+            basePipelineHandle = 0,
+            basePipelineIndex = 0,
+        }
+
+        good = GraphicsPipeline(
+            data,
+            &geometry.pipeline,
+            GraphicsPipelineData{
+                cache = &geometry.cache,
+                infoCount = 1,
+                info = &geometry.createInfo.(vk.GraphicsPipelineCreateInfo),
+            }
+        )
+        if !good {
+            panic("Failed to create Graphics Pipeline")
+        }
+
+        assert(geometry.pipeline != {}, "Pipeline is nil!")
+    }
+
     log.debug("\t Light")
     {
         log.debug("\t\t Creating Shaders")\
@@ -38,8 +159,8 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
         light := &pipelines["light"]
 
         light.shaders = {
-            { "geometry.vert.spv", .VERTEX   },
-            { "geometry.frag.spv", .FRAGMENT },
+            { "light.vert.spv", .VERTEX   },
+            { "light.frag.spv", .FRAGMENT },
         }
         light.stages = ShaderStages(data, load.GetModule, ..light.shaders)
         light.setLayouts = { descriptors["ubo"].setLayout }

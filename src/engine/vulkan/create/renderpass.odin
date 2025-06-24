@@ -2,11 +2,9 @@ package vk_create
 
 import "core:log"
 import "core:c"
-
 import "core:mem"
 import "core:fmt"
 import "base:runtime"
-
 import vk "vendor:vulkan"
 
 import "../choose"
@@ -19,9 +17,115 @@ RenderPasses :: proc(data: ^t.VulkanData) -> () {
     swapchain.formats.depth = choose.SwapchainDepthFormat(data)
 
     log.debug("Creating Render Passes")
+    {
+        passes["geometry"] = {}
+        geometryPass := &passes["geometry"]
+
+        log.debug("\t\t Color Attachment")
+        geometryPass.color.attachments = []vk.AttachmentDescription{
+            /* Position */
+            AttachmentDescription(
+                .R32G32B32A32_SFLOAT,
+                finalLayout = .SHADER_READ_ONLY_OPTIMAL
+            ),
+            /* Albedo */
+            AttachmentDescription(
+
+                .R16G16B16A16_UNORM,
+                finalLayout = .SHADER_READ_ONLY_OPTIMAL
+            ),
+            /* Normal */
+            AttachmentDescription(
+                .R8G8B8A8_SINT,
+                finalLayout = .SHADER_READ_ONLY_OPTIMAL
+            )
+        }
+
+        geometryPass.color.references = []vk.AttachmentReference{
+            t.vkar{
+                attachment = 0,
+                layout     = .COLOR_ATTACHMENT_OPTIMAL
+            },
+            t.vkar{
+                attachment = 1,
+                layout     = .COLOR_ATTACHMENT_OPTIMAL
+            },
+            t.vkar{
+                attachment = 2,
+                layout     = .COLOR_ATTACHMENT_OPTIMAL
+            }
+        }
+
+        log.debug("\t\t Depth Attachment")
+        geometryPass.depth.attachment = AttachmentDescription(
+            swapchain.formats.depth,
+            finalLayout = .DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+        )
+
+        geometryPass.depth.reference = t.vkar{
+            attachment = 3,
+            layout     = .DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+        }
+
+        log.debug("\t\t Subpass")
+        geometryPass.subpasses = []vk.SubpassDescription{
+            Subpass(
+                u32(len(geometryPass.color.references)),
+                raw_data(geometryPass.color.references),
+                &geometryPass.depth.reference
+            )
+        }
+
+        log.debug("\t\t Dependencies")
+        geometryPass.dependencies = []vk.SubpassDependency{
+            SubpassDependency(
+                { .BOTTOM_OF_PIPE },
+                { .COLOR_ATTACHMENT_OUTPUT },
+                { .MEMORY_READ },
+                { .COLOR_ATTACHMENT_READ, .COLOR_ATTACHMENT_WRITE },
+                { .BY_REGION },
+            ),
+            SubpassDependency(
+                { .COLOR_ATTACHMENT_OUTPUT },
+                { .FRAGMENT_SHADER },
+                { .COLOR_ATTACHMENT_WRITE },
+                { .SHADER_READ },
+                { .BY_REGION }
+            )
+        }
+
+        log.debug("\t\t Attachments")
+        geometryPass.attachments = []vk.AttachmentDescription{
+            geometryPass.color.attachments[0], // Position
+            geometryPass.color.attachments[1], // Albedo
+            geometryPass.color.attachments[2], // Normals
+            geometryPass.depth.attachment      // Depth
+        }
+
+        log.debug("\t\t Create Info")
+        geometryPass.createInfo = {
+            sType           = .RENDER_PASS_CREATE_INFO,
+            attachmentCount = u32(len(geometryPass.attachments)),
+            pAttachments    = raw_data(geometryPass.attachments),
+            subpassCount    = u32(len(geometryPass.subpasses)),
+            pSubpasses      = raw_data(geometryPass.subpasses),
+            dependencyCount = u32(len(geometryPass.dependencies)),
+            pDependencies   = raw_data(geometryPass.dependencies),
+        }
+
+        log.debug("\t\t Create `Geometry` Render Pass")
+        good := RenderPass(data, &geometryPass.createInfo, &geometryPass.renderPass)
+        if !good {
+            panic("Failed to create Render Pass!")
+        }
+
+        assert(geometryPass.renderPass != {}, "Render Pass is nil!")
+    }
+
     log.debug("\t Light Pass")
     {
-        lightPass := passes["light"]
+        passes["light"] = {}
+        lightPass := &passes["light"]
 
         log.debug("\t\t Color Attachment")
         lightPass.color.attachments = []vk.AttachmentDescription{
@@ -30,6 +134,7 @@ RenderPasses :: proc(data: ^t.VulkanData) -> () {
                 finalLayout = .PRESENT_SRC_KHR
             )
         }
+
         lightPass.color.references = []vk.AttachmentReference{
             t.vkar{
                 attachment = 0,
@@ -61,10 +166,10 @@ RenderPasses :: proc(data: ^t.VulkanData) -> () {
         lightPass.dependencies = []vk.SubpassDependency{
             SubpassDependency(
                 { .COLOR_ATTACHMENT_OUTPUT },
-                { .FRAGMENT_SHADER         },
+                { .FRAGMENT_SHADER },
                 { .COLOR_ATTACHMENT_WRITE },
-                { .SHADER_READ            },
-                { .BY_REGION            }
+                { .SHADER_READ },
+                { .BY_REGION }
             )
         }
 
@@ -90,13 +195,12 @@ RenderPasses :: proc(data: ^t.VulkanData) -> () {
         if !good {
             panic("Failed to create Render Pass!")
         }
-        
-        passes["light"] = lightPass
+
+        assert(lightPass.renderPass != {}, "Render Pass is nil!")
     }
 
     return
 }
-
 
 AttachmentDescription :: proc(
     format: vk.Format                    = .R8G8B8A8_UNORM,

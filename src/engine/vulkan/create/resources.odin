@@ -20,15 +20,88 @@ Resources :: proc(data: ^t.VulkanData) -> () {
     swapchain.formats.color = swapchain.formats.surface.format
     screen := swapchain.extent
     
-    gBuffers["light.color"] = {}
-    gBuffers["light.depth"] = {}
+    gBuffers["geometry.position"] = {}
+    gBuffers["geometry.albedo"]   = {}
+    gBuffers["geometry.normal"]   = {}
+    gBuffers["geometry.depth"]    = {}
+    gBuffers["light.color"]       = {}
+    gBuffers["light.depth"]       = {}
+
+    geometryPass := &passes["geometry"]
+    lightPass    := &passes["light"]
+
+    positionBuffer := &gBuffers["geometry.position"]
+    albedoBuffer   := &gBuffers["geometry.albedo"]
+    normalBuffer   := &gBuffers["geometry.normal"]
+    depthBufferG   := &gBuffers["geometry.depth"]
     
-    lightPass   := &passes["light"]
     colorBuffer := &gBuffers["light.color"]
     depthBuffer := &gBuffers["light.depth"]
 
     log.debug("Creating Resources")
-    log.debug("\t Color Buffer")
+    log.debug("\t `Geometry` GBuffers")
+    log.debug("\t\t Position Buffer")
+    good = GBuffer(
+        data,
+        positionBuffer,
+        .R32G32B32A32_SFLOAT,
+        screen.width, screen.height,
+        .OPTIMAL,
+        { .COLOR_ATTACHMENT },
+        { .DEVICE_LOCAL },
+        { .COLOR }
+    )
+    if !good {
+        panic("Failed to create Position Buffer!")
+    }
+
+    log.debug("\t\t Albedo Buffer")
+    good = GBuffer(
+        data,
+        albedoBuffer,
+        .R16G16B16A16_UNORM,
+        screen.width, screen.height,
+        .OPTIMAL,
+        { .COLOR_ATTACHMENT },
+        { .DEVICE_LOCAL },
+        { .COLOR }
+    )
+    if !good {
+        panic("Failed to create Albedo Buffer!")
+    }
+
+    log.debug("\t\t Normal Buffer")
+    good = GBuffer(
+        data,
+        normalBuffer,
+        .R8G8B8A8_SINT,
+        screen.width, screen.height,
+        .OPTIMAL,
+        { .COLOR_ATTACHMENT },
+        { .DEVICE_LOCAL },
+        { .COLOR }
+    )
+    if !good {
+        panic("Failed to create Normal Buffer!")
+    }
+    
+    log.debug("\t\t Depth Buffer")
+    good = GBuffer(
+        data,
+        depthBufferG,
+        swapchain.formats.depth,
+        screen.width, screen.height,
+        .OPTIMAL,
+        { .DEPTH_STENCIL_ATTACHMENT },
+        { .DEVICE_LOCAL },
+        { .DEPTH }
+    )
+    if !good {
+        panic("Failed to create Depth Buffer!")
+    }
+    
+    log.debug("\t `Light` GBuffers")
+    log.debug("\t\t Color Buffer")
     good = GBuffer(
         data,
         colorBuffer,
@@ -43,7 +116,7 @@ Resources :: proc(data: ^t.VulkanData) -> () {
         panic("Failed to create Color Buffer!")
     }
 
-    log.debug("\t Depth Buffer")
+    log.debug("\t\t Depth Buffer")
     good = GBuffer(
         data,
         depthBuffer,

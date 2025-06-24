@@ -31,3 +31,11 @@ UniformBufferObject :: #type struct {
     worldTime: int,
 }
 UBO :: #type UniformBufferObject
+
+@(private="file")
+VertexData :: #type struct {
+    pos:  emath.Vec3,
+    norm: emath.Vec3,
+    uv0:  emath.Vec2
+}
+Vertex :: #type VertexData

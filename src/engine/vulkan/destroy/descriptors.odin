@@ -13,7 +13,7 @@ import vk "vendor:vulkan"
 
 import t "../types"
 
-DescriptorSetLayouts :: proc(
+Descriptors :: proc(
     data: ^t.VulkanData = nil
 ) -> () {
     
@@ -26,6 +26,7 @@ DescriptorSetLayouts :: proc(
         delete(descriptor.bindings)
         delete(descriptor.sets)
         delete(descriptor.setsLayouts)
+        delete(descriptor.writes)
     }
     delete(data.descriptors)
 

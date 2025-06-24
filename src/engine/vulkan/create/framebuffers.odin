@@ -19,7 +19,40 @@ Framebuffers :: proc(data: ^t.VulkanData) -> () {
 
     screen    := swapchain.extent
     screen3D  := vk.Extent3D{ width = screen.width, height = screen.height, depth = 1 }
-    lightPass := passes["light"]
+    
+    geometryPass := &passes["geometry"]
+    {
+        geometryPass.frameBuffers = make([]vk.Framebuffer, swapchain.imageCount)
+
+        for &fb, i in geometryPass.frameBuffers {
+            log.assertf(gBuffers["geometry.position"].views[i] != {}, "Geometry Position Buffer View is nil at index %d", i)
+            log.assertf(gBuffers["geometry.albedo"].views[i]   != {}, "Geometry Albedo Buffer View is nil at index %d", i)
+            log.assertf(gBuffers["geometry.normal"].views[i]   != {}, "Geometry Normal Buffer View is nil at index %d", i)
+            log.assertf(gBuffers["geometry.depth"].views[i]    != {}, "Geometry Depth Buffer View is nil at index %d", i)
+
+            attachments: []vk.ImageView = {
+                gBuffers["geometry.position"].views[i], // Attachment 0: Position
+                gBuffers["geometry.albedo"].views[i],   // Attachment 1: Albedo
+                gBuffers["geometry.normal"].views[i],   // Attachment 2: Normal
+                gBuffers["geometry.depth"].views[i],    // Attachment 3: Depth
+            }
+
+            FrameBuffer(
+                data,
+                screen3D,
+                geometryPass^,
+                &attachments,
+                &fb
+            )
+
+            fmt.eprintfln("Created `geometry` Framebuffer #%d", i)
+        }
+
+        fmt.eprintfln("Total created `geometry` Framebuffer count: %d", len(geometryPass.frameBuffers))
+    }
+
+    
+    lightPass := &passes["light"]
     {  
         lightPass.frameBuffers = make([]vk.Framebuffer, swapchain.imageCount)
         for &fb, i in lightPass.frameBuffers {
@@ -34,12 +67,11 @@ Framebuffers :: proc(data: ^t.VulkanData) -> () {
             FrameBuffer(
                 data,
                 screen3D,
-                lightPass,
+                lightPass^,
                 &attachments,
                 &fb
             )
             fmt.eprintfln("Created `light` Framebuffer #%d", i) 
-            passes["light"] = lightPass
         }
         
         fmt.eprintfln("Total created `light` Framebuffer count: %d", len(lightPass.frameBuffers))  

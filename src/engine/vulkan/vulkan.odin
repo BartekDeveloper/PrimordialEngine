@@ -28,6 +28,7 @@ Init :: proc(rData: ^s.RenderData) {
     return
 }
 
+worldTime := 0
 ii: u32 = 0 /* Image Index */
 Render :: proc(
     rData: ^s.RenderData = nil
@@ -54,7 +55,7 @@ Render :: proc(
         return
     }
 
-    uboBuffer := uniformBuffers["ubo"].this[currentFrame]
+    uboBuffer := &uniformBuffers["ubo"].this[currentFrame]
     {
         using emath
         
@@ -94,7 +95,6 @@ Render :: proc(
         
         winWidth  := f32(swapchain.extent.width)
         winHeight := f32(swapchain.extent.height)
-        worldTime := 0
         deltaTime := f32(rData.deltaTime_f64)
 
         ubo := s.UBO{
@@ -112,6 +112,10 @@ Render :: proc(
             
             worldUp   = WORLD_UP,
             worldTime = worldTime,
+        }
+        worldTime += 1
+        if worldTime > int(~u16(0)-1) { 
+            worldTime = 0
         }
 
         uboBuffer.ptr = mem.copy(uboBuffer.ptr, rawptr(&ubo), size_of(s.UBO))
@@ -140,8 +144,61 @@ Render :: proc(
     assert(uboCurrentSet != {}, "UBO set is nil!")
 
     lightPass := passes["light"]
-    lFb       := lightPass.frameBuffers[ii]
+    geometryPass   := passes["geometry"]
 
+    lFb       := lightPass.frameBuffers[ii]
+    gFb       := geometryPass.frameBuffers[ii] 
+
+    geometryPass.clearValues = {
+        {
+            color = { float32 = { 0.0, 0.0, 0.0, 1.0 }},
+        },
+        {
+            color = { float32 = { 0.0, 0.0, 0.0, 1.0 }},
+        },
+        {
+            color = { float32 = { 0.0, 0.0, 0.0, 1.0 }},
+        },
+        {
+            depthStencil = { depth = 0.0, stencil = 0 },
+        }
+    }
+    renderPassBeginInfo: vk.RenderPassBeginInfo = {
+        sType                   = .RENDER_PASS_BEGIN_INFO,
+        renderPass              = geometryPass.renderPass,
+        framebuffer             = gFb,
+        renderArea = {
+            offset = {0, 0},
+            extent = swapchain.extent,
+        },
+        clearValueCount = u32(len(geometryPass.clearValues)),
+        pClearValues    = raw_data(geometryPass.clearValues),
+    }
+    vk.CmdBeginRenderPass(
+        gcbc^,
+        &renderPassBeginInfo,
+        .INLINE
+    )
+    {
+        vk.CmdSetViewport(gcbc^, 0, 1, &viewports["global"])
+        vk.CmdSetScissor(gcbc^, 0, 1, &scissors["global"])
+        
+        vk.CmdBindPipeline(gcbc^, .GRAPHICS, pipelines["geometry"].pipeline)
+        
+        vk.CmdBindDescriptorSets(
+            gcbc^,
+            .GRAPHICS,
+            pipelines["geometry"].layout,
+            0, 1,
+            &uboCurrentSet,
+            0, nil
+        )
+
+        vk.CmdDraw(gcbc^, 6, 1, 0, 0)
+    }
+    vk.CmdEndRenderPass(gcbc^)
+
+    
     lightPass.clearValues = {
         {
             color = { float32 = { 0.0, 0.0, 0.0, 1.0 }},
@@ -150,8 +207,7 @@ Render :: proc(
             depthStencil = { depth = 0.0, stencil = 0 },
         }
     }
-
-    renderPassBeginInfo: vk.RenderPassBeginInfo = {
+    renderPassBeginInfo = vk.RenderPassBeginInfo{
         sType                   = .RENDER_PASS_BEGIN_INFO,
         renderPass              = lightPass.renderPass,
         framebuffer             = lFb,
@@ -272,7 +328,7 @@ Clean :: proc(data: ^s.RenderData) {
     destroy.CommandBuffers(&vkData)
     destroy.FrameBuffers(&vkData)
     destroy.Pipelines(&vkData)
-    destroy.DescriptorSetLayouts(&vkData)
+    destroy.Descriptors(&vkData)
     destroy.RenderPasses(&vkData)    
     destroy.Swapchain(&vkData)
     load.CleanUpShaderModules()

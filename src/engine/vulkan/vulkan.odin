@@ -193,8 +193,8 @@ Render :: proc(
             &uboCurrentSet,
             0, nil
         )
-
-        vk.CmdDraw(gcbc^, 6, 1, 0, 0)
+        
+        // objects.VkDraw(&vkData, rData, gcbc)
     }
     vk.CmdEndRenderPass(gcbc^)
 

@@ -5,6 +5,7 @@ import "core:mem"
 
 import "src/engine"
 import "src/maths"
+import obj "src/engine/objects"
 
 main :: proc() {
     
@@ -28,8 +29,9 @@ main :: proc() {
         }
     }
     
-    engine.Init()
-    defer engine.Destroy()
-    engine.Start()
+    // engine.Init()
+    // defer engine.Destroy()
+    // engine.Start()
+    obj.Load_fromFile("./assets/models/Monke.obj")
 }
 

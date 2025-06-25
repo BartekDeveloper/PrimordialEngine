@@ -21,17 +21,19 @@ main :: proc() {
                 total_not_deallocated += v.size
             }
 
-            fmt.eprintfln("* -=-=-=-> %v ($%v) Not freed! <-=-=-=- *", len(trace.allocation_map), total_not_deallocated);
+            fmt.eprint("\n\n\n")
+            fmt.eprintfln("* -=-=-=-> %v ($%v) Not freed! <-=-=-=- *", len(trace.allocation_map), total_not_deallocated)
+            defer fmt.eprintln("* -=-=-=-> -------------- <-=-=-=- *")
             for _, entry in trace.allocation_map {
-                fmt.eprintfln("\t $%v  -\n\t\t %s", entry.size, entry.location);
+                fmt.eprintfln("\t $%v  -\n\t\t %s", entry.size, entry.location)
             }
-            fmt.eprintln("* -=-=-=-> -------------- <-=-=-=- *");
         }
     }
-    
-    // engine.Init()
-    // defer engine.Destroy()
-    // engine.Start()
-    obj.Load_fromFile("./assets/models/Monke.obj")
-}
 
+    obj.Load_fromFile("./assets/models/Monke.glb")
+    defer obj.CleanUp()
+
+    engine.Init()
+    defer engine.Destroy()
+    engine.Start()
+}

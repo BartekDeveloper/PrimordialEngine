@@ -32,10 +32,12 @@ UniformBufferObject :: #type struct {
 }
 UBO :: #type UniformBufferObject
 
-@(private="file")
+// @(private="file")
 VertexData :: #type struct {
-    pos:  emath.Vec3,
-    norm: emath.Vec3,
-    uv0:  emath.Vec2
+    pos:   emath.Vec3,
+    norm:  emath.Vec3,
+    tan:   emath.Vec3,
+    color: emath.Vec3,
+    uv0:   emath.Vec2,
 }
 Vertex :: #type VertexData

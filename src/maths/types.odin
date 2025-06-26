@@ -24,6 +24,30 @@ Vec4h :: linalg.Vector4f16
 Vec4  :: linalg.Vector4f32
 Vec4d :: linalg.Vector4f64
 
+iVec2h :: [2]i16
+iVec2  :: [2]i32
+iVec2d :: [2]i64
+
+iVec3h :: [3]i16
+iVec3  :: [3]i32
+iVec3d :: [3]i64
+
+iVec4h :: [4]i16
+iVec4  :: [4]i32
+iVec4d :: [4]i64
+
+uVec2h :: [2]u16
+uVec2  :: [2]u32
+uVec2d :: [2]u64
+
+uVec3h :: [3]u16
+uVec3  :: [3]u32
+uVec3d :: [3]u64
+
+uVec4h :: [4]u16
+uVec4  :: [4]u32
+uVec4d :: [4]u64
+
 Mat1h :: linalg.Matrix1f16
 Mat1  :: linalg.Matrix1f32
 Mat1d :: linalg.Matrix1f32
@@ -44,35 +68,35 @@ Quath :: linalg.Quaternionf16
 Quat  :: linalg.Quaternionf32
 Quatd :: linalg.Quaternionf64
 
-Mat1h_IDENTIFY :: linalg.MATRIX1F16_IDENTITY
+Mat1h_iDENTiFY :: linalg.MATRIX1F16_IDENTITY
 Mat1_IDENTITY  :: linalg.MATRIX1F32_IDENTITY
-Mat1d_IDENTIFY :: linalg.MATRIX1F64_IDENTITY
+Mat1d_iDENTiFY :: linalg.MATRIX1F64_IDENTITY
 
-Mat2h_IDENTIFY :: linalg.MATRIX2F16_IDENTITY
+Mat2h_iDENTiFY :: linalg.MATRIX2F16_IDENTITY
 Mat2_IDENTITY  :: linalg.MATRIX2F32_IDENTITY
-Mat2d_IDENTIFY :: linalg.MATRIX2F64_IDENTITY
+Mat2d_iDENTiFY :: linalg.MATRIX2F64_IDENTITY
 
-Mat3h_IDENTIFY :: linalg.MATRIX3F16_IDENTITY
+Mat3h_iDENTiFY :: linalg.MATRIX3F16_IDENTITY
 Mat3_IDENTITY  :: linalg.MATRIX3F32_IDENTITY
-Mat3d_IDENTIFY :: linalg.MATRIX3F64_IDENTITY
+Mat3d_iDENTiFY :: linalg.MATRIX3F64_IDENTITY
 
-Mat4h_IDENTIFY :: linalg.MATRIX4F16_IDENTITY
+Mat4h_iDENTiFY :: linalg.MATRIX4F16_IDENTITY
 Mat4_IDENTITY  :: linalg.MATRIX4F32_IDENTITY
-Mat4d_IDENTIFY :: linalg.MATRIX4F64_IDENTITY
+Mat4d_iDENTiFY :: linalg.MATRIX4F64_IDENTITY
 
-Quath_IDENTIFY :: linalg.QUATERNIONF16_IDENTITY
+Quath_iDENTiFY :: linalg.QUATERNIONF16_IDENTITY
 Quat_IDENTITY  :: linalg.QUATERNIONF32_IDENTITY
-Quatd_IDENTIFY :: linalg.QUATERNIONF64_IDENTITY
+Quatd_iDENTiFY :: linalg.QUATERNIONF64_IDENTITY
 
-Vec2h_X_AXIS :: linalg.VECTOR3F16_X_AXIS
-Vec2_X_AXIS  :: linalg.VECTOR3F32_X_AXIS
-Vec2d_X_AXIS :: linalg.VECTOR3F64_X_AXIS
+Vec2h_X_AXiS :: linalg.VECTOR3F16_X_AXIS
+Vec2_X_AXiS  :: linalg.VECTOR3F32_X_AXIS
+Vec2d_X_AXiS :: linalg.VECTOR3F64_X_AXIS
 
-Vec2h_Y_AXIS :: linalg.VECTOR3F16_Y_AXIS
-Vec2_Y_AXIS  :: linalg.VECTOR3F32_Y_AXIS
-Vec2d_Y_AXIS :: linalg.VECTOR3F64_Y_AXIS
+Vec2h_Y_AXiS :: linalg.VECTOR3F16_Y_AXIS
+Vec2_Y_AXiS  :: linalg.VECTOR3F32_Y_AXIS
+Vec2d_Y_AXiS :: linalg.VECTOR3F64_Y_AXIS
 
-Vec2h_Z_AXIS :: linalg.VECTOR3F16_Z_AXIS
-Vec2_Z_AXIS  :: linalg.VECTOR3F32_Z_AXIS    
-Vec2d_Z_AXIS :: linalg.VECTOR3F64_Z_AXIS
+Vec2h_Z_AXiS :: linalg.VECTOR3F16_Z_AXIS
+Vec2_Z_AXiS  :: linalg.VECTOR3F32_Z_AXIS    
+Vec2d_Z_AXiS :: linalg.VECTOR3F64_Z_AXIS
 

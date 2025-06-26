@@ -4,6 +4,7 @@ import "core:fmt"
 import vk "vendor:vulkan"
 
 import t "../types"
+import obj "../../objects"
 import emath "../../../maths"
 import s "../../../shared"
 
@@ -20,7 +21,7 @@ VkDataBuffer :: #type struct {
         size:   vk.DeviceSize,
     },
 }
-buffers: map[cstring]map[cstring]VkDataBuffer = {}
+buffers: map[string]map[cstring]VkDataBuffer = {}
 
 VkDraw :: proc(
     cmd: ^vk.CommandBuffer = nil, 
@@ -30,8 +31,9 @@ VkDraw :: proc(
     firstIndex: u32        = 0,
     firstInstance: u32     = 0,
 ) -> () {
+    using obj
+    
     fmt.eprintfln("Drawing {} of {}", modelName, sceneName)
-
 
     scene := scenes[sceneName].meshes[modelName]
     buffer := buffers[sceneName][modelName]
@@ -39,26 +41,26 @@ VkDraw :: proc(
     vertex := buffer.vertex.buffer
     index  := buffer.index.buffer
 
-    vertexCount := u32(len(scene.vertices))
-    indexCount  := u32(len(scene.indices))
+    vertexCount := u32(len(scene))
+    indexCount  := u32(len(scene))
 
     vk.CmdBindVertexBuffers(
-        cmd,
+        cmd^,
         0,
         vertexCount,
         vertex,
-        0
+        nil
     )
     if index != nil {
         vk.CmdBindIndexBuffer(
-            cmd,
-            index,
+            cmd^,
+            index^,
             0,
-            .uint32,
+            .UINT32,
         )
 
         vk.CmdDrawIndexed(
-            cmd,
+            cmd^,
             indexCount, instances,
             firstIndex, 0, firstInstance
         )
@@ -66,7 +68,7 @@ VkDraw :: proc(
     }
     
     vk.CmdDraw(
-        cmd,
+        cmd^,
         vertexCount, instances,
         firstIndex, firstInstance
     )

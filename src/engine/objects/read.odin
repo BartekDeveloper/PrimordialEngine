@@ -8,18 +8,15 @@ import tf "vendor:cgltf"
 import emath "../../maths"
 import s "../../shared"
 
-@(private="file")
 ModelDataType :: #type struct {
     vertices: [dynamic]s.Vertex,
     indices:  [dynamic]u32,
     type:     tf.primitive_type,
 }
-
 ModelData :: #type ModelDataType
-Models    :: #type [dynamic]ModelDataType
 
 SceneData :: #type struct {
-    meshes:  map[cstring]Models,
+    meshes:  map[cstring][dynamic]ModelDataType,
 }
 
 defaultOptions: tf.options = {}
@@ -85,150 +82,204 @@ ProcessData :: proc(data: ^tf.data, sceneName: string) -> () {
     defer fmt.eprintfln("* -=-=-=-> ---------- <-=-=-=- *")
     
 
-    meshes: map[cstring]Models = {}
-    for mesh, i in data.meshes {
-        models: Models = {}
-        defer delete(models)
-
-        indices: map[s.Vertex]u32 = {}
-        for prime, j in mesh.primitives {
-            model: ModelData = {}
-            model.type = prime.type
-            defer delete(model.vertices)
-            defer delete(model.indices)
-
-            accessorsMap: map[cstring]tf.accessor = {}
-            defer delete(accessorsMap)
-
-            ok: b32 = true
-            for attr, k in prime.attributes {                
-                #partial switch attr.type {
-                    case .position: {
-                        accessorsMap[attr.name] = attr.data^
-                        break
-                    }
-                    
-                    case .normal: {
-                        accessorsMap[attr.name] = attr.data^
-                        break
-                    }
-                    
-                    case .tangent: {
-                        accessorsMap[attr.name] = attr.data^
-                        break
-                    }
-                    
-                    case .color: {
-                        accessorsMap[attr.name] = attr.data^
-                        break
-                    }
-                    
-                    case .texcoord: {
-                        accessorsMap[attr.name] = attr.data^
-                        break
-                    }
-                    
-                    case: {
-                        accessorsMap[attr.name] = attr.data^
-                        break
-                    }
-                }
-            }
-            for k, _ in accessorsMap {
-                fmt.eprintfln("\t{}", k)
-            }
-
-            position: ^tf.accessor = nil
-            uv0:      ^tf.accessor = nil
-            uv1:      ^tf.accessor = nil
-            normal:   ^tf.accessor = nil
-            tangent:  ^tf.accessor = nil
-            color:    ^tf.accessor = nil
-
-            fmt.eprintln("Setting up accessors:")
-            if accessorsMap["POSITION"]   != {} do position = &accessorsMap["POSITION"]
-            if accessorsMap["TEXCOORD_0"] != {} do uv0      = &accessorsMap["TEXCOORD_0"]
-            if accessorsMap["TEXCOORD_1"] != {} do uv1      = &accessorsMap["TEXCOORD_1"]
-            if accessorsMap["NORMAL"]     != {} do normal   = &accessorsMap["NORMAL"]
-            if accessorsMap["TANGENT"]    != {} do tangent  = &accessorsMap["TANGENT"]            
-            if accessorsMap["COLOR_0"]    != {} do color    = &accessorsMap["COLOR_0"]
-            fmt.eprintln("-----------------")
-
-            fmt.eprintln("Checking position:")
-            if position == nil {
-                panic("Failed to find position data!")
-            }
-            // fmt.eprintln("-----------------")
-            
-            vertexCount := (position^).count
-            fmt.eprintfln("Vertex count: {}", vertexCount)
-            // fmt.eprintln("-----------------")
-            
-            // fmt.eprintln("Creating vertex:")
-            for l in 0..<vertexCount {
-                vertex:     s.Vertex = {}
-                
-                if position != nil {
-                    // fmt.eprintln("Position")
-                    if ok := tf.accessor_read_float(position, l, raw_data(&vertex.pos), 3); !ok{
-                        panic("Failed to read position data!")
-                    }
-                    // fmt.eprintfln("----------")
-                }
-
-                if normal != nil {
-                    // fmt.eprintln("Normal") 
-                    if ok := tf.accessor_read_float(normal, l, raw_data(&vertex.norm), 3); !ok{
-                        panic("Failed to read normal data!")
-                    }
-                    // fmt.eprintfln("----------")
-                }
-
-                if tangent != nil {
-                    // fmt.eprintln("Tangent") 
-                    if ok := tf.accessor_read_float(tangent, l, raw_data(&vertex.tan), 3); !ok{
-                        panic("Failed to read tangent data!")
-                    }
-                    // fmt.eprintfln("----------")
-                }
-
-                if color != nil {
-                    // fmt.eprintln("Color") 
-                    if ok := tf.accessor_read_float(color, l, raw_data(&vertex.color), 3); !ok{
-                        panic("Failed to read color data!")
-                    }
-                    // fmt.eprintfln("----------")
-                }
-
-                if uv0 != nil {
-                    // fmt.eprintln("UV_0") 
-                    if ok := tf.accessor_read_float(uv0, l, raw_data(&vertex.uv0), 2); !ok{
-                        panic("Failed to read uv0 data!")
-                    }
-                    // fmt.eprintfln("----------")
-                }
-
-                if uv1 != nil {
-                    // fmt.eprintln("UV_1") 
-                    // if ok := tf.accessor_read_float(uv1, l, raw_data(&vertex.uv1), 2); !ok{
-                    //     panic("Failed to read uv1 data!")
-                    // }
-                    // fmt.eprintfln("----------")
-                }
-
-                // fmt.eprintfln("\t\t{}\n", vertex)
-                append(&model.vertices, vertex)
-            }
-
-            append(&models, model)
-        }
-
-        meshes[mesh.name] = models
+    meshes: map[cstring][dynamic]ModelDataType = {}
+    for &mesh, i in data.meshes {
+        ProcessMesh(&meshes, &mesh)
     }
     scenes[sceneName] = { meshes = meshes } 
 
     return
 }
+
+ProcessMesh :: proc(
+    meshes: ^map[cstring][dynamic]ModelDataType,
+    mesh: ^tf.mesh,
+    name: cstring = "unnamed"
+) -> () {
+    models: [dynamic]ModelDataType = {}
+    defer delete(models)
+
+    indices: map[s.Vertex]u32 = {}
+    for &prime, j in mesh.primitives {
+        ProcessPrimitive(&models, &prime)
+    }
+    fmt.eprintfln("{}", mesh.name)
+
+    if meshes == nil do panic("No meshes map specified!")
+    meshes[mesh.name] = models
+
+    return
+}
+
+ProcessPrimitive :: proc(
+    models: ^[dynamic]ModelDataType,
+    prime: ^tf.primitive,
+) -> () {
+    model: ModelData = {}
+    model.type = prime.type
+    defer delete(model.vertices)
+    defer delete(model.indices)
+
+    accessorsMap: map[cstring]tf.accessor = {}
+    defer delete(accessorsMap)
+
+    ok: b32 = true
+    for &attr, k in prime.attributes {
+        MapAccessor(&accessorsMap, &attr)
+    }
+
+    for k, _ in accessorsMap {
+        fmt.eprintfln("\t{}", k)
+    }
+
+    position, uv0, uv1, normal, tangent, color: ^tf.accessor = nil, nil, nil, nil, nil, nil
+    position = CheckAccessor("POSITION",   &accessorsMap, )
+    uv0      = CheckAccessor("TEXCOORD_0", &accessorsMap)
+    uv1      = CheckAccessor("TEXCOORD_1", &accessorsMap)
+    normal   = CheckAccessor("NORMAL",     &accessorsMap)
+    tangent  = CheckAccessor("TANGENT",    &accessorsMap)
+    color    = CheckAccessor("COLOR_0",    &accessorsMap)
+
+    if position == nil {
+        panic("Failed to find position data!")
+    }
+
+    vertexCount := position.count
+    fmt.eprintfln("\t\tVertex count: {}", vertexCount)
+
+    SetIndex(0)
+    for l in 0..<vertexCount {
+        ProcessVertex(
+            &model.vertices,
+            position, normal,
+            tangent, color,
+            uv0
+        )
+    }
+
+    if models == nil do panic("No models array specified!")
+    append(models, model)
+
+    return
+}
+
+ProcessVertex :: proc(
+    vertices: ^[dynamic]s.Vertex,
+    
+    acPosition: ^tf.accessor,
+    acNormal:   ^tf.accessor,
+    acTangent:  ^tf.accessor,
+    acColor:    ^tf.accessor,
+    acUv0:      ^tf.accessor,
+) -> () {
+    if vertices == nil do panic("No vertices array specified!")
+
+    vertex: s.Vertex = {}
+    ReadVec3(acPosition, &vertex.pos)
+    ReadVec3(acNormal,   &vertex.norm)
+    ReadVec3(acTangent,  &vertex.tan)
+    ReadVec3(acColor,    &vertex.color)
+    ReadVec2(acUv0,      &vertex.uv0)
+    
+    append(vertices, vertex)
+    AddIndex()
+
+    return
+}
+
+currentIndex: u32 = 0
+SetIndex :: proc "c" (index: u32) { currentIndex = index }
+GetIndex :: proc "c" () -> u32    { return currentIndex  }
+AddIndex :: proc "c" ()           { currentIndex += 1    }
+
+ReadFloat :: proc(accessor: ^tf.accessor, data: [^]f32, #any_int count: u32) {
+    if accessor == nil {
+        return
+    }
+
+    ok := tf.accessor_read_float(accessor, auto_cast currentIndex, data, auto_cast count)
+    if !ok {
+        panic("Failed to read accessor data!")
+    }
+}
+ReadUint :: proc(accessor: ^tf.accessor, data: [^]u32, #any_int count: u32) {
+    if accessor == nil {
+        return
+    }
+    
+    ok := tf.accessor_read_uint(accessor, auto_cast currentIndex, data, auto_cast count)
+    if !ok {
+        panic("Failed to read accessor data!")
+    }
+}
+
+ReadVec4 :: proc(accessor: ^tf.accessor, data: ^emath.Vec4) {
+    ReadFloat(accessor, raw_data(data), 4)
+}
+ReadVec3 :: proc(accessor: ^tf.accessor, data: ^emath.Vec3) {
+    ReadFloat(accessor, raw_data(data), 3)
+}
+ReadVec2 :: proc(accessor: ^tf.accessor, data: ^emath.Vec2) {
+    ReadFloat(accessor, raw_data(data), 2)
+}
+ReadF32 :: proc(accessor: ^tf.accessor, data: ^f32) {
+    ReadFloat(accessor, data, 1)
+}
+
+ReadVec4U :: proc(accessor: ^tf.accessor, data: ^emath.uVec4) {
+    ReadUint(accessor, raw_data(data), 4)
+}
+ReadVec3U :: proc(accessor: ^tf.accessor, data: ^emath.uVec3) {
+    ReadUint(accessor, raw_data(data), 3)
+}
+ReadVec2U :: proc(accessor: ^tf.accessor, data: ^emath.uVec2) {
+    ReadUint(accessor, raw_data(data), 2)
+}
+ReadU32 :: proc(accessor: ^tf.accessor, data: ^u32) {
+    ReadUint(accessor, data, 1)
+}
+
+Read :: proc{
+    ReadVec4,
+    ReadVec3,
+    ReadVec2,
+    ReadF32,
+    ReadVec4U,
+    ReadVec3U,
+    ReadVec2U,
+    ReadU32,
+}
+
+MapAccessor :: proc(
+    mapping: ^map[cstring]tf.accessor = nil,
+    attr: ^tf.attribute = nil
+) -> () {
+    if mapping == nil || attr == nil {
+        return
+    }
+
+    mapping[attr.name] = attr.data^
+    return
+}
+
+CheckAccessor :: #force_inline proc(
+    name: cstring                     = "",  
+    mapping: ^map[cstring]tf.accessor = nil,
+) -> (oAccessor: ^tf.accessor) {
+    if mapping == nil do panic("No mapping specified!")
+    if mapping[name] == {} do return
+    
+    ok: bool = true
+    oAccessor, ok = &mapping[name]
+    if ok {
+        return oAccessor
+    } else {
+        panic("Failed to find accessor!")
+    }
+
+    return
+}
+
 
 CleanUp :: proc() {
     for _, v in scenes {

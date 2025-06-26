@@ -54,7 +54,7 @@ InitFromZero :: proc(
     create.Surface(data)
     create.PhysicalDeviceData(data)
     create.LogicalDevice(data)
-    load.Shaders(allocations=allocations)
+    load.Shaders()
     create.Swapchain(data)
     create.RenderPasses(data)    
     create.DescriptorSetLayouts(data)

@@ -1,35 +1,37 @@
 package objects
 
+import "core:debug/pe"
 import "core:fmt"
 import "core:strings"
+import path "core:path/filepath"
 
 import tf "vendor:cgltf"
 
 import emath "../../maths"
 import s "../../shared"
 
-ModelDataType :: #type struct {
-    vertices: [dynamic]s.Vertex,
-    indices:  [dynamic]u32,
-    type:     tf.primitive_type,
-}
-ModelData :: #type ModelDataType
-
-SceneData :: #type struct {
-    meshes:  map[cstring][dynamic]ModelDataType,
-}
-
 defaultOptions: tf.options = {}
 defaultOptionsPtr := &defaultOptions
 
-scenes: map[string]SceneData = {}
 
-Load_fromFile   :: proc(file: string = "", sceneName: string = "unnamed", options: tf.options = defaultOptions) -> (outModelData: ModelData = {}, good: bool = true) #optional_ok {
+Load_fromFile :: proc(
+    file: string = "",
+    options: tf.options = defaultOptions
+) -> (
+    outSceneData: SceneData = {},
+    good: bool = true
+) #optional_ok {
+
+    basename: string = path.base(file)
+    if basename == "." do panic("Invalid file name!")
+    ext: string = path.ext(file)
+    
+    filename: string = basename[:len(basename)-len(ext)]
+
     path, err := strings.clone_to_cstring(file, context.temp_allocator)
     if err != nil {
         panic("Failed to make file path cstring!")
     }
-    fmt.eprintfln("Name: %s\tFile path: %s", sceneName, path)
 
 
     data, result := tf.parse_file(options, path)
@@ -37,38 +39,35 @@ Load_fromFile   :: proc(file: string = "", sceneName: string = "unnamed", option
     if result != .success {
         panic("Failed to parse model data from file!")
     }
-    fmt.eprintfln("Parsed `%s`\t@ path` `%s` model data from file!", sceneName, file)
 
 
     buffer_result := tf.load_buffers(options, data, path)
     if buffer_result != .success {
         panic("Failed to load model buffers from file!")
     }
-    fmt.eprintfln("Loaded buffers for `%s`\t@ path` `%s`!", sceneName, file)
 
-
-    ProcessData(data, sceneName)
+    outSceneData = ProcessData(data, filename, file)
     return
 }
 
-Load_fromMemory :: proc(buffer: []byte = {}, sceneName: string = "unnamed", options: tf.options = defaultOptions) -> (outModelData: ModelData = {}, good: bool = true) #optional_ok {
-    
+Load_fromMemory :: proc(
+    buffer: []byte = {},
+    name: string = "unnamed",
+    options: tf.options = defaultOptions
+) -> (outSceneData: SceneData = {}, good: bool = true) #optional_ok {
+
     data, result := tf.parse(options, raw_data(buffer), len(buffer))
     defer tf.free(data)
     if result != .success {
         panic("Failed to parse model data from memory!")
     }
-    fmt.eprintfln("Parsed `%s` model data from memory!", sceneName)
-
 
     buffer_result := tf.load_buffers(options, data, nil)
     if buffer_result != .success {
         panic("Failed to load model buffers from memory!")
     }
-    fmt.eprintfln("Loaded buffers for `%s`!", sceneName)
     
-    
-    ProcessData(data, sceneName)
+    outSceneData = ProcessData(data, name, "")
     return
 }
 
@@ -77,53 +76,56 @@ Load :: proc{
     Load_fromMemory,
 }
 
-ProcessData :: proc(data: ^tf.data, sceneName: string) -> () {
+ProcessData :: proc(data: ^tf.data, name: string, path: string) -> (sceneData: SceneData) {
+    fmt.eprintfln("Loading `{}` model data...", name)
     fmt.eprintfln("* -=-=-=-> Model Data <-=-=-=- *")
     defer fmt.eprintfln("* -=-=-=-> ---------- <-=-=-=- *")
     
+    sceneData.name = name
+    sceneData.path = path
+    sceneData.objects = {}
+    sceneData.flags = {}
 
-    meshes: map[cstring][dynamic]ModelDataType = {}
+    models: Models = {}
     for &mesh, i in data.meshes {
-        ProcessMesh(&meshes, &mesh)
+        model := ProcessMesh(&mesh)
+        models[mesh.name] = model
     }
-    scenes[sceneName] = { meshes = meshes } 
+    
+    sceneData.objects = models
+    scenes[name] = sceneData
 
     return
 }
 
-ProcessMesh :: proc(
-    meshes: ^map[cstring][dynamic]ModelDataType,
-    mesh: ^tf.mesh,
-    name: cstring = "unnamed"
-) -> () {
-    models: [dynamic]ModelDataType = {}
-    defer delete(models)
+ProcessMesh :: proc(mesh: ^tf.mesh) -> (model: Model) {
+    model.name = mesh.name
+    model.meshes = {}
 
-    indices: map[s.Vertex]u32 = {}
     for &prime, j in mesh.primitives {
-        ProcessPrimitive(&models, &prime)
+        meshData := ProcessPrimitive(&prime)
+        // Use a unique key for each primitive (mesh name + primitive index)
+        primitiveKey := fmt.aprintf("{}_{}", mesh.name, j)
+        defer delete(primitiveKey)
+
+        model.meshes[primitiveKey] = meshData
     }
     fmt.eprintfln("{}", mesh.name)
 
-    if meshes == nil do panic("No meshes map specified!")
-    meshes[mesh.name] = models
-
     return
 }
 
-ProcessPrimitive :: proc(
-    models: ^[dynamic]ModelDataType,
-    prime: ^tf.primitive,
-) -> () {
-    model: ModelData = {}
-    model.type = prime.type
-    defer delete(model.vertices)
-    defer delete(model.indices)
+ProcessPrimitive :: proc(prime: ^tf.primitive) -> (mesh: Mesh) {
+    
+    fmt.eprintfln("Processing primitive type: {}", prime.type)
+    mesh.type = ConvertPrimitive(prime.type)
+    mesh.vertices = {}
+    mesh.indices = {}
+    mesh.joints = {}
 
     accessorsMap: map[cstring]tf.accessor = {}
     defer delete(accessorsMap)
 
-    ok: b32 = true
     for &attr, k in prime.attributes {
         MapAccessor(&accessorsMap, &attr)
     }
@@ -132,13 +134,14 @@ ProcessPrimitive :: proc(
         fmt.eprintfln("\t{}", k)
     }
 
-    position, uv0, uv1, normal, tangent, color: ^tf.accessor = nil, nil, nil, nil, nil, nil
-    position = CheckAccessor("POSITION",   &accessorsMap, )
+    position, uv0, uv1, normal, tangent, color, joint: ^tf.accessor = nil, nil, nil, nil, nil, nil, nil
+    position = CheckAccessor("POSITION",   &accessorsMap)
     uv0      = CheckAccessor("TEXCOORD_0", &accessorsMap)
     uv1      = CheckAccessor("TEXCOORD_1", &accessorsMap)
     normal   = CheckAccessor("NORMAL",     &accessorsMap)
     tangent  = CheckAccessor("TANGENT",    &accessorsMap)
     color    = CheckAccessor("COLOR_0",    &accessorsMap)
+    joint    = CheckAccessor("JOINTS_0",   &accessorsMap)
 
     if position == nil {
         panic("Failed to find position data!")
@@ -150,15 +153,13 @@ ProcessPrimitive :: proc(
     SetIndex(0)
     for l in 0..<vertexCount {
         ProcessVertex(
-            &model.vertices,
+            &mesh.vertices,
             position, normal,
             tangent, color,
-            uv0
+            uv0, joint
         )
+        AddIndex()
     }
-
-    if models == nil do panic("No models array specified!")
-    append(models, model)
 
     return
 }
@@ -171,18 +172,22 @@ ProcessVertex :: proc(
     acTangent:  ^tf.accessor,
     acColor:    ^tf.accessor,
     acUv0:      ^tf.accessor,
+    acJoint:    ^tf.accessor,
 ) -> () {
     if vertices == nil do panic("No vertices array specified!")
 
+    // Create Vertex
     vertex: s.Vertex = {}
+
+    // Parse data into Vertex
     ReadVec3(acPosition, &vertex.pos)
     ReadVec3(acNormal,   &vertex.norm)
     ReadVec3(acTangent,  &vertex.tan)
     ReadVec3(acColor,    &vertex.color)
     ReadVec2(acUv0,      &vertex.uv0)
-    
+
+    // Append Vertex data to vertices array
     append(vertices, vertex)
-    AddIndex()
 
     return
 }
@@ -193,19 +198,16 @@ GetIndex :: proc "c" () -> u32    { return currentIndex  }
 AddIndex :: proc "c" ()           { currentIndex += 1    }
 
 ReadFloat :: proc(accessor: ^tf.accessor, data: [^]f32, #any_int count: u32) {
-    if accessor == nil {
-        return
-    }
+    if accessor == nil do return
 
     ok := tf.accessor_read_float(accessor, auto_cast currentIndex, data, auto_cast count)
     if !ok {
         panic("Failed to read accessor data!")
     }
 }
+
 ReadUint :: proc(accessor: ^tf.accessor, data: [^]u32, #any_int count: u32) {
-    if accessor == nil {
-        return
-    }
+    if accessor == nil do return
     
     ok := tf.accessor_read_uint(accessor, auto_cast currentIndex, data, auto_cast count)
     if !ok {
@@ -274,16 +276,23 @@ CheckAccessor :: #force_inline proc(
     if ok {
         return oAccessor
     } else {
-        panic("Failed to find accessor!")
+        return nil
     }
 
     return
 }
 
-
-CleanUp :: proc() {
-    for _, v in scenes {
-        delete(v.meshes)
-    }
-    delete(scenes)
-}
+// CleanUp :: proc() {
+//     for name, &scene in scenes {
+//         for modelName, &model in scene.objects {
+//             for meshName, &mesh in model.meshes {
+//                 delete(mesh.vertices)
+//                 delete(mesh.indices)
+//                 delete(mesh.joints)
+//             }
+//             delete(model.meshes)
+//         }
+//         delete(scene.objects)
+//     }
+//     delete(scenes)
+// }

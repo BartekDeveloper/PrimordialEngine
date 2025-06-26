@@ -31,7 +31,7 @@ main :: proc() {
     }
 
     obj.Load_fromFile("./assets/models/Monke.glb")
-    defer obj.CleanUp()
+    // defer obj.CleanUp()
 
     // engine.Init()
     // defer engine.Destroy()

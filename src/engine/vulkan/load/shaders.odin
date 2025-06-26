@@ -23,16 +23,12 @@ RemoveVulkanDataPointer :: proc() { data = nil }
 GetModule :: proc(
     pName: string 
 ) -> (module: vk.ShaderModule) {   
-    if shaderModules[pName] != {} {
-        return shaderModules[pName]
-    }
-
+    if shaderModules[pName] != {} do return shaderModules[pName]
     panic("Shader module not found!")
 }
 
 Shaders :: proc(
     dir:  string = "./assets/shaders",
-    allocations: ^vk.AllocationCallbacks = nil
 ) -> () {
     handle: os.Handle
     err:    os.Error
@@ -54,40 +50,41 @@ Shaders :: proc(
         return
     }
 
-    for f, i in files {
-        if f.is_dir {
-            continue
-        }
-
-        name := f.name
-        ext := path.ext(name)
-        ext = strings.to_lower(ext, context.temp_allocator)
-
-        
-        if ext != ".spv" {
-            continue
-        }
-        log.infof("Found shader: %s", name)
-        
-        ok: bool = false
-        shaderModules[name], ok = CreateShaderModule(name, dir, allocations)
-        if ok {
-            exists[name] = true
-        } else {
-            log.error("Failed to create shader module!")
-        }
+    for &f, i in files {
+        ProcessShaderFile(&f, i, dir)
     }
-    fmt.eprintln("Exists: \n\t", exists)
-    fmt.eprintln("\n\n")
+    fmt.eprintfln("Exists: \n\t {}\n\n", exists)
 
     return
 }
 
+ProcessShaderFile :: proc(
+    f: ^os.File_Info,
+    #any_int index: u32,
+    dir: string
+) -> (ok: bool = true) {
+    if f.is_dir do return
+    
+    ext := path.ext(f.name)
+    ext = strings.to_lower(ext, context.temp_allocator)
+    if ext != ".spv" do return
+
+    log.infof("Found shader: %s", f.name)
+    shaderModules[f.name], ok = CreateShaderModule(f.name, dir)
+    if !ok {
+        log.error("Failed to create shader module!")
+        return
+    }
+
+    exists[f.name] = true
+    return
+}
+
 CreateShaderModule :: proc(
-    name: string                          = "shader",
-    dir: string                           = "./assets/shaders",
-    allocations: ^vk.AllocationCallbacks  = nil
+    name: string,
+    dir: string
 ) -> (module: vk.ShaderModule, good: bool = true) #optional_ok {
+
     module = vk.ShaderModule{}
     path := strings.join({ dir, name }, "/")
     defer delete(path)
@@ -113,7 +110,7 @@ CreateShaderModule :: proc(
     result := vk.CreateShaderModule(
         data.logical.device,
         &moduleInfo,   
-        allocations,
+        data.allocations,
         &module
     )
     if result != .SUCCESS {
@@ -135,6 +132,7 @@ CleanUpShaderModules :: proc() -> () {
         shaderModules[k] = {}
         exists[k] = false
     }
+    
     delete(shaderModules)
     delete(exists)
 

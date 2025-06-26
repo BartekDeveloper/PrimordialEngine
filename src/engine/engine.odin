@@ -37,8 +37,7 @@ Init :: proc() {
 }
 
 Start :: proc() {
-    log.info("Window is running")
-    log.info("Starting timer")    
+    log.info("Window is running\n\nStarting Timer")
     
     renderData.currentFrame = 0
     assert(renderData.MAX_FRAMES_IN_FLIGHT > 0)

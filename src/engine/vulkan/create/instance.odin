@@ -2,19 +2,19 @@ package vk_create
 
 ENABLE_VALIDATION_LAYERS: bool : true
 
-import "base:runtime"
 import "core:c"
 import "core:fmt"
 import "core:log"
 import "core:mem"
 
+import rn "base:runtime"
 
 import vk "vendor:vulkan"
 
 import win "../../window"
 import t "../types"
 
-ctx: runtime.Context
+ctx: rn.Context
 
 VulkanDebugCallback :: proc "system" (
 	messageSeverity: vk.DebugUtilsMessageSeverityFlagsEXT,
@@ -22,7 +22,7 @@ VulkanDebugCallback :: proc "system" (
 	pCallbackData: ^vk.DebugUtilsMessengerCallbackDataEXT,
 	pUserData: rawptr,
 ) -> b32 {
-	context = ctx
+	context = rn.default_context()
 
     switch(messageSeverity) {
         case { .INFO }:

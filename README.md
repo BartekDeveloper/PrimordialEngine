@@ -70,6 +70,7 @@ odin run .
 ## USED LIBRARIES
 - Vulkan
 - SDL3
+- CGLTF
 - (W.I.P)
 
 

@@ -114,14 +114,25 @@ PrintAllModels :: proc() -> () {
     fmt.eprintln("========================\n")
 }
 
-ListModelNames :: proc() -> []string {
-    names := make([]string, len(modelGroups))
+ListModelNames :: proc() -> (oNames: []string) {
+    names: [dynamic]string = {}
+    defer delete(names)
     i := 0
     for name in modelGroups {
-        names[i] = name
+        if name == "" || name == " " || strings.is_null(auto_cast name[0]) {
+            continue
+        }
+        
+        append(&names, name)
+        
         i += 1
     }
-    return names
+
+    oNames = make([]string, len(names))
+    for &name, i in names {
+        oNames[i] = name
+    }
+    return
 }
 
 CleanUpModels :: proc() -> () { 

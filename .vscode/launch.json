@@ -4,13 +4,30 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        // {
+        //     "type": "gdb",
+        //     "request": "launch",
+        //     "name": "Debug",
+        //     "target": "/home/zota/projects/multi/vk_new/vk_new",
+        //     "cwd": "/home/zota/projects/multi/vk_new",
+        //     "valuesFormatting": "prettyPrinters",
+        //     "arguments": "",
+        //     "openGdbConsole": true,
+        //     "preLaunchTask": "build_odin_debug",
+        //     "showDevDebugOutput": true,
+        //     "internalConsoleOptions": "openOnSessionStart"
+        // }
         {
-            "name": "Debug",
             "type": "gdb",
             "request": "launch",
-            "target": "${workspaceFolder}/vk_new",
-            "cwd": "${workspaceFolder}",
-            "preLaunchTask": "build_odin_debug"
+            "name": "Test - Debug",
+            "target": "/home/zota/projects/multi/vk_new/test",
+            "cwd": "/home/zota/projects/multi/vk_new",
+            "valuesFormatting": "prettyPrinters",
+            "arguments": "",
+            "openGdbConsole": true,
+            "showDevDebugOutput": true,
+            "internalConsoleOptions": "openOnFirstSessionStart",
         }
     ]
 }

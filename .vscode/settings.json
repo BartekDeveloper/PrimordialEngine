@@ -3,5 +3,9 @@
     "Codegeex.Comment.LanguagePreference": "English",
     "Codegeex.Chat.LanguagePreference": "English",
     "Codegeex.GenerationPreference": "line by line",
-    "Codegeex.RepoIndex": false
+    "Codegeex.RepoIndex": false,
+    "lldb.displayFormat": "auto",
+    "lldb.showDisassembly": "auto",
+    "lldb.dereferencePointers": true,
+    "lldb.consoleMode": "evaluate"
 }

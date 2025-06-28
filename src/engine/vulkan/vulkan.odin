@@ -20,18 +20,8 @@ import emath "../../maths"
 
 vkData: t.VulkanData = {}
 
-Init :: proc(rData: ^s.RenderData) {
-    InitFromZero(&vkData, rData)
-
-    lightPass := vkData.passes["light"]
-    fmt.eprintfln("Framebuffers count: %d", len(lightPass.frameBuffers))
-    assert(len(lightPass.frameBuffers) > 0, "Framebuffers are empty?!")
-
-    return
-}
-
-worldTime := 0
-ii: u32 = 0 /* Image Index */
+worldTime: int = 0 /* World  Time */
+ii:        u32 = 0 /* Image Index */
 Render :: proc(
     rData: ^s.RenderData = nil
 ) -> () {
@@ -196,12 +186,7 @@ Render :: proc(
             0, nil
         )
         
-        // objects.VkDraw(&vkData, rData, gcbc)
-        // o.VkDraw(
-        //     gcbc,
-        //     "Monke",
-        //     "mesh_Monke_#0"
-        // )
+        o.VkDrawMesh(gcbc, "mesh_Monke_#0", "Cube_0")
     }
     vk.CmdEndRenderPass(gcbc^)
 
@@ -318,41 +303,5 @@ Wait :: proc() {
     return
 }
 
-Clean :: proc(data: ^s.RenderData) {
-    using data
-
-    load.SetVulkanDataPointer(&vkData)
-    defer load.UnSetVulkanDataPointer()
-
-    //? Vulkan Data Cleaning functions
-    destroy.AdditionalData(&vkData)
-    destroy.SyncObjects(&vkData)
-    destroy.Samplers(&vkData)
-    destroy.DescriptorPools(&vkData)
-    destroy.UniformBuffers(&vkData)
-    destroy.CommandPools(&vkData)
-    destroy.CommandBuffers(&vkData)
-    destroy.FrameBuffers(&vkData)
-    destroy.Pipelines(&vkData)
-    destroy.Descriptors(&vkData)
-    destroy.RenderPasses(&vkData)    
-    destroy.Swapchain(&vkData)
-    load.CleanUpShaderModules()
-    destroy.LogicalDevice(&vkData)
-    destroy.PhysicalDeviceData(&vkData)
-    destroy.Surface(&vkData)
-    destroy.Instance(&vkData)
-    destroy.AppInfo(&vkData)
-
-    // Loaded Vulkan Data Cleaning functions
-
-    //* Now LETS SET ALL OF THE DATA(Vulkan Data) free
-    //* and then set them to nil pointers
-    //? ... End of vulkan deinitialization
-    
-    //! Engine DeInit in other file!
-
-    return
-}
 
 

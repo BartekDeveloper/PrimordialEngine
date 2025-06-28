@@ -33,27 +33,27 @@ Buffer :: proc(
     data: ^t.VulkanData = nil,
     buffer: ^t.Buffer = nil
 ) -> () {
-    if buffer.this != {} {
+    defer fmt.eprintfln("Destroying Vulkan buffer '{}'...\n : ('{}' - '{}'')", buffer.ptr, buffer.this, buffer.mem)
+
+    if data == nil {
+        panic("VulkanData pointer is nil!.")
+    }
+    if buffer.this != {} && buffer.this != 0x0 {
         vk.DestroyBuffer(
             data.logical.device,
             buffer.this,
             data.allocations
         )
     }
-
-    if buffer.mem != {} {
+    if buffer.mem != {} && buffer.mem != 0x0 {
         vk.FreeMemory(
             data.logical.device,
             buffer.mem,
             data.allocations
         )
     }
-
     buffer.ptr = nil
-
-    assert(buffer.this != {}, "Buffer is not destroyed!")
-    assert(buffer.mem != {}, "Buffer memory is not freed!")
-    assert(buffer.ptr == nil, "Buffer pointer is not nil!")
+    
     return
 }
 

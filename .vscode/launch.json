@@ -9,8 +9,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "${workspaceFolder}/vk_new",
-            "cwd": "${workspaceRoot}",
-            "valuesFormatting": "parseText",
+            "cwd": "${workspaceFolder}",
             "preLaunchTask": "build_odin_debug"
         }
     ]

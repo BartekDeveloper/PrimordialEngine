@@ -14,6 +14,7 @@ import vk "vendor:vulkan"
 import "load"
 import "create"
 import t "types"
+import vk_obj "objects"
 import s "../../shared"
 import win "../window"
 
@@ -47,7 +48,7 @@ InitFromZero :: proc(
     allocations = nil
 
     load.SetVulkanDataPointer(data)
-    defer load.RemoveVulkanDataPointer()
+    defer load.UnSetVulkanDataPointer()
 
     create.AppInfo(data)
     create.Instance(data)
@@ -70,6 +71,9 @@ InitFromZero :: proc(
     create.SyncObjects(data, rData)
     create.AdditionalData(data)
 
+    vk_obj.SetDataPointer(data)
+    defer vk_obj.UnSetDataPointer()
+    
     return
 }
 

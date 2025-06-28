@@ -18,7 +18,7 @@ allExits:      bool                       = false
 data:          ^t.VulkanData              = nil
 
 SetVulkanDataPointer    :: proc(pData: ^t.VulkanData) { data = pData }
-RemoveVulkanDataPointer :: proc() { data = nil }
+UnSetVulkanDataPointer :: proc() { data = nil }
 
 GetModule :: proc(
     pName: string 

@@ -6,26 +6,14 @@ import "core:os"
 import "core:strings"
 import path "core:path/filepath"
 
-// Global model storage - matches your existing pattern
-modelModules: map[string]SceneData = {}
-modelExists:  map[string]b8        = {}
-allLoaded:    bool                 = false
-
-// Get a loaded model by name
-GetModel :: proc(name: string) -> (model: SceneData, ok: bool) {
-    if modelModules[name] == {} {
-        log.errorf("Model '%s' not found!", name)
-        return {}, false
-    }
-    return modelModules[name], true
+GetModel :: proc(name: string) -> (model: SceneData, ok: bool = true) {
+    return modelGroups[name]
 }
 
-// Check if a model exists
 ModelExists :: proc(name: string) -> bool {
-    return modelExists[name]
+    return (bool)(modelExists[name])
 }
 
-// Main interface to load all models from directory - following shader pattern
 LoadModels :: proc(
     dir: string = "./assets/models",
 ) -> () {
@@ -68,8 +56,7 @@ ProcessModelFile :: proc(
     ext := path.ext(f.name)
     ext = strings.to_lower(ext, context.temp_allocator)
     
-    // Support common 3D model formats
-    validExts := []string{".gltf", ".glb", ".obj", ".fbx"}
+    validExts := []string{ ".gltf", ".glb" }
     isValidExt := false
     for validExt in validExts {
         if ext == validExt {
@@ -82,23 +69,19 @@ ProcessModelFile :: proc(
 
     log.infof("Found model: %s", f.name)
     
-    // Build full path
     fullPath := strings.join({dir, f.name}, "/")
     defer delete(fullPath)
     
-    // Use your existing Load_fromFile function
     modelData, loadOk := Load_fromFile(fullPath)
     if !loadOk {
         log.errorf("Failed to load model: %s", f.name)
         return false
     }
 
-    // Use filename without extension as key
     basename := path.base(f.name)
     modelName := basename[:len(basename)-len(ext)]
     
-    // Store in global maps
-    modelModules[modelName] = modelData
+    modelGroups[modelName] = modelData
     modelExists[modelName] = true
     
     log.infof("Successfully loaded model: %s", modelName)
@@ -106,14 +89,14 @@ ProcessModelFile :: proc(
 }
 
 PrintAllModels :: proc() -> () {
-    if len(modelModules) == 0 {
+    if len(modelGroups) == 0 {
         fmt.eprintln("No models loaded!")
         return
     }
-    
+
     fmt.eprintln("\n=== All Loaded Models ===")
-    for name, sceneData in modelModules {
-        fmt.eprintfln("Model: %s (from: %s)", name, sceneData.path)
+    for name, sceneData in modelGroups {
+        fmt.eprintfln("Scene: %s (from: %s)", name, sceneData.path)
         fmt.eprintfln("\tObjects count: %d", len(sceneData.objects))
         
         for modelName, model in sceneData.objects {
@@ -132,27 +115,24 @@ PrintAllModels :: proc() -> () {
 }
 
 ListModelNames :: proc() -> []string {
-    names := make([]string, len(modelModules))
+    names := make([]string, len(modelGroups))
     i := 0
-    for name in modelModules {
+    for name in modelGroups {
         names[i] = name
         i += 1
     }
     return names
 }
 
-CleanUpModels :: proc() -> () {
-    // Use your existing CleanUp function for the scenes map
-    // CleanUp()
-    
-    // Clean up our local storage
-    for name in modelModules {
-        modelExists[name] = false
+CleanUpModels :: proc() -> () { 
+    CleanUp()
+
+    for model, &exist in modelExists {
+        exist = false
+        delete_key(&modelExists, model)
     }
-    
-    delete(modelModules)
-    delete(modelExists)
+    if modelExists != nil do delete(modelExists)
     allLoaded = false
     
-    log.info("Cleaned up all model modules")
+    fmt.eprintln("Cleaned up all model modules")
 }

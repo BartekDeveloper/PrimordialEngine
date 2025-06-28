@@ -3,6 +3,7 @@ package objects
 import "core:debug/pe"
 import "core:fmt"
 import "core:strings"
+import "core:mem"
 import path "core:path/filepath"
 
 import tf "vendor:cgltf"
@@ -12,7 +13,6 @@ import s "../../shared"
 
 defaultOptions: tf.options = {}
 defaultOptionsPtr := &defaultOptions
-
 
 Load_fromFile :: proc(
     file: string = "",
@@ -26,7 +26,9 @@ Load_fromFile :: proc(
     if basename == "." do panic("Invalid file name!")
     ext: string = path.ext(file)
     
+    // defer panic("TODO: Finish me!")
     filename: string = basename[:len(basename)-len(ext)]
+    // fmt.eprintfln("a\t\n\tfilename:\t\n\t\t {}\n\t\nb", filename)
 
     path, err := strings.clone_to_cstring(file, context.temp_allocator)
     if err != nil {
@@ -67,7 +69,7 @@ Load_fromMemory :: proc(
         panic("Failed to load model buffers from memory!")
     }
     
-    outSceneData = ProcessData(data, name, "")
+    outSceneData = ProcessData(data, name, "@MEMORY@")
     return
 }
 
@@ -81,19 +83,27 @@ ProcessData :: proc(data: ^tf.data, name: string, path: string) -> (sceneData: S
     fmt.eprintfln("* -=-=-=-> Model Data <-=-=-=- *")
     defer fmt.eprintfln("* -=-=-=-> ---------- <-=-=-=- *")
     
-    sceneData.name = name
-    sceneData.path = path
+    sceneData.path    = strings.clone(path, context.allocator)
     sceneData.objects = {}
-    sceneData.flags = {}
+    sceneData.flags   = {}
 
     models: Models = {}
     for &mesh, i in data.meshes {
+        
+        modelsKeyName: string = ""
+        if name == "" {
+            modelsKeyName = fmt.tprintf("mesh_#%d", i)
+        } else {
+            modelsKeyName = fmt.tprintf("mesh_%s_#%d", name, i)
+        }
         model := ProcessMesh(&mesh)
-        models[mesh.name] = model
+        models[modelsKeyName] = model
     }
     
     sceneData.objects = models
-    scenes[name] = sceneData
+
+    modelNameKey := strings.clone(name, context.temp_allocator)
+    modelGroups[modelNameKey] = sceneData
 
     return
 }
@@ -104,10 +114,7 @@ ProcessMesh :: proc(mesh: ^tf.mesh) -> (model: Model) {
 
     for &prime, j in mesh.primitives {
         meshData := ProcessPrimitive(&prime)
-        // Use a unique key for each primitive (mesh name + primitive index)
         primitiveKey := fmt.aprintf("{}_{}", mesh.name, j)
-        defer delete(primitiveKey)
-
         model.meshes[primitiveKey] = meshData
     }
     fmt.eprintfln("{}", mesh.name)
@@ -150,6 +157,8 @@ ProcessPrimitive :: proc(prime: ^tf.primitive) -> (mesh: Mesh) {
     vertexCount := position.count
     fmt.eprintfln("\t\tVertex count: {}", vertexCount)
 
+    mesh.vertices = make([]s.Vertex, vertexCount)
+
     SetIndex(0)
     for l in 0..<vertexCount {
         ProcessVertex(
@@ -165,7 +174,7 @@ ProcessPrimitive :: proc(prime: ^tf.primitive) -> (mesh: Mesh) {
 }
 
 ProcessVertex :: proc(
-    vertices: ^[dynamic]s.Vertex,
+    vertices: ^[]s.Vertex,
     
     acPosition: ^tf.accessor,
     acNormal:   ^tf.accessor,
@@ -176,18 +185,15 @@ ProcessVertex :: proc(
 ) -> () {
     if vertices == nil do panic("No vertices array specified!")
 
-    // Create Vertex
     vertex: s.Vertex = {}
 
-    // Parse data into Vertex
     ReadVec3(acPosition, &vertex.pos)
     ReadVec3(acNormal,   &vertex.norm)
     ReadVec3(acTangent,  &vertex.tan)
     ReadVec3(acColor,    &vertex.color)
     ReadVec2(acUv0,      &vertex.uv0)
 
-    // Append Vertex data to vertices array
-    append(vertices, vertex)
+    vertices[currentIndex] = vertex
 
     return
 }
@@ -273,26 +279,41 @@ CheckAccessor :: #force_inline proc(
     
     ok: bool = true
     oAccessor, ok = &mapping[name]
-    if ok {
-        return oAccessor
-    } else {
-        return nil
-    }
-
+    
+    if !ok do return nil
     return
 }
 
-// CleanUp :: proc() {
-//     for name, &scene in scenes {
-//         for modelName, &model in scene.objects {
-//             for meshName, &mesh in model.meshes {
-//                 delete(mesh.vertices)
-//                 delete(mesh.indices)
-//                 delete(mesh.joints)
-//             }
-//             delete(model.meshes)
-//         }
-//         delete(scene.objects)
-//     }
-//     delete(scenes)
-// }
+CleanUp :: proc() -> () {
+    // For Group
+    for groupName, &group in modelGroups {
+        
+        // For Object
+        for modelName, &object in group.objects {
+            
+            // For Mesh
+            for meshName, &mesh in object.meshes {
+
+                mesh.verticesCount = 0
+                mesh.indicesCount  = 0
+                mesh.type          = .Invalid
+                
+                if mesh.vertices != nil do delete(mesh.vertices)
+                if mesh.indices  != nil do delete(mesh.indices)
+                if mesh.joints   != nil do delete(mesh.joints)
+
+                delete_key(&object.meshes, meshName)
+            }
+            
+            delete_key(&group.objects, modelName)
+            if object.meshes != nil do delete(object.meshes)
+        }
+        delete(group.path)
+        
+        delete_key(&modelGroups, groupName)
+        if group.objects != nil do delete(group.objects)
+    }
+    if modelGroups != nil do delete(modelGroups)
+    
+    return
+}

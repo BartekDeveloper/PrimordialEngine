@@ -12,7 +12,9 @@ import vk "vendor:vulkan"
 import "destroy"
 import "load"
 import t "types"
+import o "objects"
 import "../window"
+import obj "../objects"
 import s "../../shared"
 import emath "../../maths"
 
@@ -195,10 +197,14 @@ Render :: proc(
         )
         
         // objects.VkDraw(&vkData, rData, gcbc)
+        // o.VkDraw(
+        //     gcbc,
+        //     "Monke",
+        //     "mesh_Monke_#0"
+        // )
     }
     vk.CmdEndRenderPass(gcbc^)
 
-    
     lightPass.clearValues = {
         {
             color = { float32 = { 0.0, 0.0, 0.0, 1.0 }},
@@ -316,7 +322,7 @@ Clean :: proc(data: ^s.RenderData) {
     using data
 
     load.SetVulkanDataPointer(&vkData)
-    defer load.RemoveVulkanDataPointer()
+    defer load.UnSetVulkanDataPointer()
 
     //? Vulkan Data Cleaning functions
     destroy.AdditionalData(&vkData)

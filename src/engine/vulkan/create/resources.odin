@@ -47,7 +47,7 @@ Resources :: proc(data: ^t.VulkanData) -> () {
         .R32G32B32A32_SFLOAT,
         screen.width, screen.height,
         .OPTIMAL,
-        { .COLOR_ATTACHMENT },
+        { .COLOR_ATTACHMENT, .INPUT_ATTACHMENT },
         { .DEVICE_LOCAL },
         { .COLOR }
     )
@@ -62,7 +62,7 @@ Resources :: proc(data: ^t.VulkanData) -> () {
         .R16G16B16A16_UNORM,
         screen.width, screen.height,
         .OPTIMAL,
-        { .COLOR_ATTACHMENT },
+        { .COLOR_ATTACHMENT, .INPUT_ATTACHMENT },
         { .DEVICE_LOCAL },
         { .COLOR }
     )
@@ -77,7 +77,7 @@ Resources :: proc(data: ^t.VulkanData) -> () {
         .R8G8B8A8_SINT,
         screen.width, screen.height,
         .OPTIMAL,
-        { .COLOR_ATTACHMENT },
+        { .COLOR_ATTACHMENT, .INPUT_ATTACHMENT },
         { .DEVICE_LOCAL },
         { .COLOR }
     )

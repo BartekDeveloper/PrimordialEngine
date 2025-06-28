@@ -201,9 +201,10 @@ Pipeline :: #type struct {
 }
 
 Buffer :: #type struct {
-	this: vk.Buffer,
-	mem:  vk.DeviceMemory,
-	ptr:  rawptr,
+	this:   vk.Buffer,
+	mem:    vk.DeviceMemory,
+	ptr:    rawptr,
+    offset: vk.DeviceSize,
 }
 
 Buffers :: #type struct {

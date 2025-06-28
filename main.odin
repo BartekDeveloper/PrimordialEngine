@@ -34,8 +34,8 @@ main :: proc() {
     defer obj.CleanUpModels()
     obj.PrintAllModels()
 
-    // engine.Init()
-    // defer engine.Destroy()
+    engine.Init()
+    defer engine.Destroy()
     
-    // engine.Start()
+    engine.Start()
 }

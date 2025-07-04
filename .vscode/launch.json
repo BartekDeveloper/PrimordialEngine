@@ -17,17 +17,14 @@
         //     "showDevDebugOutput": true,
         //     "internalConsoleOptions": "openOnSessionStart"
         // }
-        {
-            "type": "gdb",
-            "request": "launch",
-            "name": "Test - Debug",
-            "target": "/home/zota/projects/multi/vk_new/test",
-            "cwd": "/home/zota/projects/multi/vk_new",
-            "valuesFormatting": "prettyPrinters",
-            "arguments": "",
-            "openGdbConsole": true,
-            "showDevDebugOutput": true,
-            "internalConsoleOptions": "openOnFirstSessionStart",
-        }
+        // {
+        //     "type": "gdb",
+        //     "request": "launch",
+        //     "name": "Test - Debug",
+        //     "target": "/home/zota/projects/multi/vk_new/vk_new",
+        //     "cwd": "/home/zota/projects/multi/vk_new",
+        //     "valuesFormatting": "parseText",
+        //     "gdb": "gdb"
+        // }
     ]
 }

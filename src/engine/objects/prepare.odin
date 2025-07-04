@@ -5,6 +5,7 @@ import "core:log"
 import "core:os"
 import "core:strings"
 import path "core:path/filepath"
+import utils "../utils"
 
 GetModel :: proc(name: string) -> (model: SceneData, ok: bool = true) {
     return modelGroups[name]
@@ -116,10 +117,9 @@ PrintAllModels :: proc() -> () {
 
 ListModelNames :: proc() -> (oNames: []string) {
     names: [dynamic]string = {}
-    defer delete(names)
     i := 0
     for name in modelGroups {
-        if name == "" || name == " " || strings.is_null(auto_cast name[0]) {
+        if utils.IsReallyEmpty(name) {
             continue
         }
         
@@ -132,6 +132,8 @@ ListModelNames :: proc() -> (oNames: []string) {
     for &name, i in names {
         oNames[i] = name
     }
+    delete(names)
+
     return
 }
 

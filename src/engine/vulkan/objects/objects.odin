@@ -1,10 +1,10 @@
 package vk_object
 
-import "core:mem/virtual"
-import "core:text/regex/virtual_machine"
+import "base:runtime"
 import "core:fmt"
 import "core:mem"
 import "core:strings"
+import rn "base:runtime"
 
 import vk "vendor:vulkan"
 
@@ -13,12 +13,15 @@ import "../create"
 import "../destroy"
 import "../copy"
 import t "../types"
+import utils "../../utils"
 import obj "../../objects"
 import emath "../../../maths"
 import s "../../../shared"
 
 data: ^t.VulkanData = nil
+
 SetDataPointer   :: proc(pData: ^t.VulkanData) { data = pData }
+
 UnSetDataPointer :: proc()                     { data = nil }
 
 VkDataBuffer :: struct {
@@ -36,7 +39,7 @@ buffers: map[string]map[string]VkDataBuffer = {}
 CreateBuffersForModel :: proc(
     name: string = "",
 ) {
-    if name == "" || name == " " || strings.is_null(auto_cast name[0]) {
+    if utils.IsReallyEmpty(name) {
         fmt.eprintln("[WARN] CreateBuffersForModel: Model name is empty!")
         return
     }
@@ -54,25 +57,26 @@ CreateBuffersForModel :: proc(
     
     fmt.eprintfln("Creating Vulkan buffers for model '%s'...", name)
     
-    if _, exists := buffers[name]; !exists {
-        buffers[name] = make(map[string]VkDataBuffer)
-    }
+    // THIS IS THE CRITICAL CHANGE: Use context.allocator for persistent map keys
+    clonedModelName := strings.clone(name, context.allocator)
 
-    buffers[name] = {}
-    currentBufferGroup := &buffers[name]
-    // For model
+    _, exists := buffers[clonedModelName]
+    if !exists {
+        buffers[clonedModelName] = make(map[string]VkDataBuffer)
+    }
+    
+    currentBufferGroup := &buffers[clonedModelName]
+
     for modelKey, &model in sceneData.objects {
-        // For mesh
         for meshName, &mesh in model.meshes {
+            clonedMeshName := strings.clone(meshName, context.allocator)
+
+            currentBufferGroup[clonedMeshName] = {}
             
-            currentBufferGroup[meshName] = {}
-            meshBuffers := &currentBufferGroup[meshName]
+            meshBuffers := &currentBufferGroup[clonedMeshName]
+
             meshBuffers.vertexCount = u32(len(mesh.vertices))
             meshBuffers.indexCount  = u32(len(mesh.indices))
-
-            if meshBuffers == nil {
-                panic("Trying to make `vulkan` object buffers `meshBuffers`` is nil!")
-            }
 
             if len(mesh.vertices) > 0 {
                 vertexBufferSize := vk.DeviceSize(len(mesh.vertices) * size_of(s.Vertex))
@@ -141,6 +145,7 @@ CreateBuffersForAllModels :: proc() -> () {
     }
     
     modelNames := obj.ListModelNames()
+    fmt.eprintfln("Loaded Model Names: {}", modelNames)
     defer delete(modelNames)
 
     if len(modelNames) == 0 {
@@ -153,10 +158,8 @@ CreateBuffersForAllModels :: proc() -> () {
         CreateBuffersForModel(name)
     }
     fmt.eprintln("Finished creating Vulkan buffers for all loaded models.")
-
     return
 }
-
 CleanUpBuffersForModel :: proc(name: string) {
     if data == nil {
         fmt.eprintln("[ERROR] CleanUpBuffersForModel: VulkanData pointer is nil! Call SetDataPointer first.")
@@ -165,28 +168,27 @@ CleanUpBuffersForModel :: proc(name: string) {
     
     sceneData, ok := obj.GetModel(name)
     if !ok {
-        fmt.eprintfln("[ERROR] CreateBuffersForModel: Model '%s' not found!", name)
+        fmt.eprintfln("[WARN] CleanUpBuffersForModel: Model '%s' not found! Buffers might not exist or were already cleaned.", name)
+    }
+    
+    fmt.eprintfln("Cleaning up Vulkan buffers for model '%s'...", name)
+
+    modelBuffers, modelExists := buffers[name]
+    if !modelExists {
+        fmt.eprintfln("[WARN] CleanUpBuffersForModel: No buffers found for model '%s' in map to clean up.", name)
         return
     }
-    fmt.eprintfln("Creating Vulkan buffers for model '%s'...", name)
 
-    buffers[name] = {}
-    currentBufferGroup := &buffers[name]
-
-    // For model
-    for modelKey, &model in sceneData.objects {
-        // For mesh
-        for meshName, &mesh in model.meshes {
-            
-            currentBufferGroup[meshName] = {}
-            meshBuffers := &currentBufferGroup[meshName]
-
-            destroy.Buffer(data, &meshBuffers.vertex)
-            destroy.Buffer(data, &meshBuffers.index)            
-        }
-        delete(model.meshes)
+    for meshName, &meshBuffers in modelBuffers {
+        destroy.Buffer(data, &meshBuffers.vertex)
+        destroy.Buffer(data, &meshBuffers.index)            
+        delete(meshName)
     }
-    delete(sceneData.objects)
+    
+    delete(buffers[name])
+    delete(name) 
+
+    fmt.eprintfln("Finished cleaning up Vulkan buffers for model '%s'.", name)
 }
 
 CleanUpAllBuffers :: proc() -> () {
@@ -194,66 +196,41 @@ CleanUpAllBuffers :: proc() -> () {
         panic("[ERROR] CleanUpAllBuffers: VulkanData pointer is nil! Call SetDataPointer first.")
     }
 
-    for modelGroupName, &buffer in buffers {
-        for meshName, &meshBuffers in buffer {
+    fmt.eprintln("Cleaning up all Vulkan buffers...")
+    for modelGroupName, &modelBufferMap in buffers {
+        for meshName, &meshBuffers in modelBufferMap {
             destroy.Buffer(data, &meshBuffers.vertex)
             destroy.Buffer(data, &meshBuffers.index)
+            delete(meshName)
         }
-        delete(buffer)
+        delete(modelBufferMap) 
+        delete(modelGroupName)
     }
     delete(buffers)
+    fmt.eprintln("Finished cleaning up all Vulkan buffers.")
     return
 }
 
-VkDrawAllMeshes :: proc(
-    cmd: ^vk.CommandBuffer = nil,
-    name: string           = ""
-) -> () {
-    if _, exists := buffers[name]; !exists {
-        fmt.eprintfln("[ERROR] VkDraw: No buffers found for model '%s'", name)
-        return
-    }
-
-    modelBuffers := buffers[name]
-    offsets: []vk.DeviceSize = { 0 }
-
-    for meshName, &meshBuffer in modelBuffers {
-        // Bind vertex buffer
-        vertexBuffers: []vk.Buffer = { meshBuffer.vertex.this }
-
-        
-        vk.CmdBindVertexBuffers(
-            cmd^,
-            0,
-            meshBuffer.vertexCount,
-            raw_data(vertexBuffers),
-            raw_data(offsets)
-        )
-        
-        if meshBuffer.hasIndices {
-            vk.CmdBindIndexBuffer(cmd^, meshBuffer.index.this, 0, .UINT32)
-            vk.CmdDrawIndexed(cmd^, meshBuffer.indexCount, 1, 0, 0, 0)
-            
-            return
-        }
-
-        vk.CmdDraw(cmd^, meshBuffer.vertexCount, 1, 0, 0)
-    }
-    return
-}
 
 VkDrawMesh :: proc(
     cmd: ^vk.CommandBuffer = nil,
     name: string           = "",
     meshName: string       = ""
 ) -> () {
-    if _, exists := buffers[name]; !exists {
+    // fmt.eprintfln("DEBUG: VkDrawMesh called with name='%s', meshName='%s'", name, meshName)
+    // fmt.eprintfln("DEBUG: Buffers map content inside VkDrawMesh: %v", buffers)
+
+    modelBuffers, modelExists := buffers[name]
+    if !modelExists {
         fmt.eprintfln("[ERROR] VkDrawMesh: No buffers found for model '%s'", name)
         return
     }
-
-    modelBuffers := buffers[name]
-    meshBuffer   := modelBuffers[meshName]
+    
+    meshBuffer, meshExits := modelBuffers[meshName]
+    if !meshExits {
+        fmt.eprintfln("[ERROR] VkDrawMesh: No buffers found for model '%s', mesh '%s'", name, meshName)
+        return
+    }
 
     offsets:       []vk.DeviceSize = { 0 }
     vertexBuffers: []vk.Buffer = { meshBuffer.vertex.this }
@@ -261,7 +238,7 @@ VkDrawMesh :: proc(
     vk.CmdBindVertexBuffers(
         cmd^,
         0,
-        meshBuffer.vertexCount,
+        u32(len(vertexBuffers)),
         raw_data(vertexBuffers),
         raw_data(offsets)
     )

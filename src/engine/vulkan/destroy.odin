@@ -24,8 +24,8 @@ Clean :: proc(data: ^s.RenderData) {
     fmt.eprintln("Cleaning up Vulkan data...")
 
     o.SetDataPointer(&vkData)
-    defer o.UnSetDataPointer()
     o.CleanUpAllBuffers()
+    defer o.UnSetDataPointer()
 
     load.SetVulkanDataPointer(&vkData)
     defer load.UnSetVulkanDataPointer()

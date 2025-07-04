@@ -185,8 +185,8 @@ Render :: proc(
             &uboCurrentSet,
             0, nil
         )
-        
-        o.VkDrawMesh(gcbc, "mesh_Monke_#0", "Cube_0")
+        // o.DisplayAllModelBuffers()
+        o.VkDrawMesh(gcbc, "Monke", "Cube_0")
     }
     vk.CmdEndRenderPass(gcbc^)
 
@@ -291,10 +291,13 @@ Render :: proc(
             log.error("Failed to present swapchain image! %s", result)
             panic("Failed to present swapchain image!")
         }
+
     }
 
     rData.currentFrame += 1
     rData.currentFrame %= rData.MAX_FRAMES_IN_FLIGHT
+    // if rData.currentFrame > 1 do panic("Frame!")
+
     return
 }
 

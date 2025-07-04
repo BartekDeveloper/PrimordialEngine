@@ -18,7 +18,8 @@ Init :: proc() {
     context.logger = log.create_console_logger(.Debug)
     defer log.destroy_console_logger(context.logger)
     
-    renderData.MAX_FRAMES_IN_FLIGHT = 2
+    renderData = {}
+    renderData.MAX_FRAMES_IN_FLIGHT = 3
 
     log.info("Setting up Render Data");
     log.infof("\tMAX FRAMES IN FLIGHT: %d", renderData.MAX_FRAMES_IN_FLIGHT)
@@ -41,7 +42,8 @@ Start :: proc() {
     
     renderData.currentFrame = 0
     assert(renderData.MAX_FRAMES_IN_FLIGHT > 0)
-    
+    assert(renderData.MAX_FRAMES_IN_FLIGHT == 3, "MAX_FRAMES_IN_FLIGHT is not 3!")
+
     start := time.now()._nsec
     for window.Running() {
         end := time.now()._nsec

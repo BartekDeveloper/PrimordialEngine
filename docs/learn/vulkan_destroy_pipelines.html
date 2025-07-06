@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pipelines.odin (in vulkan/destroy)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>pipelines.odin</code> (in <code>vulkan/destroy</code>)</h1>
+        <p>This file provides procedures for destroying Vulkan pipelines, pipeline layouts, and pipeline caches.</p>
+        <h2><code>Pipelines</code> procedure</h2>
+        <p>This procedure iterates through all pipelines stored in <code>data.pipelines</code>. For each pipeline, it calls the <code>Pipeline</code> procedure to destroy the pipeline and its associated cache, and then calls <code>PipelineLayout</code> to destroy the pipeline's layout. Finally, it deletes the <code>pipelines</code> map itself, along with the global viewports and scissors maps.</p>
+        <h2><code>PipelineLayout</code> procedure</h2>
+        <p>This procedure destroys a single Vulkan pipeline layout. It checks if the <code>pipelineLayout</code> handle is valid before destroying it using <code>vk.DestroyPipelineLayout</code>.</p>
+        <h2><code>Pipeline</code> procedure</h2>
+        <p>This procedure destroys a single Vulkan pipeline and its associated pipeline cache. It checks if the <code>pipeline</code> and <code>cache</code> handles are valid before destroying them using <code>vk.DestroyPipeline</code> and <code>vk.DestroyPipelineCache</code>. It also clears the <code>createInfo</code> field of the <code>t.Pipeline</code> struct and frees memory allocated for pipeline stages and states.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

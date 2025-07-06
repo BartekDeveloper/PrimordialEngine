@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>linalg.odin (in maths)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>linalg.odin</code> (in <code>maths</code>)</h1>
+        <p>This file provides common linear algebra operations, specifically for creating projection and view matrices.</p>
+        <h2><code>Perspective</code> procedure</h2>
+        <p>This procedure creates a perspective projection matrix. It takes the field of view in the Y direction (<code>fovy</code>), the aspect ratio (<code>aspect</code>), and the near and far clipping planes (<code>near</code>, <code>far</code>) as input. It uses the <code>Tan</code> function (presumably from <code>clib.odin</code>) to calculate the tangent of half the field of view.</p>
+        <h2><code>Perspective_InfDistance</code> procedure</h2>
+        <p>This procedure creates a perspective projection matrix with an infinite far clipping plane. It takes the field of view in the Y direction (<code>fovy</code>), the aspect ratio (<code>aspect</code>), and the near clipping plane (<code>near</code>) as input. This is useful for scenarios where objects can be infinitely far away.</p>
+        <h2><code>Orthographic</code> procedure</h2>
+        <p>This procedure creates an orthographic projection matrix. It takes the bounds of the viewing volume (top, right, bottom, left, near, far) as input. Orthographic projection is typically used for 2D rendering or for specific 3D views where perspective distortion is not desired.</p>
+        <h2><code>LookAt</code> procedure</h2>
+        <p>This procedure creates a view matrix, which transforms world-space coordinates into camera-space coordinates. It takes the camera's position (<code>eye</code>), the point the camera is looking at (<code>center</code>), and the camera's up direction (<code>up</code>) as input. It calculates the forward, right, and up vectors of the camera's local coordinate system and constructs the view matrix from them.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>read.odin (in engine/objects)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>read.odin</code> (in <code>engine/objects</code>)</h1>
+        <p>This file is responsible for parsing and processing 3D model data from various file formats, primarily glTF (GL Transmission Format), using the <code>vendor:cgltf</code> library.</p>
+        <h2>Global Variables</h2>
+        <ul>
+            <li><code>defaultOptions</code>: Default options for the <code>cgltf</code> library.</li>
+            <li><code>currentIndex</code>: A <code>u32</code> used as an index during vertex processing.</li>
+        </ul>
+        <h2><code>Load</code> procedure group</h2>
+        <p>This procedure group provides two ways to load 3D model data:</p>
+        <ul>
+            <li><strong><code>Load_fromFile</code></strong>: Loads model data from a specified file path. It uses <code>cgltf.parse_file</code> and <code>cgltf.load_buffers</code> to read and parse the glTF file. It then calls <code>ProcessData</code> to convert the parsed data into the engine's internal <code>SceneData</code> format.</li>
+            <li><strong><code>Load_fromMemory</code></strong>: Loads model data from a byte buffer in memory. Similar to <code>Load_fromFile</code>, it uses <code>cgltf.parse</code> and <code>cgltf.load_buffers</code> to process the data and then calls <code>ProcessData</code>.</li>
+        </ul>
+        <h2><code>ProcessData</code> procedure</h2>
+        <p>This procedure takes the raw parsed <code>cgltf.data</code> and converts it into the engine's <code>SceneData</code> structure. It iterates through the meshes in the <code>cgltf.data</code> and calls <code>ProcessMesh</code> for each one.</p>
+        <h2><code>ProcessMesh</code> procedure</h2>
+        <p>This procedure processes a single <code>cgltf.mesh</code> and converts it into the engine's <code>Model</code> structure. It iterates through the primitives within the mesh and calls <code>ProcessPrimitive</code> for each.</p>
+        <h2><code>ProcessPrimitive</code> procedure</h2>
+        <p>This procedure processes a single <code>cgltf.primitive</code> and converts it into the engine's <code>Mesh</code> structure. It extracts vertex attributes (position, UVs, normals, tangents, colors, joints) and populates the <code>vertices</code> array. It also determines the primitive type (e.g., triangles, lines).</p>
+        <h2><code>ProcessVertex</code> procedure</h2>
+        <p>This procedure reads the vertex attributes for a single vertex from the <code>cgltf.accessor</code> objects and populates an <code>s.Vertex</code> struct. It uses helper functions like <code>ReadVec3</code>, <code>ReadVec2</code> to read data from the accessors.</p>
+        <h2>Index Management Procedures</h2>
+        <ul>
+            <li><strong><code>SetIndex</code></strong>: Sets the <code>currentIndex</code>.</li>
+            <li><strong><code>GetIndex</code></strong>: Returns the <code>currentIndex</code>.</li>
+            <li><strong><code>AddIndex</code></strong>: Increments the <code>currentIndex</code>.</li>
+        </ul>
+        <h2><code>Read</code> procedure group</h2>
+        <p>This procedure group provides various functions for reading data from <code>cgltf.accessor</code> objects:</p>
+        <ul>
+            <li><strong><code>ReadFloat</code></strong>: Reads floating-point data.</li>
+            <li><strong><code>ReadUint</code></strong>: Reads unsigned integer data.</li>
+            <li><strong><code>ReadVec4</code>, <code>ReadVec3</code>, <code>ReadVec2</code>, <code>ReadF32</code></strong>: Read vector and scalar floating-point data.</li>
+            <li><strong><code>ReadVec4U</code>, <code>ReadVec3U</code>, <code>ReadVec2U</code>, <code>ReadU32</code></strong>: Read vector and scalar unsigned integer data.</li>
+        </ul>
+        <h2><code>MapAccessor</code> procedure</h2>
+        <p>Maps a <code>cgltf.attribute</code> to its corresponding <code>cgltf.accessor</code> in a provided map.</p>
+        <h2><code>CheckAccessor</code> procedure</h2>
+        <p>Checks if an accessor with a given name exists in the provided map and returns a pointer to it.</p>
+        <h2><code>CleanUp</code> procedure</h2>
+        <p>Cleans up the memory allocated for the loaded model data. It iterates through all <code>SceneData</code>, <code>Model</code>, and <code>Mesh</code> objects and frees their associated vertex and index data.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>command_buffers.odin (in vulkan/destroy)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>command_buffers.odin</code> (in <code>vulkan/destroy</code>)</h1>
+        <p>This file provides procedures for destroying Vulkan command buffers.</p>
+        <h2><code>CommandBuffers</code> procedure</h2>
+        <p>This procedure iterates through all command buffers stored in <code>data.commandBuffers</code> and deletes the underlying memory for each. Finally, it deletes the <code>commandBuffers</code> map itself. Note that Vulkan command buffers are implicitly freed when their parent command pool is destroyed, so this primarily cleans up the Odin-side memory.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pipelines.odin (in vulkan/create)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>pipelines.odin</code> (in <code>vulkan/create</code>)</h1>
+        <p>This file is responsible for creating and configuring the Vulkan graphics pipelines used in the renderer. It defines the various states of the graphics pipeline and orchestrates their creation.</p>
+        <h2><code>Pipelines</code> procedure</h2>
+        <p>This is the main procedure that creates all the graphics pipelines for the application. It sets up global viewports and scissors, and then proceeds to create the geometry and lighting pipelines.</p>
+        <h3>Geometry Pipeline Creation</h3>
+        <p>This section configures and creates the geometry pass pipeline. It involves:</p>
+        <ul>
+            <li><strong>Shaders:</strong> Specifies the vertex and fragment shaders (<code>geometry.vert.spv</code>, <code>geometry.frag.spv</code>).</li>
+            <li><strong>Descriptor Set Layouts:</strong> Binds the UBO descriptor set layout.</li>
+            <li><strong>Vertex Input:</strong> Defines the vertex binding and attribute descriptions for the <code>s.Vertex</code> struct (position, normal, UV).</li>
+            <li><strong>Pipeline States:</strong> Configures various pipeline states:
+                <ul>
+                    <li><code>DefaultVertexInput</code>: How vertex data is interpreted.</li>
+                    <li><code>DefaultInputAssembly</code>: How vertices are assembled into primitives (triangle list).</li>
+                    <li><code>DefaultViewportState</code>: Defines the viewport and scissor rectangles.</li>
+                    <li><code>DefaultRasterization</code>: Controls rasterization settings (e.g., polygon mode, cull mode, depth bias).</li>
+                    <li><code>DefaultMultisample</code>: Configures multisampling.</li>
+                    <li><code>DefaultDepthStencil</code>: Sets up depth and stencil testing.</li>
+                    <li><code>DefaultColorBlending</code>: Defines color blending for the output attachments.</li>
+                    <li><code>DefaultDynamicStates</code>: Specifies dynamic states (viewport and scissor).</li>
+                </ul>
+            </li>
+            <li><strong>Pipeline Layout:</strong> Creates the pipeline layout, which defines the descriptor set layouts and push constants used by the pipeline.</li>
+            <li><strong>Pipeline Cache:</strong> Creates a pipeline cache for optimizing pipeline creation.</li>
+            <li><strong>Graphics Pipeline:</strong> Creates the final graphics pipeline using <code>vk.CreateGraphicsPipelines</code>.</li>
+        </ul>
+        <h3>Light Pipeline Creation</h3>
+        <p>This section configures and creates the lighting pass pipeline. It follows a similar process to the geometry pipeline, but with specific configurations for the lighting pass:</p>
+        <ul>
+            <li><strong>Shaders:</strong> Specifies the vertex and fragment shaders (<code>light.vert.spv</code>, <code>light.frag.spv</code>).</li>
+            <li><strong>Descriptor Set Layouts:</strong> Binds both the UBO and G-Buffer descriptor set layouts.</li>
+            <li><strong>Pipeline States:</strong> Configures pipeline states, typically with simpler settings as it operates on a full-screen quad.</li>
+            <li><strong>Pipeline Layout:</strong> Creates the pipeline layout for the lighting pass.</li>
+            <li><strong>Pipeline Cache:</strong> Creates a pipeline cache for the lighting pass.</li>
+            <li><strong>Graphics Pipeline:</strong> Creates the final lighting graphics pipeline.</li>
+        </ul>
+        <h2>Helper Procedures</h2>
+        <p>This file contains numerous helper procedures for configuring individual Vulkan pipeline states:</p>
+        <ul>
+            <li><strong><code>DefaultVertexInput</code></strong>: Creates a <code>vk.PipelineVertexInputStateCreateInfo</code> struct, defining how vertex data is consumed by the pipeline.</li>
+            <li><strong><code>DefaultInputAssembly</code></strong>: Creates a <code>vk.PipelineInputAssemblyStateCreateInfo</code> struct, defining how vertices are assembled into primitives.</li>
+            <li><strong><code>DefaultViewportState</code></strong>: Creates a <code>vk.PipelineViewportStateCreateInfo</code> struct, defining the viewports and scissor rectangles.</li>
+            <li><strong><code>DefaultRasterization</code></strong>: Creates a <code>vk.PipelineRasterizationStateCreateInfo</code> struct, defining rasterization parameters.</li>
+            <li><strong><code>DefaultMultisample</code></strong>: Creates a <code>vk.PipelineMultisampleStateCreateInfo</code> struct, defining multisampling parameters.</li>
+            <li><strong><code>DefaultDepthStencil</code></strong>: Creates a <code>vk.PipelineDepthStencilStateCreateInfo</code> struct, defining depth and stencil testing parameters.</li>
+            <li><strong><code>DefaultBlendAttachment</code></strong>: Creates a <code>vk.PipelineColorBlendAttachmentState</code> struct, defining color blending for a single attachment.</li>
+            <li><strong><code>DefaultFillColorBlendAttachments</code></strong>: Creates a slice of <code>vk.PipelineColorBlendAttachmentState</code> structs, typically used to initialize multiple color attachments with default blending.</li>
+            <li><strong><code>DefaultColorBlending</code></strong>: Creates a <code>vk.PipelineColorBlendStateCreateInfo</code> struct, defining overall color blending parameters.</li>
+            <li><strong><code>DefaultCreateDynamicStates</code></strong>: Creates a <code>vk.PipelineDynamicStateCreateInfo</code> struct, specifying which pipeline states can be changed dynamically without recreating the pipeline.</li>
+            <li><strong><code>DefaultDynamicStates</code></strong>: A specialized version of <code>DefaultCreateDynamicStates</code> that sets up viewport and scissor as dynamic states.</li>
+            <li><strong><code>DefaultPipelineLayoutCreateInfo</code></strong>: Creates a <code>vk.PipelineLayoutCreateInfo</code> struct, defining the layout of descriptor sets and push constants.</li>
+            <li><strong><code>DefaultPipelineCacheInfo</code></strong>: Creates a <code>vk.PipelineCacheCreateInfo</code> struct, used for creating pipeline caches.</li>
+            <li><strong><code>DefaultPipelineEmptyCacheCreateInfo</code></strong>: A specialized version of <code>DefaultPipelineCacheInfo</code> for creating an empty pipeline cache.</li>
+            <li><strong><code>CleanPipelineVertexData</code></strong>: Cleans up memory allocated for <code>PipelineVertexData</code>.</li>
+            <li><strong><code>AddBinding</code> (procedure group)</strong>: Provides multiple ways to add vertex binding descriptions to <code>PipelineVertexData</code>.</li>
+            <li><strong><code>AddAttribute</code> (procedure group)</strong>: Provides multiple ways to add vertex attribute descriptions to <code>PipelineVertexData</code>.</li>
+            <li><strong><code>SetLayouts</code></strong>: A helper to create a slice of <code>vk.DescriptorSetLayout</code> from variadic arguments.</li>
+            <li><strong><code>PipelineLayout</code></strong>: Creates a <code>vk.PipelineLayout</code> object.</li>
+            <li><strong><code>PipelineCache</code></strong>: Creates a <code>vk.PipelineCache</code> object.</li>
+            <li><strong><code>GraphicsPipeline</code></strong>: Creates a <code>vk.Pipeline</code> object for graphics pipelines.</li>
+        </ul>
+        <h2>Custom Types</h2>
+        <ul>
+            <li><strong><code>PipelineVertexData</code></strong>: A struct to hold dynamic arrays of vertex binding and attribute descriptions.</li>
+            <li><strong><code>ChainedBindings</code></strong>: A linked list structure for vertex binding descriptions.</li>
+            <li><strong><code>ChainedAttributes</code></strong>: A linked list structure for vertex attribute descriptions.</li>
+            <li><strong><code>GraphicsInfoStates</code></strong>: A struct that holds pointers to various <code>vk.Pipeline*StateCreateInfo</code> structs, used for organizing pipeline state creation.</li>
+            <li><strong><code>GraphicsPipelineData</code></strong>: A struct used to pass pipeline creation information to the <code>GraphicsPipeline</code> procedure.</li>
+        </ul>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

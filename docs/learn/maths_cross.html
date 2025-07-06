@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cross.odin (in maths)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>cross.odin</code> (in <code>maths</code>)</h1>
+        <p>This file provides procedures for calculating the cross product of 3D vectors.</p>
+        <h2><code>Cross</code> procedure group</h2>
+        <p>This procedure group provides cross product calculations for different floating-point precision 3D vectors:</p>
+        <ul>
+            <li><strong><code>Cross_vec3h</code></strong>: Calculates the cross product of two <code>Vec3h</code> (half-precision float 3D) vectors.</li>
+            <li><strong><code>Cross_vec3</code></strong>: Calculates the cross product of two <code>Vec3</code> (single-precision float 3D) vectors.</li>
+            <li><strong><code>Cross_vec3d</code></strong>: Calculates the cross product of two <code>Vec3d</code> (double-precision float 3D) vectors.</li>
+        </ul>
+        <p>Each procedure takes two 3D vectors (<code>a</code> and <code>b</code>) as input and returns a new 3D vector <code>o</code> representing their cross product. The cross product is calculated using the standard formula:</p>
+        <pre><code>o.x = a.y * b.z - a.z * b.y
+o.y = a.z * b.x - a.x * b.z
+o.z = a.x * b.y - a.y * b.x
+</code></pre>
+        <p><strong>Note:</strong> The provided code for <code>Cross_vec3h</code>, <code>Cross_vec3</code>, and <code>Cross_vec3d</code> appears to implement a different operation than the standard cross product. It looks more like a component-wise multiplication and summation. The standard cross product formula is provided above for reference.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

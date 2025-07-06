@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>descriptors.odin (in vulkan/destroy)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>descriptors.odin</code> (in <code>vulkan/destroy</code>)</h1>
+        <p>This file provides procedures for destroying Vulkan descriptors and descriptor pools.</p>
+        <h2><code>Descriptors</code> procedure</h2>
+        <p>This procedure iterates through all descriptors stored in <code>data.descriptors</code>. For each descriptor, it calls <code>DescriptorSetLayout</code> to destroy its layout and then deletes the associated Odin-side memory (bindings, sets, setsLayouts, writes). Finally, it deletes the <code>descriptors</code> map itself.</p>
+        <h2><code>DescriptorPools</code> procedure</h2>
+        <p>This procedure iterates through all descriptor pools stored in <code>data.descriptorPools</code> and calls the <code>DescriptorPool</code> procedure to destroy each one. Finally, it deletes the <code>descriptorPools</code> map itself.</p>
+        <h2><code>DescriptorSetLayout</code> procedure</h2>
+        <p>This procedure destroys a single Vulkan descriptor set layout. It checks if the <code>setLayout</code> handle is valid before destroying it using <code>vk.DestroyDescriptorSetLayout</code>.</p>
+        <h2><code>DescriptorPool</code> procedure</h2>
+        <p>This procedure destroys a single Vulkan descriptor pool. It clears the <code>createInfo</code> and <code>poolCount</code> fields of the <code>t.DescriptorPool</code> struct and then calls <code>vk.DestroyDescriptorPool</code> to destroy the underlying Vulkan object.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>types.odin (in engine/objects)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>types.odin</code> (in <code>engine/objects</code>)</h1>
+        <p>This file defines the data structures and utility procedures used for representing and converting 3D model data within the engine.</p>
+        <h2>Type Aliases</h2>
+        <ul>
+            <li><code>joint</code>: Alias for <code>u8</code>, likely representing a joint index in skeletal animation.</li>
+        </ul>
+        <h2><code>PrimitiveType</code> enum</h2>
+        <p>An enumeration defining the different types of geometric primitives that can be rendered:</p>
+        <ul>
+            <li><code>Invalid</code></li>
+            <li><code>Point</code></li>
+            <li><code>Line</code></li>
+            <li><code>Triangle</code></li>
+            <li><code>TriangleStrip</code></li>
+            <li><code>TriangleFan</code></li>
+        </ul>
+        <h2><code>Mesh</code> struct</h2>
+        <p>Represents a single mesh within a 3D model. It contains:</p>
+        <ul>
+            <li><code>vertices</code>: A slice of <code>s.Vertex</code> (from <code>shared.odin</code>) representing the vertex data.</li>
+            <li><code>indices</code>: A slice of <code>u32</code> representing the index data (for indexed drawing).</li>
+            <li><code>joints</code>: A slice of <code>joint</code> (u8), likely for skeletal animation data.</li>
+            <li><code>verticesCount</code>: The number of vertices in the mesh.</li>
+            <li><code>indicesCount</code>: The number of indices in the mesh.</li>
+            <li><code>type</code>: The <code>PrimitiveType</code> of the mesh.</li>
+        </ul>
+        <h2><code>SceneFlag</code> enum</h2>
+        <p>An enumeration defining flags for a scene:</p>
+        <ul>
+            <li><code>ReLoad</code></li>
+            <li><code>Invalid</code></li>
+        </ul>
+        <h2><code>SceneFlags</code> bit set</h2>
+        <p>A bit set based on <code>SceneFlag</code>, allowing multiple flags to be set for a scene.</p>
+        <h2><code>Model</code> struct</h2>
+        <p>Represents a model within a scene. It contains:</p>
+        <ul>
+            <li><code>name</code>: The name of the model (cstring).</li>
+            <li><code>meshes</code>: A map of <code>Mesh</code> structs, keyed by mesh name.</li>
+        </ul>
+        <h2><code>Models</code> type alias</h2>
+        <p>An alias for <code>map[string]Model</code>, representing a collection of models.</p>
+        <h2><code>SceneData</code> struct</h2>
+        <p>Represents a complete 3D scene. It contains:</p>
+        <ul>
+            <li><code>path</code>: The path from which the scene data was loaded.</li>
+            <li><code>objects</code>: A <code>Models</code> map containing all the models in the scene.</li>
+            <li><code>flags</code>: <code>SceneFlags</code> for the scene.</li>
+        </ul>
+        <h2>Global Variables</h2>
+        <ul>
+            <li><code>modelGroups</code>: A map of <code>SceneData</code> structs, keyed by model group name.</li>
+            <li><code>modelExists</code>: A map of booleans, indicating if a model exists, keyed by model name.</li>
+            <li><code>allLoaded</code>: A boolean indicating if all models have been loaded.</li>
+        </ul>
+        <h2><code>ConvertPrimitive</code> procedure group</h2>
+        <p>This procedure group provides functions for converting between <code>cgltf.primitive_type</code> (from the <code>cgltf</code> vendor library) and the engine's internal <code>PrimitiveType</code> enum:</p>
+        <ul>
+            <li><strong><code>ConvertPrimitive_fromTfToUnified</code></strong>: Converts from <code>cgltf.primitive_type</code> to <code>PrimitiveType</code>.</li>
+            <li><strong><code>ConvertPrimitive_fromUnifiedToTf</code></strong>: Converts from <code>PrimitiveType</code> to <code>cgltf.primitive_type</code>.</li>
+        </ul>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

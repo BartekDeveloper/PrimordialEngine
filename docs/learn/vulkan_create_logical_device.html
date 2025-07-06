@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>logical_device.odin (in vulkan/create)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>logical_device.odin</code> (in <code>vulkan/create</code>)</h1>
+        <p>This file handles the creation of the Vulkan logical device, which is the software interface to the physical device (GPU).</p>
+        <h2><code>LogicalDevice</code> procedure</h2>
+        <p>This procedure creates the Vulkan logical device. It performs the following steps:</p>
+        <ol>
+            <li><strong>Configures Queue Create Infos:</strong> It sets up <code>vk.DeviceQueueCreateInfo</code> structs for each unique queue family (graphics, present, compute, transfer) found on the physical device. This specifies the queues that the logical device will expose.</li>
+            <li><strong>Configures Device Create Info:</strong> It populates a <code>vk.DeviceCreateInfo</code> struct with information about the requested queues, enabled extensions (like <code>VK_KHR_SWAPCHAIN_EXTENSION_NAME</code>), enabled validation layers (if <code>ENABLE_VALIDATION_LAYERS</code> is true), and enabled physical device features (like <code>samplerAnisotropy</code>).</li>
+            <li><strong>Creates Logical Device:</strong> It calls <code>vk.CreateDevice</code> to create the Vulkan logical device.</li>
+            <li><strong>Loads Device Addresses:</strong> It loads the Vulkan function pointers specific to the created logical device.</li>
+            <li><strong>Retrieves Queues:</strong> It retrieves the handles to the graphics, present, compute, and transfer queues from the logical device.</li>
+        </ol>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>types.odin (in vulkan/types)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>types.odin</code> (in <code>vulkan/types</code>)</h1>
+        <p>This file defines the various data structures used throughout the Vulkan renderer.</p>
+        <h2><code>VulkanData</code> struct</h2>
+        <p>This is the main struct that encapsulates all the core Vulkan-related data and objects. It acts as a central hub for managing the Vulkan state. Key fields include:</p>
+        <ul>
+            <li><code>renderData</code>: General rendering data (from <code>shared.odin</code>).</li>
+            <li><code>appInfo</code>: Application information.</li>
+            <li><code>instance</code>: Vulkan instance data.</li>
+            <li><code>surface</code>: The window surface.</li>
+            <li><code>physical</code>: Physical device data.</li>
+            <li><code>logical</code>: Logical device data.</li>
+            <li><code>swapchain</code>: Swapchain data.</li>
+            <li><code>samplers</code>: Map of Vulkan samplers.</li>
+            <li><code>passes</code>: Map of render passes.</li>
+            <li><code>descriptorPools</code>: Map of descriptor pools.</li>
+            <li><code>descriptors</code>: Map of descriptors.</li>
+            <li><code>pipelines</code>: Map of graphics pipelines.</li>
+            <li><code>gBuffers</code>: Map of G-Buffers.</li>
+            <li><code>commandPools</code>: Map of command pools.</li>
+            <li><code>commandBuffers</code>: Map of command buffers.</li>
+            <li><code>viewports</code>: Map of viewports.</li>
+            <li><code>scissors</code>: Map of scissors.</li>
+            <li><code>syncObjects</code>: Synchronization objects (semaphores and fences).</li>
+            <li><code>uniformBuffers</code>: Map of uniform buffers.</li>
+            <li><code>frameResized</code>: Boolean indicating if the window has been resized.</li>
+            <li><code>allocations</code>: Vulkan allocation callbacks.</li>
+        </ul>
+        <h2><code>Instance</code> struct</h2>
+        <p>Stores data related to the Vulkan instance, including extensions, layers, create info, and the debug messenger.</p>
+        <h2><code>Logical</code> struct</h2>
+        <p>Stores data related to the Vulkan logical device, including queue create infos, extensions, requested features, and the device handle.</p>
+        <h2><code>SwapchainFormats</code> struct</h2>
+        <p>Stores the formats used by the swapchain, including the surface format, color format, and depth format.</p>
+        <h2><code>Swapchain</code> struct</h2>
+        <p>Stores data related to the Vulkan swapchain, including its formats, present mode, extent, image count, create info, and lists of images and image views.</p>
+        <h2><code>DescriptorPool</code> struct</h2>
+        <p>Stores data related to a Vulkan descriptor pool, including its create info, pool sizes, and the pool handle.</p>
+        <h2><code>Descriptor</code> struct</h2>
+        <p>Stores data related to a Vulkan descriptor set, including its pool name, layout, bindings, and allocated sets.</p>
+        <h2><code>ColorPass</code> struct</h2>
+        <p>Describes the color attachments and references for a render pass.</p>
+        <h2><code>DepthPass</code> struct</h2>
+        <p>Describes the depth attachment and reference for a render pass.</p>
+        <h2><code>RenderPass</code> struct</h2>
+        <p>Stores data related to a Vulkan render pass, including its color and depth passes, subpasses, dependencies, attachments, create info, and framebuffers.</p>
+        <h2><code>PipelinesCreateInfos</code> union</h2>
+        <p>A union of various Vulkan pipeline create info structs, allowing for flexible pipeline creation.</p>
+        <h2><code>ShaderReference</code> struct</h2>
+        <p>References a shader by its name and stage.</p>
+        <h2><code>SemaphoreObject</code> struct</h2>
+        <p>Stores data related to a Vulkan semaphore, including its handle and create info.</p>
+        <h2><code>SemaphoresObjects</code> struct</h2>
+        <p>Stores image available and render finished semaphores.</p>
+        <h2><code>FenceObject</code> struct</h2>
+        <p>Stores data related to a Vulkan fence, including its handle and create info.</p>
+        <h2><code>SyncObjects</code> struct</h2>
+        <p>Stores arrays of semaphore and fence objects for synchronization.</p>
+        <h2><code>CommandPool</code> struct</h2>
+        <p>Stores data related to a Vulkan command pool, including its create info and handle.</p>
+        <h2><code>CommandBuffer</code> struct</h2>
+        <p>Stores data related to Vulkan command buffers, including their allocate info and handles.</p>
+        <h2><code>Pipeline</code> struct</h2>
+        <p>Stores data related to a Vulkan pipeline, including its shaders, stages, layouts, cache, create info, and handle.</p>
+        <h2><code>Buffer</code> struct</h2>
+        <p>Stores data related to a Vulkan buffer, including its handle, device memory, and mapped pointer.</p>
+        <h2><code>Buffers</code> struct</h2>
+        <p>Stores create info and a slice of <code>Buffer</code> structs.</p>
+        <h2><code>GBuffer</code> struct</h2>
+        <p>Stores data related to a G-Buffer, including its images, image views, and device memories.</p>
+        <h2>Type Aliases</h2>
+        <ul>
+            <li><code>vkad</code>: Alias for <code>vk.AttachmentDescription</code>.</li>
+            <li><code>vkar</code>: Alias for <code>vk.AttachmentReference</code>.</li>
+            <li><code>vibd</code>: Alias for <code>vk.VertexInputBindingDescription</code>.</li>
+            <li><code>viad</code>: Alias for <code>vk.VertexInputAttributeDescription</code>.</li>
+        </ul>
+        <h2><code>PhysicalDeviceData</code> struct</h2>
+        <p>Stores detailed information about the chosen physical device, including its features, properties, capabilities, memory properties, formats, modes, and queue families.</p>
+        <h2><code>Queues</code> struct</h2>
+        <p>Stores handles to the graphics, present, compute, and transfer queues.</p>
+        <h2><code>QueueIndices</code> struct</h2>
+        <p>Stores the family indices for the graphics, present, compute, and transfer queues.</p>
+        <h2><code>GetModuleProc</code> procedure type</h2>
+        <p>Defines the signature for a procedure that retrieves a shader module by name.</p>
+        <h2><code>ShaderLang</code> enum</h2>
+        <p>Defines an enumeration for shader languages (GLSL, SPIRV).</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

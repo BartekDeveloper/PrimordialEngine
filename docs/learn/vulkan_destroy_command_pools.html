@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>command_pools.odin (in vulkan/destroy)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>command_pools.odin</code> (in <code>vulkan/destroy</code>)</h1>
+        <p>This file provides procedures for destroying Vulkan command pools.</p>
+        <h2><code>CommandPools</code> procedure</h2>
+        <p>This procedure iterates through all command pools stored in <code>data.commandPools</code> and calls the <code>CommandPool</code> procedure to destroy each one. Finally, it deletes the <code>commandPools</code> map itself.</p>
+        <h2><code>CommandPool</code> procedure</h2>
+        <p>This procedure destroys a single Vulkan command pool. It sets the <code>createInfo</code> field of the <code>t.CommandPool</code> struct to an empty struct and then calls <code>vk.DestroyCommandPool</code> to destroy the underlying Vulkan object.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

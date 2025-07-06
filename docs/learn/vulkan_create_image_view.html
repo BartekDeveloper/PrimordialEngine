@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>image_view.odin (in vulkan/create)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>image_view.odin</code> (in <code>vulkan/create</code>)</h1>
+        <p>This file provides procedures for creating Vulkan image views.</p>
+        <h2><code>ImageView</code> procedure group</h2>
+        <p>This procedure group provides two ways to create Vulkan image views:</p>
+        <ul>
+            <li><strong><code>ImageView_return</code>:</strong> This procedure creates a <code>vk.ImageView</code> and returns it along with a boolean indicating success. It takes various parameters such as the image, format, aspect mask, and mipmap levels.</li>
+            <li><strong><code>ImageView_modify</code>:</strong> This procedure creates a <code>vk.ImageView</code> and modifies a provided <code>vk.ImageView</code> pointer to store the created image view. It returns a boolean indicating success.</li>
+        </ul>
+        <p>Both procedures handle the creation of the image view, which provides a way to interpret the image data.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

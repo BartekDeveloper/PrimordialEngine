@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>samplers.odin (in vulkan/create)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>samplers.odin</code> (in <code>vulkan/create</code>)</h1>
+        <p>This file provides procedures for creating Vulkan samplers.</p>
+        <h2><code>Samplers</code> procedure</h2>
+        <p>This procedure creates the samplers used in the application. Currently, it creates a sampler specifically for the G-Buffers. Samplers define how texture data is sampled in shaders, including filtering, addressing modes, and anisotropy.</p>
+        <p>The G-Buffer sampler is configured with:</p>
+        <ul>
+            <li><strong>Linear filtering:</strong> For both magnification and minification.</li>
+            <li><strong>Clamp to edge addressing mode:</strong> For all U, V, and W coordinates.</li>
+            <li><strong>Anisotropy disabled:</strong> For simplicity.</li>
+            <li><strong>Opaque black border color:</strong> For sampling outside the texture coordinates.</li>
+            <li><strong>No unnormalized coordinates:</strong> Coordinates are expected to be in the [0, 1) range.</li>
+            <li><strong>No compare enable:</strong> Not used for depth comparison.</li>
+            <li><strong>Linear mipmap mode:</strong> For mipmap level selection.</li>
+        </ul>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

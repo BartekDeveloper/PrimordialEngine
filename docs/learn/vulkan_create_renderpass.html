@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>renderpass.odin (in vulkan/create)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>renderpass.odin</code> (in <code>vulkan/create</code>)</h1>
+        <p>This file defines procedures for creating Vulkan render passes, which describe the rendering operations and their dependencies.</p>
+        <h2><code>RenderPasses</code> procedure</h2>
+        <p>This is the main procedure that creates the render passes for the application. It creates two main render passes:</p>
+        <ol>
+            <li><strong>Geometry Pass:</strong> This render pass renders the scene geometry into multiple G-Buffer attachments (position, albedo, normal, and depth). The <code>finalLayout</code> for the color attachments is set to <code>SHADER_READ_ONLY_OPTIMAL</code>, making them ready for use as input to the lighting pass.</li>
+            <li><strong>Light Pass:</strong> This render pass takes the G-Buffer attachments as input and calculates the final lit image. It has a subpass dependency that ensures the geometry pass completes before the lighting pass begins.</li>
+        </ol>
+        <h2><code>AttachmentDescription</code> procedure</h2>
+        <p>This is a helper procedure that creates a <code>vk.AttachmentDescription</code> struct. This struct describes a single attachment used in a render pass, including its format, load and store operations, and initial and final layouts.</p>
+        <h2><code>Subpass</code> procedure</h2>
+        <p>This is a helper procedure that creates a <code>vk.SubpassDescription</code> struct. This struct describes a subpass within a render pass, including its color and depth attachments.</p>
+        <h2><code>SubpassDependency</code> procedure</h2>
+        <p>This is a helper procedure that creates a <code>vk.SubpassDependency</code> struct. This struct defines a dependency between two subpasses, ensuring that one subpass completes before another begins. It specifies the source and destination subpasses, pipeline stages, and access masks.</p>
+        <h2><code>RenderPass</code> procedure</h2>
+        <p>This is a helper procedure that creates a <code>vk.RenderPass</code> object based on the provided <code>vk.RenderPassCreateInfo</code>. It returns a boolean indicating the success of the creation.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>buffers.odin (in vulkan/destroy)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>buffers.odin</code> (in <code>vulkan/destroy</code>)</h1>
+        <p>This file provides procedures for destroying Vulkan buffers and their associated memory.</p>
+        <h2><code>UniformBuffers</code> procedure</h2>
+        <p>This procedure iterates through all uniform buffers stored in <code>data.uniformBuffers</code> and calls the <code>Buffers</code> procedure to destroy each one. Finally, it deletes the <code>uniformBuffers</code> map itself.</p>
+        <h2><code>Buffer</code> procedure</h2>
+        <p>This procedure destroys a single Vulkan buffer and frees its associated device memory. It takes the <code>VulkanData</code> struct and a pointer to a <code>t.Buffer</code> struct as input. It checks if the buffer and memory handles are valid before destroying them using <code>vk.DestroyBuffer</code> and <code>vk.FreeMemory</code>.</p>
+        <h2><code>Buffers</code> procedure</h2>
+        <p>This procedure iterates through a slice of <code>t.Buffer</code> structs and calls the <code>Buffer</code> procedure to destroy each individual buffer.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>main.odin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>main.odin</code></h1>
+        <p>This file is the main entry point for the application.</p>
+        <h2><code>main</code> procedure</h2>
+        <p>The <code>main</code> procedure is the first code to be executed. It performs the following actions:</p>
+        <ol>
+            <li><strong>Initializes a memory tracker (in debug mode):</strong> When the application is compiled with the <code>ODIN_DEBUG</code> flag, it sets up a memory tracking allocator to detect memory leaks. It prints a summary of any unfreed memory upon exit.</li>
+            <li><strong>Loads 3D models:</strong> It calls <code>obj.LoadModels()</code> to load all 3D models from the <code>assets/models</code> directory.</li>
+            <li><strong>Initializes the engine:</strong> It calls <code>engine.Init()</code> to initialize the rendering engine.</li>
+            <li><strong>Starts the engine's main loop:</strong> It calls <code>engine.Start()</code> to begin the main application loop, which handles rendering and user input.</li>
+            <li><strong>Cleans up resources:</strong> It uses <code>defer</code> statements to ensure that <code>obj.CleanUpModels()</code> and <code>engine.Destroy()</code> are called before the application exits, freeing up all allocated resources.</li>
+        </ol>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

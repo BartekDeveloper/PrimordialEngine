@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>engine.odin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>engine.odin</code></h1>
+        <p>This file contains the core logic of the rendering engine.</p>
+        <h2><code>Init</code> procedure</h2>
+        <p>Initializes the engine. This includes:</p>
+        <ul>
+            <li>Setting up a console logger.</li>
+            <li>Initializing the <code>renderData</code> struct, which holds rendering-related data.</li>
+            <li>Creating the application window.</li>
+            <li>Initializing the Vulkan renderer.</li>
+        </ul>
+        <h2><code>Start</code> procedure</h2>
+        <p>Starts the engine's main loop. This loop continues as long as the window is open and performs the following actions on each iteration:</p>
+        <ul>
+            <li>Calculates the delta time (the time elapsed since the last frame).</li>
+            <li>Polls for user input and window events.</li>
+            <li>Calls the Vulkan renderer's <code>Render</code> procedure to draw the scene.</li>
+        </ul>
+        <p>After the loop finishes (i.e., the window is closed), it waits for the Vulkan renderer to finish its work.</p>
+        <h2><code>Destroy</code> procedure</h2>
+        <p>Cleans up all engine resources, including:</p>
+        <ul>
+            <li>The Vulkan renderer.</li>
+            <li>The application window.</li>
+            <li>The console logger.</li>
+        </ul>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

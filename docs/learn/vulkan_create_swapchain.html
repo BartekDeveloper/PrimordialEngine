@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>swapchain.odin (in vulkan/create)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>swapchain.odin</code> (in <code>vulkan/create</code>)</h1>
+        <p>This file handles the creation of the Vulkan swapchain, which is responsible for presenting rendered images to the screen.</p>
+        <h2><code>Swapchain</code> procedure</h2>
+        <p>This procedure creates the Vulkan swapchain. It performs the following steps:</p>
+        <ol>
+            <li><strong>Chooses Swapchain Properties:</strong> It uses helper procedures from the <code>choose</code> package to determine the optimal swapchain extent (resolution), surface format (color space and format), and present mode (how images are presented to the screen).</li>
+            <li><strong>Determines Image Count:</strong> It calculates the number of images the swapchain should contain, based on the physical device capabilities.</li>
+            <li><strong>Configures Swapchain Create Info:</strong> It populates a <code>vk.SwapchainCreateInfoKHR</code> struct with all the chosen properties, including image usage, sharing mode, and pre-transform.</li>
+            <li><strong>Creates Swapchain:</strong> It calls <code>vk.CreateSwapchainKHR</code> to create the Vulkan swapchain.</li>
+            <li><strong>Retrieves Swapchain Images:</strong> It calls <code>SwapchainImages</code> to get the handles to the images owned by the swapchain.</li>
+        </ol>
+        <h2><code>SwapchainImages</code> procedure</h2>
+        <p>This procedure retrieves the images from the created swapchain and creates image views for each of them. These image views are then used as color attachments in the rendering process.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

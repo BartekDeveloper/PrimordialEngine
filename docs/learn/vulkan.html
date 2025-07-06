@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vulkan.odin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>vulkan.odin</code></h1>
+        <p>This file is the heart of the Vulkan renderer. It contains the main <code>Render</code> procedure, which is called on every frame to draw the scene.</p>
+        <h2><code>Render</code> procedure</h2>
+        <p>The <code>Render</code> procedure orchestrates the entire rendering process for a single frame. Here's a breakdown of its key responsibilities:</p>
+        <ol>
+            <li><strong>Synchronization:</strong> It waits for the previous frame to finish rendering before starting a new one, using fences.</li>
+            <li><strong>Acquire Swapchain Image:</strong> It acquires the next available image from the swapchain to render into.</li>
+            <li><strong>Update Uniform Buffer:</strong> It updates the Uniform Buffer Object (UBO) with the latest data, such as the camera matrices, lighting information, and other global variables.</li>
+            <li><strong>Record Command Buffer:</strong> It records a new command buffer for the current frame. This involves:
+                <ul>
+                    <li><strong>Geometry Pass:</strong>
+                        <ul>
+                            <li>Begins the geometry render pass.</li>
+                            <li>Binds the geometry pipeline.</li>
+                            <li>Binds the UBO descriptor set.</li>
+                            <li>Draws all the objects in the scene.</li>
+                            <li>Ends the geometry render pass.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Lighting Pass:</strong>
+                        <ul>
+                            <li>Begins the lighting render pass.</li>
+                            <li>Binds the lighting pipeline.</li>
+                            <li>Binds the UBO and G-Buffer descriptor sets.</li>
+                            <li>Draws a full-screen quad to apply lighting to the scene.</li>
+                            <li>Ends the lighting render pass.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li><strong>Submit Command Buffer:</strong> It submits the recorded command buffer to the graphics queue for execution.</li>
+            <li><strong>Present Image:</strong> It presents the rendered image to the screen.</li>
+        </ol>
+        <h2><code>Wait</code> procedure</h2>
+        <p>This procedure simply waits for the GPU to finish all its work. It's called before the application exits to ensure that all rendering commands have been processed.</p>
+        <h2>Global Variables</h2>
+        <ul>
+            <li><code>vkData</code>: A <code>t.VulkanData</code> struct that holds all the core Vulkan data, such as the logical device, swapchain, render passes, and pipelines.</li>
+            <li><code>worldTime</code>: An integer that's incremented on every frame, which can be used for animations.</li>
+            <li><code>ii</code>: The index of the current swapchain image.</li>
+        </ul>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

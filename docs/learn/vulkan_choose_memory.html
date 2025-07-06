@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>memory.odin (in vulkan/choose)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>memory.odin</code> (in <code>vulkan/choose</code>)</h1>
+        <p>This file contains helper functions for choosing Vulkan memory types.</p>
+        <h2><code>MemoryType</code> procedure group</h2>
+        <p>This procedure group provides two ways to find a suitable memory type:</p>
+        <ul>
+            <li><strong><code>MemoryType_return</code>:</strong> This procedure returns the index of the first suitable memory type it finds. It panics if no suitable memory type is found.</li>
+            <li><strong><code>MemoryType_modify</code>:</strong> This procedure modifies a pointer to a <code>u32</code> to store the index of the first suitable memory type it finds. It returns <code>false</code> if no suitable memory type is found.</li>
+        </ul>
+        <p>Both procedures take a physical device, a type filter, and a set of memory properties as input. The type filter is a bitmask that specifies the allowed memory types. The memory properties specify the required properties of the memory, such as whether it should be host-visible or device-local.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

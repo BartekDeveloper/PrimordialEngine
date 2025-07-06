@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>shaders.odin (in vulkan/create)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>shaders.odin</code> (in <code>vulkan/create</code>)</h1>
+        <p>This file provides procedures for creating Vulkan shader stages.</p>
+        <h2><code>ShaderStages</code> procedure</h2>
+        <p>This procedure creates a slice of <code>vk.PipelineShaderStageCreateInfo</code> structs from a list of shader references. It takes the Vulkan data, a function to get the shader module, and a variadic list of <code>t.ShaderReference</code> structs as input. For each shader reference, it retrieves the corresponding shader module and creates a <code>vk.PipelineShaderStageCreateInfo</code> struct.</p>
+        <h2><code>ShaderStage</code> procedure</h2>
+        <p>This is a helper procedure that creates a single <code>vk.PipelineShaderStageCreateInfo</code> struct. This struct describes a single shader stage in a graphics pipeline, including the shader module, the shader stage (e.g., vertex, fragment), and the entry point function name.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

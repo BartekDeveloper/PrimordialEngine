@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>clib.odin (in maths)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>clib.odin</code> (in <code>maths</code>)</h1>
+        <p>This file defines foreign function interfaces (FFI) to a C library named <code>triangle_functions.o</code>, which provides various trigonometric functions.</p>
+        <h2>Foreign Imports</h2>
+        <p>This file imports the <code>triangle_functions.o</code> library, exposing the following C functions as Odin procedures:</p>
+        <h3>Cosine Functions</h3>
+        <ul>
+            <li><code>Cos</code>: Calculates the cosine of a <code>f32</code> value.</li>
+            <li><code>CosD</code>: Calculates the cosine of a <code>f64</code> value.</li>
+            <li><code>CosI</code>: Calculates the cosine of an <code>i32</code> value.</li>
+            <li><code>CosD_Approx</code>: Calculates an approximate cosine of a <code>f64</code> value.</li>
+            <li><code>CosI_Approx</code>: Calculates an approximate cosine of a <code>f32</code> value, returning an <code>i32</code>.</li>
+        </ul>
+        <h3>Sine Functions</h3>
+        <ul>
+            <li><code>Sin</code>: Calculates the sine of a <code>f32</code> value.</li>
+            <li><code>SinD</code>: Calculates the sine of a <code>f64</code> value.</li>
+            <li><code>SinI</code>: Calculates the sine of an <code>i32</code> value.</li>
+            <li><code>SinD_Approx</code>: Calculates an approximate sine of a <code>f64</code> value.</li>
+            <li><code>SinI_Approx</code>: Calculates an approximate sine of a <code>f32</code> value, returning an <code>i32</code>.</li>
+        </ul>
+        <h3>Tangent Functions</h3>
+        <ul>
+            <li><code>Tan</code>: Calculates the tangent of a <code>f32</code> value.</li>
+            <li><code>TanD</code>: Calculates the tangent of a <code>f64</code> value.</li>
+            <li><code>TanI</code>: Calculates the tangent of a <code>f32</code> value, returning an <code>i32</code>.</li>
+            <li><code>TanD_Approx</code>: Calculates an approximate tangent of a <code>f64</code> value.</li>
+            <li><code>TanI_Approx</code>: Calculates an approximate tangent of a <code>f32</code> value, returning an <code>i32</code>.</li>
+        </ul>
+        <h2>Global Variable</h2>
+        <ul>
+            <li><code>PI</code>: A <code>f64</code> constant representing the mathematical constant Pi, imported from the C library.</li>
+        </ul>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

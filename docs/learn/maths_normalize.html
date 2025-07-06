@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>normalize.odin (in maths)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>normalize.odin</code> (in <code>maths</code>)</h1>
+        <p>This file provides procedures for normalizing various data types, including scalars, vectors, and quaternions.</p>
+        <h2><code>Length</code> alias</h2>
+        <p>An alias to <code>linalg.length</code>, which is used to calculate the magnitude (length) of vectors and quaternions.</p>
+        <h2><code>Normalize</code> procedure group</h2>
+        <p>This procedure group provides normalization calculations for different data types and precisions:</p>
+        <h3>Scalar Normalization</h3>
+        <ul>
+            <li><strong><code>Normalize_i32</code></strong>: Normalizes an <code>i32</code> value. (Returns 1).</li>
+            <li><strong><code>Normalize_f32</code></strong>: Normalizes an <code>f32</code> value. (Returns 1.0).</li>
+            <li><strong><code>Normalize_f64</code></strong>: Normalizes an <code>f64</code> value. (Returns 1.0).</li>
+        </ul>
+        <h3>Vector Normalization</h3>
+        <ul>
+            <li><strong><code>Normalize_vec2h</code></strong>: Normalizes a <code>Vec2h</code> (half-precision float 2D) vector.</li>
+            <li><strong><code>Normalize_vec2</code></strong>: Normalizes a <code>Vec2</code> (single-precision float 2D) vector.</li>
+            <li><strong><code>Normalize_vec2d</code></strong>: Normalizes a <code>Vec2d</code> (double-precision float 2D) vector.</li>
+            <li><strong><code>Normalize_vec3h</code></strong>: Normalizes a <code>Vec3h</code> (half-precision float 3D) vector.</li>
+            <li><strong><code>Normalize_vec3</code></strong>: Normalizes a <code>Vec3</code> (single-precision float 3D) vector.</li>
+            <li><strong><code>Normalize_vec3d</code></strong>: Normalizes a <code>Vec3d</code> (double-precision float 3D) vector.</li>
+            <li><strong><code>Normalize_vec4h</code></strong>: Normalizes a <code>Vec4h</code> (half-precision float 4D) vector.</li>
+            <li><strong><code>Normalize_vec4</code></strong>: Normalizes a <code>Vec4</code> (single-precision float 4D) vector.</li>
+            <li><strong><code>Normalize_vec4d</code></strong>: Normalizes a <code>Vec4d</code> (double-precision float 4D) vector.</li>
+        </ul>
+        <h3>Quaternion Normalization</h3>
+        <ul>
+            <li><strong><code>Normalize_quath</code></strong>: Normalizes a <code>Quath</code> (half-precision float) quaternion.</li>
+            <li><strong><code>Normalize_quat</code></strong>: Normalizes a <code>Quat</code> (single-precision float) quaternion.</li>
+            <li><strong><code>Normalize_quatd</code></strong>: Normalizes a <code>Quatd</code> (double-precision float) quaternion.</li>
+        </ul>
+        <p>Normalization scales a vector or quaternion to have a magnitude of 1, preserving its direction. This is a common operation in graphics and physics for various calculations.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

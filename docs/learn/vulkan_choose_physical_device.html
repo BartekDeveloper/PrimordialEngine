@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>physical_device.odin (in vulkan/choose)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>physical_device.odin</code> (in <code>vulkan/choose</code>)</h1>
+        <p>This file contains the logic for selecting the most suitable physical device (i.e., GPU) for the application.</p>
+        <h2><code>PhysicalDevicesData</code> procedure</h2>
+        <p>This procedure enumerates all available physical devices and scores them based on their capabilities. The device with the highest score is then selected for use.</p>
+        <p>The scoring is based on a number of factors, including:</p>
+        <ul>
+            <li><strong>Device type:</strong> Discrete GPUs are preferred over integrated GPUs.</li>
+            <li><strong>Queue families:</strong> The device must support graphics, present, and compute queues.</li>
+            <li><strong>Features:</strong> The device must support all the required features, such as sampler anisotropy.</li>
+            <li><strong>Properties:</strong> The device's properties, such as the maximum image dimensions and the maximum number of samplers, are also taken into account.</li>
+        </ul>
+        <p>The procedure returns a <code>t.PhysicalDeviceData</code> struct, which contains all the relevant information about the selected device.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

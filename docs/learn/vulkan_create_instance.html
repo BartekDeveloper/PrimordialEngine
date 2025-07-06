@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>instance.odin (in vulkan/create)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>instance.odin</code> (in <code>vulkan/create</code>)</h1>
+        <p>This file handles the creation of the Vulkan instance, which is the first Vulkan object that needs to be created. It also sets up validation layers and debug callbacks.</p>
+        <h2><code>ENABLE_VALIDATION_LAYERS</code> constant</h2>
+        <p>A boolean constant that controls whether Vulkan validation layers are enabled. When enabled, validation layers provide detailed error messages and warnings, which are invaluable for debugging Vulkan applications.</p>
+        <h2><code>VulkanDebugCallback</code> procedure</h2>
+        <p>This is a C-compatible callback function that is invoked by the Vulkan validation layers when an event occurs (e.g., an error, warning, or information message). It logs the messages to the console.</p>
+        <h2><code>Instance</code> procedure</h2>
+        <p>This procedure creates the Vulkan instance. It performs the following steps:</p>
+        <ol>
+            <li><strong>Gathers Extensions and Layers:</strong> It collects the necessary Vulkan instance extensions (including those required by the windowing system) and validation layers.</li>
+            <li><strong>Configures Instance Creation Info:</strong> It populates a <code>vk.InstanceCreateInfo</code> struct with information about the application, enabled extensions, and enabled layers.</li>
+            <li><strong>Sets up Debug Messenger (if enabled):</strong> If <code>ENABLE_VALIDATION_LAYERS</code> is true, it configures a <code>vk.DebugUtilsMessengerCreateInfoEXT</code> struct and links it to the instance creation info. This messenger uses the <code>VulkanDebugCallback</code> to report debug messages.</li>
+            <li><strong>Creates Instance:</strong> It calls <code>vk.CreateInstance</code> to create the Vulkan instance.</li>
+            <li><strong>Loads Instance Addresses:</strong> It loads the Vulkan function pointers specific to the created instance.</li>
+            <li><strong>Creates Debug Messenger (if enabled):</strong> If <code>ENABLE_VALIDATION_LAYERS</code> is true, it creates the debug messenger using <code>vk.CreateDebugUtilsMessengerEXT</code>.</li>
+        </ol>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

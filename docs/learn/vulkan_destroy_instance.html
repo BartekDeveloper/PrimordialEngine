@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>instance.odin (in vulkan/destroy)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>instance.odin</code> (in <code>vulkan/destroy</code>)</h1>
+        <p>This file provides a procedure for destroying the Vulkan instance and its associated debug messenger.</p>
+        <h2><code>Instance</code> procedure</h2>
+        <p>This procedure destroys the Vulkan instance. It performs the following steps:</p>
+        <ol>
+            <li><strong>Destroys Debug Messenger:</strong> If a debug messenger was created, it destroys it using <code>vk.DestroyDebugUtilsMessengerEXT</code> and clears its associated info struct.</li>
+            <li><strong>Destroys Instance:</strong> It destroys the Vulkan instance using <code>vk.DestroyInstance</code> and clears its associated create info struct.</li>
+            <li><strong>Frees Memory:</strong> It frees the memory allocated for the instance's extensions and layers.</li>
+        </ol>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

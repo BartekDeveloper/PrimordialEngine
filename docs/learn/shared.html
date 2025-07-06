@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>shared.odin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>shared.odin</code></h1>
+        <p>This file defines data structures that are shared across different parts of the engine, particularly between the core engine logic and the rendering backend.</p>
+        <h2><code>RenderData</code> struct</h2>
+        <p>This struct holds data related to the rendering process that needs to be accessible globally. Key fields include:</p>
+        <ul>
+            <li><code>deltaTime</code>: The time elapsed since the last frame, in nanoseconds (i64).</li>
+            <li><code>deltaTime_f64</code>: The time elapsed since the last frame, in seconds (f64).</li>
+            <li><code>currentFrame</code>: The index of the current frame being rendered.</li>
+            <li><code>MAX_FRAMES_IN_FLIGHT</code>: The maximum number of frames that can be in flight simultaneously (i.e., being processed by the GPU).</li>
+        </ul>
+        <h2><code>UniformBufferObject</code> struct (aliased as <code>UBO</code>)</h2>
+        <p>This struct defines the layout of the Uniform Buffer Object (UBO), which is a block of data passed to shaders. It contains various parameters that influence rendering, such as:</p>
+        <ul>
+            <li><strong>Important:</strong>
+                <ul>
+                    <li><code>proj</code>: Projection matrix.</li>
+                    <li><code>iProj</code>: Inverse projection matrix.</li>
+                    <li><code>view</code>: View matrix.</li>
+                    <li><code>iView</code>: Inverse view matrix.</li>
+                    <li><code>deltaTime</code>: Time elapsed since the last frame (f32).</li>
+                </ul>
+            </li>
+            <li><strong>Window:</strong>
+                <ul>
+                    <li><code>winWidth</code>: Window width.</li>
+                    <li><code>winHeight</code>: Window height.</li>
+                </ul>
+            </li>
+            <li><strong>Camera:</strong>
+                <ul>
+                    <li><code>cameraPos</code>: Camera position.</li>
+                    <li><code>cameraUp</code>: Camera up vector.</li>
+                </ul>
+            </li>
+            <li><strong>World:</strong>
+                <ul>
+                    <li><code>worldUp</code>: World up vector.</li>
+                    <li><code>worldTime</code>: Current world time.</li>
+                </ul>
+            </li>
+            <li><strong>Temporary:</strong>
+                <ul>
+                    <li><code>model</code>: Model matrix (likely for a single object, or a placeholder).</li>
+                </ul>
+            </li>
+        </ul>
+        <h2><code>VertexData</code> struct (aliased as <code>Vertex</code>)</h2>
+        <p>This struct defines the layout of vertex data, which describes the properties of each vertex in a 3D model. Key fields include:</p>
+        <ul>
+            <li><code>pos</code>: Position of the vertex (3D vector).</li>
+            <li><code>norm</code>: Normal vector of the vertex (3D vector).</li>
+            <li><code>tan</code>: Tangent vector of the vertex (3D vector).</li>
+            <li><code>color</code>: Color of the vertex (3D vector).</li>
+            <li><code>uv0</code>: Texture coordinates of the vertex (2D vector).</li>
+        </ul>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

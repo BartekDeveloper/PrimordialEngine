@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>label.odin (in vulkan/create)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>label.odin</code> (in <code>vulkan/create</code>)</h1>
+        <p>This file provides helper procedures for setting debug names (labels) for Vulkan objects. These labels are useful for debugging and profiling Vulkan applications, as they allow you to identify specific objects in tools like RenderDoc.</p>
+        <h2><code>Label</code> procedure group</h2>
+        <p>This procedure group provides several ways to set labels for Vulkan objects:</p>
+        <ul>
+            <li><strong><code>Label_single</code>:</strong> Sets a label for a single Vulkan object. It takes the device, a string for the label, the object's handle, and its type as input.</li>
+            <li><strong><code>Label_mutliple_1</code>:</strong> Sets labels for multiple Vulkan objects provided as a slice of handles. It appends an index to each label.</li>
+            <li><strong><code>Label_mutliple_2</code>:</strong> Sets labels for multiple Vulkan objects provided as a pointer to an array of handles and a count. It appends an index to each label.</li>
+            <li><strong><code>Label_gbuffer</code>:</strong> Sets labels for the images, image views, and memory associated with a G-Buffer. It appends an index to each label.</li>
+        </ul>
+        <p>These procedures are only active when the <code>ODIN_DEBUG</code> flag is enabled during compilation.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

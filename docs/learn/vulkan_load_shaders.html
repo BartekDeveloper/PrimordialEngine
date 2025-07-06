@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>shaders.odin (in vulkan/load)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>shaders.odin</code> (in <code>vulkan/load</code>)</h1>
+        <p>This file is responsible for loading and managing Vulkan shader modules.</p>
+        <h2>Global Variables</h2>
+        <ul>
+            <li><code>shaderModules</code>: A map that stores loaded shader modules, keyed by their filenames.</li>
+            <li><code>exists</code>: A map that tracks whether a shader module exists, keyed by its filename.</li>
+            <li><code>allExits</code>: A boolean flag, currently unused.</li>
+            <li><code>data</code>: A pointer to the <code>t.VulkanData</code> struct, providing access to Vulkan-related data.</li>
+        </ul>
+        <h2><code>SetVulkanDataPointer</code> procedure</h2>
+        <p>Sets the <code>data</code> global variable to the provided <code>t.VulkanData</code> pointer.</p>
+        <h2><code>UnSetVulkanDataPointer</code> procedure</h2>
+        <p>Sets the <code>data</code> global variable to <code>nil</code>.</p>
+        <h2><code>GetModule</code> procedure</h2>
+        <p>Retrieves a loaded shader module by its filename. Panics if the module is not found.</p>
+        <h2><code>Shaders</code> procedure</h2>
+        <p>This procedure loads all shader modules from a specified directory (defaults to <code>./assets/shaders</code>). It iterates through the files in the directory, processes each shader file, and creates a shader module for it.</p>
+        <h2><code>ProcessShaderFile</code> procedure</h2>
+        <p>This procedure processes a single shader file. It checks if the file has a <code>.spv</code> extension (SPIR-V bytecode) and then calls <code>CreateShaderModule</code> to create a Vulkan shader module from its contents.</p>
+        <h2><code>CreateShaderModule</code> procedure</h2>
+        <p>This procedure creates a Vulkan shader module from the provided shader code. It reads the shader code from the specified file, creates a <code>vk.ShaderModuleCreateInfo</code> struct, and then calls <code>vk.CreateShaderModule</code> to create the shader module.</p>
+        <h2><code>CleanUpShaderModules</code> procedure</h2>
+        <p>This procedure destroys all loaded shader modules and frees their associated resources. It iterates through the <code>shaderModules</code> map, destroys each module using <code>vk.DestroyShaderModule</code>, and then clears the <code>shaderModules</code> and <code>exists</code> maps.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

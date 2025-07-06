@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>resources.odin (in vulkan/create)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>resources.odin</code> (in <code>vulkan/create</code>)</h1>
+        <p>This file is responsible for creating various Vulkan resources, primarily the G-Buffers.</p>
+        <h2><code>Resources</code> procedure</h2>
+        <p>This procedure creates the G-Buffers used in the deferred rendering pipeline. It initializes several <code>t.GBuffer</code> structs and then calls the <code>GBuffer</code> helper procedure to create the images, image views, and memory for each G-Buffer.</p>
+        <p>The G-Buffers created include:</p>
+        <ul>
+            <li><strong><code>geometry.position</code></strong>: Stores the world-space position of each fragment.</li>
+            <li><strong><code>geometry.albedo</code></strong>: Stores the base color (albedo) of each fragment.</li>
+            <li><strong><code>geometry.normal</code></strong>: Stores the world-space normal of each fragment.</li>
+            <li><strong><code>geometry.depth</code></strong>: Stores the depth information for the geometry pass.</li>
+            <li><strong><code>light.color</code></strong>: Stores the final lit color output of the lighting pass.</li>
+            <li><strong><code>light.depth</code></strong>: Stores the depth information for the lighting pass.</li>
+        </ul>
+        <p>Each G-Buffer is created with specific formats, usage flags, and memory properties suitable for its purpose.</p>
+        <h2><code>GBuffer</code> procedure</h2>
+        <p>This is a helper procedure that creates a G-Buffer. It allocates images, image views, and device memory for the specified G-Buffer. It takes the Vulkan data, a <code>t.GBuffer</code> struct, format, dimensions, tiling, usage flags, memory flags, and aspect mask as input.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

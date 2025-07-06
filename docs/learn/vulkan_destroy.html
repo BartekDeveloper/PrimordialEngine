@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>destroy.odin (in vulkan)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>destroy.odin</code> (in <code>vulkan</code>)</h1>
+        <p>This file contains the <code>Clean</code> procedure, which is responsible for cleaning up all Vulkan resources.</p>
+        <h2><code>Clean</code> procedure</h2>
+        <p>This procedure is called when the application is shutting down. It calls a series of <code>destroy</code> procedures (defined in <code>src/engine/vulkan/destroy/</code>) to free all allocated Vulkan resources in the reverse order of their creation. This includes:</p>
+        <ul>
+            <li>Buffers</li>
+            <li>Synchronization objects (semaphores and fences)</li>
+            <li>Samplers</li>
+            <li>Descriptor pools</li>
+            <li>Command pools and buffers</li>
+            <li>Framebuffers</li>
+            <li>Pipelines</li>
+            <li>Render passes</li>
+            <li>The swapchain</li>
+            <li>The logical and physical devices</li>
+            <li>The Vulkan instance</li>
+        </ul>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

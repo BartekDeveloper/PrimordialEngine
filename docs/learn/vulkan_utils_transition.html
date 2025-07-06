@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>transition.odin (in vulkan/utils)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>transition.odin</code> (in <code>vulkan/utils</code>)</h1>
+        <p>This file provides a utility procedure for performing image layout transitions using Vulkan pipeline barriers.</p>
+        <h2><code>Transition</code> procedure</h2>
+        <p>This procedure inserts an image memory barrier into a command buffer to transition an image's layout. It takes the following parameters:</p>
+        <ul>
+            <li><code>data</code>: A pointer to the <code>t.VulkanData</code> struct.</li>
+            <li><code>cmd</code>: The command buffer to record the barrier into.</li>
+            <li><code>image</code>: The image to transition.</li>
+            <li><code>srcStage</code>: The source pipeline stage.</li>
+            <li><code>dstStage</code>: The destination pipeline stage.</li>
+            <li><code>srcAccessMask</code>: The source access mask.</li>
+            <li><code>dstAccessMask</code>: The destination access mask.</li>
+            <li><code>srcLayout</code>: The old image layout.</li>
+            <li><code>dstLayout</code>: The new image layout.</li>
+            <li><code>srcQueueFamilyIndex</code>: The source queue family index (for ownership transfers).</li>
+            <li><code>dstQueueFamilyIndex</code>: The destination queue family index (for ownership transfers).</li>
+            <li><code>aspectMask</code>: The image aspect mask.</li>
+            <li><code>baseMipLevel</code>: The base mipmap level.</li>
+            <li><code>levelCount</code>: The number of mipmap levels.</li>
+            <li><code>baseArrayLayer</code>: The base array layer.</li>
+            <li><code>layerCount</code>: The number of array layers.</li>
+        </ul>
+        <p>This procedure is crucial for ensuring that image layouts are correct before they are accessed by different pipeline stages or queues, preventing validation errors and ensuring proper rendering.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

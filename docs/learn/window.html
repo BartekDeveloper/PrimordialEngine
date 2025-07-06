@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>window.odin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>window.odin</code></h1>
+        <p>This file handles the creation and management of the application window using the SDL3 library.</p>
+        <h2><code>WindowData</code> struct</h2>
+        <p>This struct holds all the data related to the window, such as its dimensions, title, and a pointer to the underlying <code>sdl.Window</code> object.</p>
+        <h2><code>Init</code> procedure</h2>
+        <p>Initializes SDL3 and creates the application window.</p>
+        <h2><code>Running</code> procedure</h2>
+        <p>Returns <code>true</code> if the window is still open, and <code>false</code> otherwise.</p>
+        <h2><code>Poll</code> procedure</h2>
+        <p>Polls for window events, such as the user clicking the close button. If a close event is detected, it sets the <code>closing</code> flag in the <code>WindowData</code> struct to <code>true</code>.</p>
+        <h2><code>Clean</code> procedure</h2>
+        <p>Destroys the window and quits SDL3.</p>
+        <h2>Helper Functions</h2>
+        <ul>
+            <li><code>GetInstanceExtensions</code>: Returns the Vulkan instance extensions required by SDL3.</li>
+            <li><code>GetFrameBufferSize</code>: Returns the width and height of the window's framebuffer in pixels.</li>
+        </ul>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

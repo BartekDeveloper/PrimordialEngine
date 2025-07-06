@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>framebuffers.odin (in vulkan/create)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>framebuffers.odin</code> (in <code>vulkan/create</code>)</h1>
+        <p>This file provides procedures for creating Vulkan framebuffers.</p>
+        <h2><code>Framebuffers</code> procedure</h2>
+        <p>This procedure creates the framebuffers for both the geometry and lighting render passes. Framebuffers are collections of image views that serve as rendering targets for a render pass.</p>
+        <p>For the geometry pass, it creates framebuffers that attach the G-Buffer images (position, albedo, normal, and depth). For the lighting pass, it creates framebuffers that attach the swapchain images and a depth buffer.</p>
+        <h2><code>FrameBuffer</code> procedure</h2>
+        <p>This is a helper procedure that creates a single Vulkan framebuffer based on the provided <code>vk.FramebufferCreateInfo</code>. It takes the Vulkan data, the size of the framebuffer, the render pass it will be used with, and a list of image views to attach as input.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

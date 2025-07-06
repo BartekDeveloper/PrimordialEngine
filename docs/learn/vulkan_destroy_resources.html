@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>resources.odin (in vulkan/destroy)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>resources.odin</code> (in <code>vulkan/destroy</code>)</h1>
+        <p>This file provides procedures for destroying Vulkan resources, primarily G-Buffers.</p>
+        <h2><code>Resources</code> procedure</h2>
+        <p>This procedure iterates through all G-Buffers stored in <code>data.gBuffers</code> and calls the <code>GBuffer</code> procedure to destroy each one. Finally, it deletes the <code>gBuffers</code> map itself.</p>
+        <h2><code>GBuffer</code> procedure</h2>
+        <p>This procedure destroys a single G-Buffer. It iterates through the images, image views, and memory associated with the G-Buffer and calls the respective <code>Image</code>, <code>ImageView</code>, and <code>Memory</code> destruction procedures for each. Finally, it deletes the slices holding the images, views, and memory.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

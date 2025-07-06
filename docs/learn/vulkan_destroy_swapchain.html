@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>swapchain.odin (in vulkan/destroy)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>swapchain.odin</code> (in <code>vulkan/destroy</code>)</h1>
+        <p>This file provides a procedure for destroying the Vulkan swapchain and its associated resources.</p>
+        <h2><code>Swapchain</code> procedure</h2>
+        <p>This procedure destroys the Vulkan swapchain. It performs the following steps:</p>
+        <ol>
+            <li><strong>Destroys Resources:</strong> It calls the <code>Resources</code> procedure (from <code>src/engine/vulkan/destroy/resources.odin</code>) to destroy the G-Buffers and other resources associated with the swapchain.</li>
+            <li><strong>Destroys Image Views:</strong> It iterates through the swapchain image views and destroys each one using <code>vk.DestroyImageView</code>.</li>
+            <li><strong>Frees Image Memory:</strong> It frees the memory allocated for the swapchain images.</li>
+            <li><strong>Destroys Swapchain:</strong> It destroys the swapchain itself using <code>vk.DestroySwapchainKHR</code>.</li>
+        </ol>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>image.odin (in vulkan/create)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>image.odin</code> (in <code>vulkan/create</code>)</h1>
+        <p>This file provides procedures for creating Vulkan images.</p>
+        <h2><code>Image</code> procedure group</h2>
+        <p>This procedure group provides two ways to create Vulkan images:</p>
+        <ul>
+            <li><strong><code>Image_return</code>:</strong> This procedure creates a <code>vk.Image</code> and allocates device memory for it. It returns the created image and a boolean indicating success. It takes various parameters such as width, height, format, usage, and memory properties.</li>
+            <li><strong><code>Image_modify</code>:</strong> This procedure creates a <code>vk.Image</code> and allocates device memory for it, similar to <code>Image_return</code>. However, instead of returning the image, it modifies a provided <code>vk.Image</code> pointer to store the created image. It returns a boolean indicating success.</li>
+        </ul>
+        <p>Both procedures handle the creation of the image, querying memory requirements, allocating memory, and binding the memory to the image.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

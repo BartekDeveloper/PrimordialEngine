@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>swapchain.odin (in vulkan/choose)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>swapchain.odin</code> (in <code>vulkan/choose</code>)</h1>
+        <p>This file contains helper functions for choosing swapchain properties.</p>
+        <h2><code>SwapchainExtent</code> procedure</h2>
+        <p>This procedure returns the extent (i.e., width and height) of the swapchain. It gets the framebuffer size from the window and returns it as a <code>vk.Extent2D</code>.</p>
+        <h2><code>SwapchainFormat</code> procedure</h2>
+        <p>This procedure chooses the best surface format for the swapchain. It queries the available surface formats and scores them based on a list of preferred formats. The format with the highest score is then returned.</p>
+        <h2><code>SwapchainPresentMode</code> procedure</h2>
+        <p>This procedure chooses the best present mode for the swapchain. It queries the available present modes and scores them based on a list of preferred modes. The mode with the highest score is then returned.</p>
+        <h2><code>SwapchainDepthFormat</code> procedure</h2>
+        <p>This procedure chooses the best depth format for the swapchain. It calls the <code>FindSupportedFormat</code> procedure to find the first supported depth format from a list of candidates.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>types.odin (in maths)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>types.odin</code> (in <code>maths</code>)</h1>
+        <p>This file defines various type aliases for common mathematical structures, such as vectors, matrices, and quaternions, using types from the <code>core:math/linalg</code> package. It also defines identity constants for these types.</p>
+        <h2>Vector Type Aliases</h2>
+        <p>This section defines aliases for 2D, 3D, and 4D vectors with different floating-point and integer precisions:</p>
+        <ul>
+            <li><strong>Floating-point vectors:</strong> <code>Vec2h</code>, <code>Vec2</code>, <code>Vec2d</code>, <code>Vec3h</code>, <code>Vec3</code>, <code>Vec3d</code>, <code>Vec4h</code>, <code>Vec4</code>, <code>Vec4d</code>.</li>
+            <li><strong>Signed integer vectors:</strong> <code>iVec2h</code>, <code>iVec2</code>, <code>iVec2d</code>, <code>iVec3h</code>, <code>iVec3</code>, <code>iVec3d</code>, <code>iVec4h</code>, <code>iVec4</code>, <code>iVec4d</code>.</li>
+            <li><strong>Unsigned integer vectors:</strong> <code>uVec2h</code>, <code>uVec2</code>, <code>uVec2d</code>, <code>uVec3h</code>, <code>uVec3</code>, <code>uVec3d</code>, <code>uVec4h</code>, <code>uVec4</code>, <code>uVec4d</code>.</li>
+        </ul>
+        <h2>Matrix Type Aliases</h2>
+        <p>This section defines aliases for 1x1, 2x2, 3x3, and 4x4 matrices with different floating-point precisions:</p>
+        <ul>
+            <li><code>Mat1h</code>, <code>Mat1</code>, <code>Mat1d</code></li>
+            <li><code>Mat2h</code>, <code>Mat2</code>, <code>Mat2d</code></li>
+            <li><code>Mat3h</code>, <code>Mat3</code>, <code>Mat3d</code></li>
+            <li><code>Mat4h</code>, <code>Mat4</code>, <code>Mat4d</code></li>
+        </ul>
+        <h2>Quaternion Type Aliases</h2>
+        <p>This section defines aliases for quaternions with different floating-point precisions:</p>
+        <ul>
+            <li><code>Quath</code>, <code>Quat</code>, <code>Quatd</code></li>
+        </ul>
+        <h2>Identity Constants</h2>
+        <p>This section defines identity constants for various matrix and quaternion types. These constants represent the identity transformation for their respective types:</p>
+        <ul>
+            <li><code>Mat1h_iDENTIFY</code>, <code>Mat1_IDENTITY</code>, <code>Mat1d_iDENTIFY</code></li>
+            <li><code>Mat2h_iDENTIFY</code>, <code>Mat2_IDENTITY</code>, <code>Mat2d_iDENTIFY</code></li>
+            <li><code>Mat3h_iDENTIFY</code>, <code>Mat3_IDENTITY</code>, <code>Mat3d_iDENTIFY</code></li>
+            <li><code>Mat4h_iDENTIFY</code>, <code>Mat4_IDENTITY</code>, <code>Mat4d_iDENTIFY</code></li>
+            <li><code>Quath_iDENTIFY</code>, <code>Quat_IDENTITY</code>, <code>Quatd_iDENTIFY</code></li>
+        </ul>
+        <h2>Axis Constants</h2>
+        <p>This section defines constants for the X, Y, and Z axes for 2D vectors with different floating-point precisions:</p>
+        <ul>
+            <li><code>Vec2h_X_AXiS</code>, <code>Vec2_X_AXiS</code>, <code>Vec2d_X_AXiS</code></li>
+            <li><code>Vec2h_Y_AXiS</code>, <code>Vec2_Y_AXiS</code>, <code>Vec2d_Y_AXiS</code></li>
+            <li><code>Vec2h_Z_AXiS</code>, <code>Vec2_Z_AXiS</code>, <code>Vec2d_Z_AXiS</code></li>
+        </ul>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

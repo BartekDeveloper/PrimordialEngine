@@ -1,0 +1,122 @@
+
+/* Global Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #1a1a1a; /* Dark background */
+    color: #e0e0e0; /* Light text */
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+.container {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #2a2a2a; /* Slightly lighter dark background for content */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 1s ease-in-out;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    color: #4CAF50; /* Green headings */
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+    animation: slideInFromLeft 0.8s ease-out;
+}
+
+h1 { font-size: 2.5em; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; }
+h2 { font-size: 2em; }
+h3 { font-size: 1.5em; }
+
+p {
+    margin-bottom: 1em;
+}
+
+a {
+    color: #66bb6a; /* Lighter green links */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #81c784;
+    text-decoration: underline;
+}
+
+/* Code Blocks */
+pre {
+    background-color: #1e1e1e; /* Even darker for code */
+    color: #b5cea8; /* Light green for code text */
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+    animation: fadeIn 1.2s ease-in-out;
+}
+
+code {
+    font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+    background-color: #333;
+    padding: 2px 5px;
+    border-radius: 3px;
+    color: #ffcc80; /* Orange for inline code */
+}
+
+pre code {
+    background-color: transparent;
+    padding: 0;
+    color: inherit;
+}
+
+/* Lists */
+ul, ol {
+    margin-bottom: 1em;
+    padding-left: 25px;
+}
+
+li {
+    margin-bottom: 0.5em;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInFromLeft {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        margin: 10px;
+        padding: 15px;
+    }
+    h1 { font-size: 2em; }
+    h2 { font-size: 1.8em; }
+}
+
+/* Scrollbar Styling (for Webkit browsers) */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #333;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #777;
+}

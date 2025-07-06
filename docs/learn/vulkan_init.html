@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>init.odin (in vulkan)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>init.odin</code> (in <code>vulkan</code>)</h1>
+        <p>This file contains the <code>Init</code> and <code>InitFromZero</code> procedures, which are responsible for initializing the Vulkan renderer.</p>
+        <h2><code>Init</code> procedure</h2>
+        <p>This procedure is the main entry point for initializing the Vulkan renderer. It simply calls the <code>InitFromZero</code> procedure.</p>
+        <h2><code>InitFromZero</code> procedure</h2>
+        <p>This procedure performs the bulk of the Vulkan initialization. It creates all the necessary Vulkan objects, in the correct order, by calling a series of <code>create</code> procedures (defined in <code>src/engine/vulkan/create/</code>). This includes:</p>
+        <ul>
+            <li>The Vulkan instance</li>
+            <li>The window surface</li>
+            <li>The physical and logical devices</li>
+            <li>The swapchain</li>
+            <li>The render passes</li>
+            <li>The descriptor set layouts</li>
+            <li>The pipelines</li>
+            <li>The framebuffers</li>
+            <li>The command pools and buffers</li>
+            <li>The uniform buffers</li>
+            <li>The descriptor pools</li>
+            <li>The samplers</li>
+            <li>The descriptor sets</li>
+            <li>The synchronization objects (semaphores and fences)</li>
+        </ul>
+        <p>It also loads the shaders and creates the vertex and index buffers for all the 3D models.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

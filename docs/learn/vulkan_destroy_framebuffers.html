@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>framebuffers.odin (in vulkan/destroy)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>framebuffers.odin</code> (in <code>vulkan/destroy</code>)</h1>
+        <p>This file provides procedures for destroying Vulkan framebuffers.</p>
+        <h2><code>FrameBuffers</code> procedure</h2>
+        <p>This procedure iterates through all render passes stored in <code>data.passes</code>. For each render pass, it iterates through its framebuffers and calls the <code>FrameBuffer</code> procedure to destroy each one. Finally, it deletes the <code>frameBuffers</code> slice and <code>clearValues</code> slice (if not empty) for each pass, and then deletes the <code>passes</code> map itself.</p>
+        <h2><code>FrameBuffer</code> procedure</h2>
+        <p>This procedure destroys a single Vulkan framebuffer. It checks if the <code>fb</code> handle is valid before destroying it using <code>vk.DestroyFramebuffer</code>.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

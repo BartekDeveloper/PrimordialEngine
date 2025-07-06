@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sync_objects.odin (in vulkan/create)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>sync_objects.odin</code> (in <code>vulkan/create</code>)</h1>
+        <p>This file provides procedures for creating Vulkan synchronization objects, specifically semaphores and fences.</p>
+        <h2><code>SyncObjects</code> procedure</h2>
+        <p>This procedure creates the synchronization objects needed for the rendering loop. It creates:</p>
+        <ul>
+            <li><strong>Semaphores:</strong> One image available semaphore and one render finished semaphore for each swapchain image. Semaphores are used to signal when an image is available for rendering and when rendering to an image is complete.</li>
+            <li><strong>Fences:</strong> One fence for each frame in flight. Fences are used to signal when the GPU has finished executing commands for a particular frame, allowing the CPU to safely reuse resources.</li>
+        </ul>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

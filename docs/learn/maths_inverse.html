@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>inverse.odin (in maths)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>inverse.odin</code> (in <code>maths</code>)</h1>
+        <p>This file provides procedures for calculating the inverse of matrices and quaternions.</p>
+        <h2><code>Inverse</code> procedure group</h2>
+        <p>This procedure group provides inverse calculations for different matrix and quaternion types:</p>
+        <h3>Matrix Inverses</h3>
+        <ul>
+            <li><strong><code>Inverse_mat2h</code></strong>: Calculates the inverse of a <code>Mat2h</code> (half-precision float 2x2) matrix.</li>
+            <li><strong><code>Inverse_mat2</code></strong>: Calculates the inverse of a <code>Mat2</code> (single-precision float 2x2) matrix.</li>
+            <li><strong><code>Inverse_mat2d</code></strong>: Calculates the inverse of a <code>Mat2d</code> (double-precision float 2x2) matrix.</li>
+            <li><strong><code>Inverse_mat3h</code></strong>: Calculates the inverse of a <code>Mat3h</code> (half-precision float 3x3) matrix.</li>
+            <li><strong><code>Inverse_mat3</code></strong>: Calculates the inverse of a <code>Mat3</code> (single-precision float 3x3) matrix.</li>
+            <li><strong><code>Inverse_mat3d</code></strong>: Calculates the inverse of a <code>Mat3d</code> (double-precision float 3x3) matrix.</li>
+            <li><strong><code>Inverse_mat4h</code></strong>: Calculates the inverse of a <code>Mat4h</code> (half-precision float 4x4) matrix.</li>
+            <li><strong><code>Inverse_mat4</code></strong>: Calculates the inverse of a <code>Mat4</code> (single-precision float 4x4) matrix.</li>
+            <li><strong><code>Inverse_mat4d</code></strong>: Calculates the inverse of a <code>Mat4d</code> (double-precision float 4x4) matrix.</li>
+        </ul>
+        <h3>Quaternion Inverses</h3>
+        <ul>
+            <li><strong><code>Inverse_quath</code></strong>: Calculates the inverse of a <code>Quath</code> (half-precision float) quaternion.</li>
+            <li><strong><code>Inverse_quat</code></strong>: Calculates the inverse of a <code>Quat</code> (single-precision float) quaternion.</li>
+            <li><strong><code>Inverse_quatd</code></strong>: Calculates the inverse of a <code>Quatd</code> (double-precision float) quaternion.</li>
+        </ul>
+        <p><strong>Note:</strong> The provided quaternion inverse implementations (<code>1.0 / q</code>) are incorrect for general quaternions. The inverse of a quaternion <code>q</code> is typically <code>conjugate(q) / norm(q)^2</code>. For unit quaternions, the inverse is simply the conjugate.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

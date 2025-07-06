@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>prepare.odin (in engine/objects)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>prepare.odin</code> (in <code>engine/objects</code>)</h1>
+        <p>This file handles the loading, management, and basic querying of 3D models within the engine.</p>
+        <h2>Global Variables</h2>
+        <ul>
+            <li><code>modelGroups</code>: A map that stores <code>SceneData</code> structs, keyed by the model name. This holds the parsed data for each loaded 3D model.</li>
+            <li><code>modelExists</code>: A map that tracks whether a model has been loaded, keyed by its name.</li>
+            <li><code>allLoaded</code>: A boolean flag indicating whether all models have been loaded.</li>
+        </ul>
+        <h2><code>GetModel</code> procedure</h2>
+        <p>Retrieves the <code>SceneData</code> for a given model name. Returns the <code>SceneData</code> and a boolean indicating if the model was found.</p>
+        <h2><code>ModelExists</code> procedure</h2>
+        <p>Checks if a model with the given name has been loaded. Returns <code>true</code> if it exists, <code>false</code> otherwise.</p>
+        <h2><code>LoadModels</code> procedure</h2>
+        <p>This is the main procedure for loading 3D models. It opens the specified directory (defaults to <code>./assets/models</code>), reads all files within it, and calls <code>ProcessModelFile</code> for each file. It only processes files with <code>.gltf</code> or <code>.glb</code> extensions.</p>
+        <h2><code>ProcessModelFile</code> procedure</h2>
+        <p>This procedure processes a single model file. It checks the file extension, loads the model data using <code>Load_fromFile</code> (presumably from <code>read.odin</code>), and stores the parsed <code>SceneData</code> in the <code>modelGroups</code> map. It also updates the <code>modelExists</code> map.</p>
+        <h2><code>PrintAllModels</code> procedure</h2>
+        <p>Prints a detailed summary of all loaded models, including their scene name, object count, mesh count, and vertex/index counts for each mesh.</p>
+        <h2><code>ListModelNames</code> procedure</h2>
+        <p>Returns a slice of strings containing the names of all currently loaded models.</p>
+        <h2><code>CleanUpModels</code> procedure</h2>
+        <p>Cleans up all loaded model data. It calls <code>CleanUp</code> (presumably from <code>read.odin</code>) and then clears the <code>modelExists</code> map and sets <code>allLoaded</code> to <code>false</code>.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

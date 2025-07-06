@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sync_objects.odin (in vulkan/destroy)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>sync_objects.odin</code> (in <code>vulkan/destroy</code>)</h1>
+        <p>This file provides a procedure for destroying Vulkan synchronization objects (semaphores and fences).</p>
+        <h2><code>SyncObjects</code> procedure</h2>
+        <p>This procedure destroys all semaphores and fences created for synchronization. It iterates through the <code>semaphores</code> and <code>fences</code> slices within the <code>t.SyncObjects</code> struct and calls <code>vk.DestroySemaphore</code> and <code>vk.DestroyFence</code> respectively to destroy the underlying Vulkan objects. Finally, it deletes the slices themselves.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

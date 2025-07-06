@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>descriptors.odin (in vulkan/create)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>descriptors.odin</code> (in <code>vulkan/create</code>)</h1>
+        <p>This file provides procedures for creating and managing Vulkan descriptors, which are used to bind resources like uniform buffers and sampled images to shaders.</p>
+        <h2><code>ImageInfo</code> procedure</h2>
+        <p>This procedure populates a <code>vk.DescriptorImageInfo</code> struct, which describes an image resource for a descriptor set. It specifies the image view, sampler, and image layout.</p>
+        <h2><code>DescriptorSetLayouts</code> procedure</h2>
+        <p>This procedure creates the descriptor set layouts used by the application. It sets up layouts for:</p>
+        <ul>
+            <li><strong>Uniform Buffer Object (UBO):</strong> Used to bind uniform buffers containing global data like camera matrices.</li>
+            <li><strong>G-Buffer Samplers:</strong> Used to bind the G-Buffer images (position, albedo, normal) as sampled images in the lighting pass.</li>
+        </ul>
+        <h2><code>DescriptorPools</code> procedure</h2>
+        <p>This procedure creates the descriptor pools. Descriptor pools are used to allocate individual descriptor sets. It creates a global descriptor pool with enough capacity for uniform buffers and combined image samplers for all frames in flight.</p>
+        <h2><code>DescriptorSets</code> procedure</h2>
+        <p>This procedure allocates and updates the descriptor sets. It performs the following steps:</p>
+        <ol>
+            <li><strong>Allocation:</strong> Allocates descriptor sets for the UBO and G-Buffer samplers from the global descriptor pool.</li>
+            <li><strong>Updating:</strong> Updates the allocated descriptor sets with the actual buffer and image information. This involves creating <code>vk.WriteDescriptorSet</code> structs and calling <code>vk.UpdateDescriptorSets</code>.</li>
+        </ol>
+        <h2><code>BufferInfo</code> procedure</h2>
+        <p>This procedure populates a <code>vk.DescriptorBufferInfo</code> struct, which describes a buffer resource for a descriptor set. It specifies the buffer, its size, and an offset.</p>
+        <h2><code>DescriptorWrite</code> procedure</h2>
+        <p>This procedure populates a <code>vk.WriteDescriptorSet</code> struct, which is used to update descriptor sets. It specifies the destination descriptor set, binding, type of descriptor, and the resource information (buffer, image, or texel buffer view).</p>
+        <h2><code>DescriptorAllocateInfo</code> procedure</h2>
+        <p>This procedure populates a <code>vk.DescriptorSetAllocateInfo</code> struct, which is used to specify how descriptor sets should be allocated from a descriptor pool.</p>
+        <h2><code>DescriptorAllocate</code> procedure</h2>
+        <p>This procedure allocates descriptor sets from a descriptor pool based on the provided <code>vk.DescriptorSetAllocateInfo</code>. It returns a boolean indicating the success of the allocation.</p>
+        <h2><code>DescriptorPoolCreateInfo</code> procedure</h2>
+        <p>This procedure populates a <code>vk.DescriptorPoolCreateInfo</code> struct, which is used to specify the parameters for creating a descriptor pool.</p>
+        <h2><code>DescriptorPool</code> procedure</h2>
+        <p>This procedure creates a Vulkan descriptor pool based on the provided <code>vk.DescriptorPoolCreateInfo</code>. It returns a <code>vk.Result</code> indicating the success or failure of the operation.</p>
+        <h2><code>LayoutBinding</code> procedure group</h2>
+        <p>This procedure group provides two ways to create <code>vk.DescriptorSetLayoutBinding</code> structs, which define the individual bindings within a descriptor set layout:</p>
+        <ul>
+            <li><strong><code>LayoutBinding_1</code>:</strong> Populates a provided <code>vk.DescriptorSetLayoutBinding</code> pointer.</li>
+            <li><strong><code>LayoutBinding_2</code>:</strong> Returns a new <code>vk.DescriptorSetLayoutBinding</code> struct.</li>
+        </ul>
+        <p>Both procedures take the binding number, descriptor type, shader stage flags, and descriptor count as input.</p>
+        <h2><code>LayoutInfo</code> procedure group</h2>
+        <p>This procedure group provides two ways to create <code>vk.DescriptorSetLayoutCreateInfo</code> structs, which define the overall layout of a descriptor set:</p>
+        <ul>
+            <li><strong><code>LayoutInfo_1</code>:</strong> Returns a new <code>vk.DescriptorSetLayoutCreateInfo</code> struct from a slice of bindings.</li>
+            <li><strong><code>LayoutInfo_2</code>:</strong> Populates a provided <code>vk.DescriptorSetLayoutCreateInfo</code> pointer from a slice of bindings.</li>
+        </ul>
+        <h2><code>DescriptorSetLayout</code> procedure</h2>
+        <p>This procedure creates a Vulkan descriptor set layout based on the provided <code>vk.DescriptorSetLayoutCreateInfo</code>. It returns a boolean indicating the success of the creation.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

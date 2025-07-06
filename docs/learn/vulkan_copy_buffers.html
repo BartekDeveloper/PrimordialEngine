@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>buffers.odin (in vulkan/copy)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><code>buffers.odin</code> (in <code>vulkan/copy</code>)</h1>
+        <p>This file contains helper functions for copying data to Vulkan buffers.</p>
+        <h2><code>ToBuffer</code> procedure group</h2>
+        <p>This procedure group provides two ways to copy data to a buffer:</p>
+        <ul>
+            <li><strong><code>ToBuffer_vulkan</code>:</strong> This procedure takes a <code>vk.Buffer</code> and a <code>vk.DeviceMemory</code> object as input. It maps the memory, copies the data, and then unmaps the memory.</li>
+            <li><strong><code>ToBuffer_unified</code>:</strong> This procedure takes a <code>t.Buffer</code> struct as input. It maps the memory, copies the data, and then unmaps the memory.</li>
+        </ul>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

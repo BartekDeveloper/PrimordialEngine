@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation Index</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        #search-bar {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background-color: #333;
+            color: #eee;
+            box-sizing: border-box;
+        }
+        #documentation-list {
+            list-style: none;
+            padding: 0;
+        }
+        #documentation-list li {
+            background-color: #3a3a3a;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+        #documentation-list li:hover {
+            transform: translateY(-3px);
+            background-color: #4a4a4a;
+        }
+        #documentation-list li a {
+            color: #66bb6a;
+            text-decoration: none;
+            font-weight: bold;
+            display: block;
+        }
+        #documentation-list li a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Documentation Index</h1>
+        <input type="text" id="search-bar" placeholder="Search documentation...">
+        <ul id="documentation-list">
+            <!-- Documentation links will be inserted here by JavaScript -->
+        </ul>
+    </div>
+    <script src="script.js"></script>
+    <script>
+        const documentationFiles = [
+            "main.html",
+            "engine.html",
+            "engine_types.html",
+            "vulkan.html",
+            "vulkan_destroy.html",
+            "vulkan_init.html",
+            "window.html",
+            "window_vulkan.html",
+            "vulkan_choose_format.html",
+            "vulkan_choose_memory.html",
+            "vulkan_choose_physical_device.html",
+            "vulkan_choose_swapchain.html",
+            "vulkan_copy_buffers.html",
+            "vulkan_create_additional_data.html",
+            "vulkan_create_appinfo.html",
+            "vulkan_create_buffers.html",
+            "vulkan_create_command_buffers.html",
+            "vulkan_create_command_pools.html",
+            "vulkan_create_descriptors.html",
+            "vulkan_create_framebuffers.html",
+            "vulkan_create_image.html",
+            "vulkan_create_image_view.html",
+            "vulkan_create_instance.html",
+            "vulkan_create_label.html",
+            "vulkan_create_logical_device.html",
+            "vulkan_create_physical_device_data.html",
+            "vulkan_create_pipelines.html",
+            "vulkan_create_renderpass.html",
+            "vulkan_create_resources.html",
+            "vulkan_create_samplers.html",
+            "vulkan_create_shaders.html",
+            "vulkan_create_surface.html",
+            "vulkan_create_swapchain.html",
+            "vulkan_create_sync_objects.html",
+            "vulkan_destroy_additional_data.html",
+            "vulkan_destroy_appinfo.html",
+            "vulkan_destroy_buffers.html",
+            "vulkan_destroy_command_buffers.html",
+            "vulkan_destroy_command_pools.html",
+            "vulkan_destroy_descriptors.html",
+            "vulkan_destroy_framebuffers.html",
+            "vulkan_destroy_image.html",
+            "vulkan_destroy_image_view.html",
+            "vulkan_destroy_instance.html",
+            "vulkan_destroy_logical_device.html",
+            "vulkan_destroy_memory.html",
+            "vulkan_destroy_physical_device_data.html",
+            "vulkan_destroy_pipelines.html",
+            "vulkan_destroy_renderpass.html",
+            "vulkan_destroy_resources.html",
+            "vulkan_destroy_samplers.html",
+            "vulkan_destroy_shaders.html",
+            "vulkan_destroy_surface.html",
+            "vulkan_destroy_swapchain.html",
+            "vulkan_destroy_sync_objects.html",
+            "vulkan_label_label.html",
+            "vulkan_load_shaders.html",
+            "vulkan_objects_objects.html",
+            "vulkan_types_types.html",
+            "vulkan_utils_transition.html",
+            "maths_clib.html",
+            "maths_cross.html",
+            "maths_dot.html",
+            "maths_inverse.html",
+            "maths_linalg.html",
+            "maths_math.html",
+            "maths_normalize.html",
+            "maths_types.html",
+            "shared.html",
+            "engine_objects_prepare.html",
+            "engine_objects_read.html",
+            "engine_objects_types.html",
+            "engine_utils_empty.html"
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const list = document.getElementById('documentation-list');
+            const searchBar = document.getElementById('search-bar');
+
+            function renderList(files) {
+                list.innerHTML = ''; // Clear existing list
+                files.forEach(file => {
+                    const listItem = document.createElement('li');
+                    const link = document.createElement('a');
+                    link.href = file;
+                    link.textContent = file.replace('.html', '').replace(/_/g, ' '); // Basic title from filename
+                    listItem.appendChild(link);
+                    list.appendChild(listItem);
+                });
+            }
+
+            // Initial render
+            renderList(documentationFiles);
+
+            // Search functionality
+            searchBar.addEventListener('keyup', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredFiles = documentationFiles.filter(file => {
+                    return file.toLowerCase().includes(searchTerm);
+                });
+                renderList(filteredFiles);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -15,17 +15,27 @@ layout(binding=0) uniform UBO {
     
     vec3 worldUp;
     int worldTime;
+
+    mat4 model;
 } ubo;
 
-layout(location = 0) in vec3 pos;
-layout(location = 1) in vec3 norm;
-layout(location = 2) in vec2 uv;
+layout(location = 0) in vec3 inPos;
+layout(location = 1) in vec3 inNorm;
+layout(location = 2) in vec2 inUv;
 
-layout(location = 0) out vec3 oPos;
-layout(location = 1) out vec3 oNorm;
-layout(location = 2) out vec2 oUV;
+layout(location = 0) out vec3 pos;
+layout(location = 1) out vec3 norm;
+layout(location = 2) out vec2 uv;
 
 void main() {
-    mat4 worldPos = ubo.proj * ubo.view;
-    gl_Position = worldPos * vec4(pos, 1.0);
+    mat4 modelView = ubo.view * ubo.model;
+    vec4 position  = ubo.proj * modelView * vec4(inPos, 1.0);
+    pos = position.xyz;
+    gl_Position = position;
+
+    norm = vec3(1.0, 1.0, 1.0);
+
+    float u = 0.75;
+    float v = 0.5;
+    uv = vec2(u, v);
 }

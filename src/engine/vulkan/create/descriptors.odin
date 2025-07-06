@@ -13,6 +13,20 @@ import t "../types"
 import win "../../window"
 import s "../../../shared"
 
+ImageInfo :: proc(
+    imageInfo: ^vk.DescriptorImageInfo = nil,
+    imageView: ^vk.ImageView           = nil,
+    sampler: ^vk.Sampler               = nil,
+    imageLayout: vk.ImageLayout        = .SHADER_READ_ONLY_OPTIMAL,
+) -> () {
+    imageInfo^ = {
+        imageLayout = imageLayout,
+        imageView   = imageView^,
+        sampler     = sampler^,
+    }
+    return
+}
+
 DescriptorSetLayouts :: proc(
     data: ^t.VulkanData
 ) -> () {
@@ -38,23 +52,68 @@ DescriptorSetLayouts :: proc(
 
         descriptor.layoutInfo = LayoutInfo_1(descriptor.bindings)
 
-        good = DescriptorSetLayout( 
+        good = DescriptorSetLayout(
             data,
-        &descriptor.layoutInfo,
+            &descriptor.layoutInfo,
             &descriptor.setLayout
         )
         if !good {
-            panic("Failed to create Descriptor Set Layout")
+            panic("Failed to create UBO Descriptor Set Layout")
         }
         assert(descriptor.setLayout != 0x0, "UBO descriptor set layout is nil!")
-        
+
         descriptor.setsLayouts = make([]vk.DescriptorSetLayout, MAX_FRAMES_IN_FLIGHT)
         for &l in descriptor.setsLayouts do l = descriptor.setLayout
-        
-        assert(descriptor.sets           != nil, "UBO descriptor is nil!")
-        assert(descriptor.setLayout      != 0x0, "UBO descriptor set layout is nil!")
-        assert(descriptor.setsLayouts    != nil, "UBO descriptor layouts is nil!")
+
+        assert(descriptor.sets             != nil, "UBO descriptor is nil!")
+        assert(descriptor.setLayout        != 0x0, "UBO descriptor set layout is nil!")
+        assert(descriptor.setsLayouts      != nil, "UBO descriptor layouts is nil!")
         assert(descriptor.setsLayouts[0] != 0x0, "UBO descriptor layout is nil!")
+    }
+
+    log.debug("\t G-Buffer Samplers")
+    {
+        descriptors["gBuffers"] = {}
+        descriptor := &descriptors["gBuffers"]
+        descriptor.poolName = "global"
+        descriptor.sets = make([]vk.DescriptorSet, MAX_FRAMES_IN_FLIGHT)
+
+        descriptor.bindings = make([]vk.DescriptorSetLayoutBinding, 3)
+        descriptor.bindings[0] = LayoutBinding_2(
+            0,
+            .COMBINED_IMAGE_SAMPLER,
+            { .FRAGMENT }
+        )
+        descriptor.bindings[1] = LayoutBinding_2(
+            1,
+            .COMBINED_IMAGE_SAMPLER,
+            { .FRAGMENT }
+        )
+        descriptor.bindings[2] = LayoutBinding_2(
+            2,
+            .COMBINED_IMAGE_SAMPLER,
+            { .FRAGMENT }
+        )
+
+        descriptor.layoutInfo = LayoutInfo_1(descriptor.bindings)
+
+        good = DescriptorSetLayout(
+            data,
+            &descriptor.layoutInfo,
+            &descriptor.setLayout
+        )
+        if !good {
+            panic("Failed to create G-Buffer Sampler Descriptor Set Layout")
+        }
+        assert(descriptor.setLayout != 0x0, "G-Buffer sampler descriptor set layout is nil!")
+
+        descriptor.setsLayouts = make([]vk.DescriptorSetLayout, MAX_FRAMES_IN_FLIGHT)
+        for &l in descriptor.setsLayouts do l = descriptor.setLayout
+
+        assert(descriptor.sets             != nil, "G-Buffer samplers descriptor sets are nil!")
+        assert(descriptor.setLayout        != 0x0, "G-Buffer samplers descriptor set layout is nil!")
+        assert(descriptor.setsLayouts      != nil, "G-Buffer samplers descriptor layouts is nil!")
+        assert(descriptor.setsLayouts[0] != 0x0, "G-Buffer samplers descriptor layout is nil!")
     }
 
     return
@@ -72,7 +131,11 @@ DescriptorPools :: proc(data: ^t.VulkanData) -> () {
             {
                 type            = .UNIFORM_BUFFER,
                 descriptorCount = MAX_FRAMES_IN_FLIGHT,
-            }
+            },
+            {
+                type            = .COMBINED_IMAGE_SAMPLER,
+                descriptorCount = 3 * MAX_FRAMES_IN_FLIGHT,
+            },
         }
         globalPool.poolCount = u32(len(globalPool.pools))
         assert(len(globalPool.pools) != 0, "Descriptor pools are empty!")
@@ -81,7 +144,8 @@ DescriptorPools :: proc(data: ^t.VulkanData) -> () {
             data,
             &globalPool,
             raw_data(globalPool.pools),
-            globalPool.poolCount
+            globalPool.poolCount,
+            maxSets = MAX_FRAMES_IN_FLIGHT + MAX_FRAMES_IN_FLIGHT
         )
 
         res := DescriptorPool(data, &globalPool)
@@ -97,24 +161,23 @@ DescriptorPools :: proc(data: ^t.VulkanData) -> () {
 }
 
 
-
 DescriptorSets :: proc(data: ^t.VulkanData) -> () {
     using data
     log.debug("Creating Descriptor Sets")
     MAX_FRAMES_IN_FLIGHT := u32(renderData.MAX_FRAMES_IN_FLIGHT)
 
-    globalPool    := descriptorPools["global"]
-    uboDescriptor := descriptors["ubo"]
-    
+    globalPool      := descriptorPools["global"]
+    uboDescriptor   := descriptors["ubo"]
+
     log.debug("\t Allocation")
     {
         log.debug("\t\t UBO")
         {
             using uboDescriptor;
 
-            assert(setLayout != 0x0, "Descriptor set layout is nil!")
-            log.info(len(sets))
-            
+            assert(setLayout != 0x0, "UBO Descriptor set layout is nil!")
+            log.info(fmt.aprintf("UBO sets count before allocation: %v", len(sets)))
+
             allocInfo: vk.DescriptorSetAllocateInfo = {}
             DescriptorAllocateInfo(&allocInfo, &globalPool, raw_data(setsLayouts), u32(len(setsLayouts)))
 
@@ -124,15 +187,33 @@ DescriptorSets :: proc(data: ^t.VulkanData) -> () {
                 raw_data(uboDescriptor.sets)
             )
             if !good {
-                panic("Failed to allocate descriptor sets")
+                panic("Failed to allocate UBO descriptor sets")
             }
-            log.info(len(sets))
+            log.info(fmt.aprintf("UBO sets count after allocation: %v", len(sets)))
+        }
 
+        log.debug("\t\t G-Buffer Samplers")
+        {
+            gBufferDescriptor := &descriptors["gBuffers"]
+            using gBufferDescriptor;
 
-            descriptors["ubo"] = uboDescriptor
+            assert(setLayout != 0x0, "G-Buffer Descriptor set layout is nil!")
+            log.info(fmt.aprintf("G-Buffer sets count before allocation: %v", len(sets)))
+
+            allocInfo: vk.DescriptorSetAllocateInfo = {}
+            DescriptorAllocateInfo(&allocInfo, &globalPool, raw_data(setsLayouts), u32(len(setsLayouts)))
+
+            good := DescriptorAllocate(
+                data,
+                &allocInfo,
+                raw_data(gBufferDescriptor.sets)
+            )
+            if !good {
+                panic("Failed to allocate G-Buffer descriptor set")
+            }
+            log.info(fmt.aprintf("G-Buffer sets count after allocation: %v", len(sets)))
         }
     }
-
 
     log.debug("\t Updating")
     {
@@ -140,67 +221,129 @@ DescriptorSets :: proc(data: ^t.VulkanData) -> () {
         uboDescriptor := &descriptors["ubo"]
         uboBuffers    := (&uniformBuffers["ubo"]).this
 
-        uboDescriptor.writes = make([]vk.WriteDescriptorSet, MAX_FRAMES_IN_FLIGHT)
-        {
-            using uboDescriptor;
+        for _, i in uboBuffers {
+            log.assert(uboBuffers[i] != {}, "UBO Buffer is nil")
+            us := &uboDescriptor.sets[i]
 
-            for _, i in uboBuffers {
-                log.assert(uboBuffers[i] != {}, "UBO Buffer is nil")
-                us := &uboDescriptor.sets[i]
+            bufferInfo: vk.DescriptorBufferInfo = {}
+            BufferInfo(
+                &bufferInfo,
+                uboBuffers[i],
+                size_of(s.UBO)
+            )
 
-                bufferInfo: vk.DescriptorBufferInfo = {}
-                BufferInfo(
-                    &bufferInfo,
-                    uboBuffers[i],
-                    size_of(s.UBO)
-                )
-
-                DescriptorWrite(
-                    &uboDescriptor.writes[i],
-                    us,
-                    .UNIFORM_BUFFER,
-                    bufferInfo = &bufferInfo
-                )
-            }
-            
+            writeUbo_temp: vk.WriteDescriptorSet = {}
+            DescriptorWrite(
+                &writeUbo_temp,
+                us,
+                .UNIFORM_BUFFER,
+                bufferInfo = &bufferInfo,
+                binding = 0,
+            )
             vk.UpdateDescriptorSets(
                 logical.device,
-                u32(len(uboDescriptor.writes)),
-                raw_data(uboDescriptor.writes),
+                1,
+                &writeUbo_temp,
+                0,
+                nil
+            )
+        }
+
+        log.debug("\t\t G-Buffer Samplers")
+        gBufferDescriptor := &descriptors["gBuffers"]
+        gBufferSampler    := &samplers["gBuffers"]
+        
+        positionGBuffer   := gBuffers["geometry.position"]
+        albedoGBuffer     := gBuffers["geometry.albedo"]
+        normalGBuffer     := gBuffers["geometry.normal"]
+
+        for i: int = 0; i < renderData.MAX_FRAMES_IN_FLIGHT; i += 1 {
+            ds := &gBufferDescriptor.sets[i]
+
+            writesForCurrentSet: []vk.WriteDescriptorSet = make([]vk.WriteDescriptorSet, 3)
+
+            positionImageInfo: vk.DescriptorImageInfo = {}
+            ImageInfo(
+                &positionImageInfo,
+                &positionGBuffer.views[i],
+                gBufferSampler,
+                .SHADER_READ_ONLY_OPTIMAL,
+            )
+            DescriptorWrite(
+                &writesForCurrentSet[0],
+                ds,
+                .COMBINED_IMAGE_SAMPLER,
+                binding = 0,
+                imageInfo = &positionImageInfo,
+            )
+
+            albedoImageInfo: vk.DescriptorImageInfo = {}
+            ImageInfo(
+                &albedoImageInfo,
+                &albedoGBuffer.views[i],
+                gBufferSampler,
+                .SHADER_READ_ONLY_OPTIMAL,
+            )
+            DescriptorWrite(
+                &writesForCurrentSet[1],
+                ds,
+                .COMBINED_IMAGE_SAMPLER,
+                binding = 1,
+                imageInfo = &albedoImageInfo,
+            )
+
+            normalImageInfo: vk.DescriptorImageInfo = {}
+            ImageInfo(
+                &normalImageInfo,
+                &normalGBuffer.views[i],
+                gBufferSampler,
+                .SHADER_READ_ONLY_OPTIMAL,
+            )
+            DescriptorWrite(
+                &writesForCurrentSet[2],
+                ds,
+                .COMBINED_IMAGE_SAMPLER,
+                binding = 2,
+                imageInfo = &normalImageInfo,
+            )
+
+            vk.UpdateDescriptorSets(
+                logical.device,
+                u32(len(writesForCurrentSet)),
+                raw_data(writesForCurrentSet),
                 0,
                 nil
             )
         }
     }
 
-
     return
 }
 
 BufferInfo :: proc(
     bufferInfo: ^vk.DescriptorBufferInfo = nil,
-    buffer: t.Buffer                     = {},
+    buffer: t.Buffer                    = {},
     size: int                            = 0,
     offset: vk.DeviceSize                = 0,
 ) -> () {
     bufferInfo^ = {
         buffer = buffer.this,
-        range  = vk.DeviceSize(size), 
+        range  = vk.DeviceSize(size),
         offset = offset,
     }
     return
 }
 
 DescriptorWrite :: proc(
-    write: ^vk.WriteDescriptorSet        = nil,
-    set: ^vk.DescriptorSet               = nil,
-    descriptorType: vk.DescriptorType    = .UNIFORM_BUFFER,
-    binding: u32                         = 0,
-    arrayElement: u32                    = 0,
-    count: u32                           = 1,
+    write: ^vk.WriteDescriptorSet      = nil,
+    set: ^vk.DescriptorSet            = nil,
+    descriptorType: vk.DescriptorType = .UNIFORM_BUFFER,
+    binding: u32                      = 0,
+    arrayElement: u32                 = 0,
+    count: u32                        = 1,
     bufferInfo: ^vk.DescriptorBufferInfo = nil,
-    imageInfo: ^vk.DescriptorImageInfo   = nil,
-    texelBufferView: ^vk.BufferView      = nil,
+    imageInfo: ^vk.DescriptorImageInfo  = nil,
+    texelBufferView: ^vk.BufferView    = nil,
 ) -> () {
 
     write^ = {
@@ -220,25 +363,25 @@ DescriptorWrite :: proc(
 
 DescriptorAllocateInfo :: proc(
     allocInfo: ^vk.DescriptorSetAllocateInfo = nil,
-    pool: ^t.DescriptorPool                  = nil,
+    pool: ^t.DescriptorPool                 = nil,
     layouts: [^]vk.DescriptorSetLayout       = nil,
     count: u32                               = 0,
-    pNext: rawptr                            = nil
+    pNext: rawptr                           = nil
 ) -> () {
     allocInfo^ = {
-        sType              = .DESCRIPTOR_SET_ALLOCATE_INFO,
-        pNext              = pNext,
-        descriptorPool     = pool.this,
+        sType            = .DESCRIPTOR_SET_ALLOCATE_INFO,
+        pNext            = pNext,
+        descriptorPool   = pool.this,
         descriptorSetCount = count,
-        pSetLayouts        = layouts
+        pSetLayouts      = layouts
     }
     return
 }
 
 DescriptorAllocate :: proc(
-    data: ^t.VulkanData                      = nil,
+    data: ^t.VulkanData                    = nil,
     allocInfo: ^vk.DescriptorSetAllocateInfo = nil,
-    sets: [^]vk.DescriptorSet                = nil
+    sets: [^]vk.DescriptorSet              = nil
 ) -> (ok: bool = true) {
     log.debug("Allocating Descriptor Sets")
     result := vk.AllocateDescriptorSets(
@@ -247,7 +390,7 @@ DescriptorAllocate :: proc(
         sets
     )
     if result != .SUCCESS {
-        log.error("Failed to allocate descriptor sets!")
+        log.error(fmt.aprintf("Failed to allocate descriptor sets! Error: %v", result))
         ok = false
         return
     }
@@ -256,20 +399,21 @@ DescriptorAllocate :: proc(
 }
 
 DescriptorPoolCreateInfo :: proc(
-    data:  ^t.VulkanData                = nil,
-    pool:  ^t.DescriptorPool            = nil,
-    pools: [^]vk.DescriptorPoolSize     = nil,
-    count: u32                          = 0,
-    flags: vk.DescriptorPoolCreateFlags = {},
+    data:  ^t.VulkanData                  = nil,
+    pool:  ^t.DescriptorPool              = nil,
+    pools: [^]vk.DescriptorPoolSize         = nil,
+    count: u32                            = 0,
+    flags: vk.DescriptorPoolCreateFlags   = {},
     pNext: rawptr = nil,
+    maxSets: u32 = 0,
 ) -> (createInfo: vk.DescriptorPoolCreateInfo = {}) {
     createInfo = {
-        sType           = .DESCRIPTOR_POOL_CREATE_INFO,
-        pNext           = pNext,
-        flags           = flags,
-        maxSets         = count * u32(data.renderData.MAX_FRAMES_IN_FLIGHT),
-        poolSizeCount   = count,
-        pPoolSizes      = pools,
+        sType            = .DESCRIPTOR_POOL_CREATE_INFO,
+        pNext            = pNext,
+        flags            = flags,
+        maxSets          = maxSets,
+        poolSizeCount    = count,
+        pPoolSizes       = pools,
     }
 
     return
@@ -290,12 +434,12 @@ DescriptorPool :: proc(
 }
 
 LayoutBinding_1 :: proc(
-    binding: u32                                  = 0,
-    type: vk.DescriptorType                       = .UNIFORM_BUFFER,
-    stageFlags: vk.ShaderStageFlags               = { .FRAGMENT },
-    count: u32                                    = 1,
+    binding: u32                          = 0,
+    type: vk.DescriptorType               = .UNIFORM_BUFFER,
+    stageFlags: vk.ShaderStageFlags       = { .FRAGMENT },
+    count: u32                            = 1,
     layoutBinding: ^vk.DescriptorSetLayoutBinding = nil,
-    immutableSamplers: [^]vk.Sampler              = nil
+    immutableSamplers: [^]vk.Sampler     = nil
 ) -> () {
     layoutBinding^ = {
         binding            = binding,
@@ -308,11 +452,11 @@ LayoutBinding_1 :: proc(
 }
 
 LayoutBinding_2 :: proc(
-    binding: u32                                  = 0,
-    type: vk.DescriptorType                       = .UNIFORM_BUFFER,
-    stageFlags: vk.ShaderStageFlags               = { .FRAGMENT },
-    count: u32                                    = 1,
-    immutableSamplers: [^]vk.Sampler              = nil
+    binding: u32                          = 0,
+    type: vk.DescriptorType               = .UNIFORM_BUFFER,
+    stageFlags: vk.ShaderStageFlags       = { .FRAGMENT },
+    count: u32                            = 1,
+    immutableSamplers: [^]vk.Sampler     = nil
 ) -> (layoutBinding: vk.DescriptorSetLayoutBinding) {
     layoutBinding = {
         binding            = binding,
@@ -347,7 +491,7 @@ LayoutInfo_2 :: proc(
     binding:    []vk.DescriptorSetLayoutBinding = {},
     layoutInfo: ^vk.DescriptorSetLayoutCreateInfo = nil
 ) -> () {
-    
+
     layoutInfo^ = {
         sType        = .DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
         pNext        = nil,
@@ -364,7 +508,7 @@ LayoutInfo :: proc{
 }
 
 DescriptorSetLayout :: proc(
-    data: ^t.VulkanData                     = nil,
+    data: ^t.VulkanData                  = nil,
     info: ^vk.DescriptorSetLayoutCreateInfo = nil,
     setLayout: ^vk.DescriptorSetLayout      = nil
 ) -> (ok: bool = true) {
@@ -373,7 +517,7 @@ DescriptorSetLayout :: proc(
     log.debug("Creating Descriptor Set Layout")
     result := vk.CreateDescriptorSetLayout(logical.device, info, allocations, setLayout)
     if result != .SUCCESS {
-        log.error("Failed to create descriptor set layout!")
+        log.error(fmt.aprintf("Failed to create descriptor set layout! Error: %v", result))
         ok = false
         return
     }

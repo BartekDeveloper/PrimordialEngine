@@ -26,7 +26,6 @@ LogicalDevice :: proc(data: ^t.VulkanData) -> () {
         }
     }
 
-
     fmt.eprintfln("=*=*=*= Requested Device Extensions =*=*=*=")
     for &e in logical.extensions {
         fmt.eprintfln("\t%s", e) 
@@ -54,6 +53,7 @@ LogicalDevice :: proc(data: ^t.VulkanData) -> () {
     vk.GetDeviceQueue(logical.device, physical.queues.idx.present,  0, &physical.queues.present)
     vk.GetDeviceQueue(logical.device, physical.queues.idx.compute,  0, &physical.queues.compute)
     vk.GetDeviceQueue(logical.device, physical.queues.idx.transfer, 0, &physical.queues.transfer)
+
 
     return
 }

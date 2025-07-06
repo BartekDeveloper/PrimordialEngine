@@ -77,29 +77,29 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
         )
         defer CleanPipelineVertexData(&pVertexData)
 
-        pDynamicStates: [2]vk.DynamicState = {}
-        pVertexInputInfo := DefaultVertexInput(&pVertexData)
-        pInputAssemblyInfo := DefaultInputAssembly()
-        pViewportState := DefaultViewportState(1, 1)
-        pRasterizationInfo := DefaultRasterization()
-        pMultisampleState := DefaultMultisample()
-        pDepthStencil := DefaultDepthStencil(depthTestEnable = true)
+        pDynamicStates:       [2]vk.DynamicState = {}
+        pVertexInputInfo       := DefaultVertexInput(&pVertexData)
+        pInputAssemblyInfo     := DefaultInputAssembly(topology = .TRIANGLE_LIST)
+        pViewportState         := DefaultViewportState(1, 1)
+        pRasterizationInfo     := DefaultRasterization(polygonMode = .FILL)
+        pMultisampleState      := DefaultMultisample()
+        pDepthStencil          := DefaultDepthStencil(depthTestEnable = true, depthWriteEnable = true)
 
         pColorBlendAttachments := DefaultFillColorBlendAttachments(3, blendEnable = false)
-        pColorBlending := DefaultColorBlending(3, raw_data(pColorBlendAttachments))
-        pDynamicState := DefaultDynamicStates(&pDynamicStates)
+        pColorBlending         := DefaultColorBlending(3, raw_data(pColorBlendAttachments))
+        pDynamicState          := DefaultDynamicStates(&pDynamicStates)
 
         defer delete(pColorBlendAttachments)
 
         pStates: GraphicsInfoStates = {
-            vertex = &pVertexInputInfo,
-            assembly = &pInputAssemblyInfo,
-            viewport = &pViewportState,
-            raster = &pRasterizationInfo,
-            multisample = &pMultisampleState,
+            vertex       = &pVertexInputInfo,
+            assembly     = &pInputAssemblyInfo,
+            viewport     = &pViewportState,
+            raster       = &pRasterizationInfo,
+            multisample  = &pMultisampleState,
             depthStencil = &pDepthStencil,
-            colorBlend = &pColorBlending,
-            dynamics = &pDynamicState,
+            colorBlend   = &pColorBlending,
+            dynamics     = &pDynamicState,
         }
 
         pPipelineLayoutCreateInfo := DefaultPipelineLayoutCreateInfo(
@@ -148,6 +148,12 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
         if !good {
             panic("Failed to create Graphics Pipeline")
         }
+        Label_single(
+            logical.device,
+            "pipeline - geometry",
+            geometry.pipeline,
+            .PIPELINE
+        )
 
         assert(geometry.pipeline != {}, "Pipeline is nil!")
     }
@@ -162,8 +168,8 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
             { "light.vert.spv", .VERTEX   },
             { "light.frag.spv", .FRAGMENT },
         }
-        light.stages = ShaderStages(data, load.GetModule, ..light.shaders)
-        light.setLayouts = { descriptors["ubo"].setLayout }
+        light.stages     = ShaderStages(data, load.GetModule, ..light.shaders)
+        light.setLayouts = { descriptors["ubo"].setLayout, descriptors["gBuffers"].setLayout }
 
         pVertexData:          PipelineVertexData = {{}, {}}
         
@@ -173,10 +179,10 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
         pViewportState         := DefaultViewportState(1, 1)
         pRasterizationInfo     := DefaultRasterization()
         pMultisampleState      := DefaultMultisample()
-        pDepthStencil          := DefaultDepthStencil(depthTestEnable = false)
+        pDepthStencil          := DefaultDepthStencil()
         pColorBlendAttachments := DefaultFillColorBlendAttachments(1, blendEnable = false)
-        pColorBlendAttachment  := pColorBlendAttachments[0]
-        pColorBlending         := DefaultColorBlending(1, &pColorBlendAttachment)
+        pColorBlendAttachment  := &pColorBlendAttachments[0]
+        pColorBlending         := DefaultColorBlending(1, pColorBlendAttachment)
         pDynamicState          := DefaultDynamicStates(&pDynamicStates)
         
         defer delete(pColorBlendAttachments)
@@ -238,7 +244,12 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
         if !good {
             panic("Failed to create Graphics Pipeline")
         }
-        log.info("Created `light` Graphics Pipeline")
+        Label_single(
+            logical.device,
+            "pipeline - light",
+            light.pipeline,
+            .PIPELINE
+        )
 
         assert(light.pipeline != {}, "Pipeline is nil!")
     }
@@ -266,7 +277,7 @@ DefaultVertexInput :: proc(
 }
 
 DefaultInputAssembly :: proc(
-    topology: vk.PrimitiveTopology                  = .TRIANGLE_LIST,
+    topology: vk.PrimitiveTopology                  = .TRIANGLE_STRIP,
     restartEnable: b32                              = false,
     flags: vk.PipelineInputAssemblyStateCreateFlags = {}
 ) -> (inputAssembly: vk.PipelineInputAssemblyStateCreateInfo) {
@@ -303,7 +314,7 @@ DefaultViewportState :: proc(
 DefaultRasterization :: proc(
     cullMode: vk.CullModeFlags                      = nil,
     polygonMode: vk.PolygonMode                     = .FILL,
-    lineWidth: f32                                  = 1,
+    lineWidth: f32                                  = 1.0,
     frontFace: vk.FrontFace                         = .COUNTER_CLOCKWISE,
     rasterizerDiscardEnable: b8                     = false,
     depthBiasEnable: b8                             = false,

@@ -13,22 +13,6 @@ import "../choose"
 import t "../types"
 import win "../../window"
 
-/*
-    data: ^t.VulkanData             = nil,
-    imageView: ^vk.ImageView        = nil,
-    image: vk.Image                 = 0,
-    format: vk.Format               = vk.Format.R8G8B8A8_SINT,
-    aspectMask: vk.ImageAspectFlags = { .COLOR },
-    mipLevels:  u8                  = 1,
-    arrayLayers: u16                = 1,
-    tiling: vk.ImageTiling          = .OPTIMAL,
-    baseMipLevel: u8                = 0,
-    baseArrayLayer: u8              = 0,
-    components: vk.ComponentMapping = { .R, .G, .B, .A },
-    viewType: vk.ImageViewType      = .D2,
-    flags: vk.ImageViewCreateFlags  = {},
-*/
-
 @(require_results)
 Image_return :: proc(
     data: ^t.VulkanData                      = nil,

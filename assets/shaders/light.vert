@@ -30,5 +30,6 @@ vec2 positions[6] = vec2[](
 );
 
 void main() {
-    gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);
+    int vi = gl_VertexIndex;
+    gl_Position = vec4(positions[vi], 0.0, 1.0);
 }

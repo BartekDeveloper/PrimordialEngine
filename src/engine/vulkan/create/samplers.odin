@@ -18,5 +18,38 @@ Samplers :: proc(data: ^t.VulkanData) -> () {
 
     good: bool = true
 
+    log.debug("Creating G-Buffer Sampler")
+    {
+        samplerInfo: vk.SamplerCreateInfo = {
+            sType                   = .SAMPLER_CREATE_INFO,
+            magFilter               = .LINEAR,
+            minFilter               = .LINEAR,
+            addressModeU            = .CLAMP_TO_EDGE,
+            addressModeV            = .CLAMP_TO_EDGE,
+            addressModeW            = .CLAMP_TO_EDGE,
+            anisotropyEnable        = false,
+            maxAnisotropy           = 1.0,
+            borderColor             = .INT_OPAQUE_BLACK,
+            unnormalizedCoordinates = false,
+            compareEnable           = false,
+            compareOp               = .ALWAYS,
+            mipmapMode              = .LINEAR,
+            mipLodBias              = 0.0,
+            minLod                  = 0.0,
+            maxLod                  = 0.0,
+        }
+
+        samplers["gBuffers"] = {}
+        gBufferSampler := &samplers["gBuffers"]
+        res := vk.CreateSampler(
+            logical.device,
+            &samplerInfo,
+            allocations,
+            gBufferSampler
+        )
+        if res != .SUCCESS {
+            panic(fmt.aprintf("Failed to create G-Buffer sampler! Error: %v", res))
+        }
+    }
     return
 }

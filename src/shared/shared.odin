@@ -29,6 +29,9 @@ UniformBufferObject :: #type struct {
     // World
     worldUp:   emath.Vec3,
     worldTime: int,
+    
+    // Temporary
+    model: emath.Mat4,
 }
 UBO :: #type UniformBufferObject
 

@@ -86,6 +86,13 @@ SwapchainImages :: proc(data: ^t.VulkanData) -> () {
     if len(swapchain.images) == 0 {
         panic("Failed to get swapchain images!")
     }
+    Label_mutliple_2(
+        logical.device,
+        "Swapchain Image",
+        ([^]u64)(raw_data(swapchain.images)),
+        u32(len(swapchain.images)),
+        .IMAGE
+    )
 
     log.debug("Creating swapchain image views")
     swapchain.views = make([dynamic]vk.ImageView, len(swapchain.images))
@@ -99,10 +106,16 @@ SwapchainImages :: proc(data: ^t.VulkanData) -> () {
             panic("Failed to create Swapchain Views!")
         }
     }
+    Label_mutliple_2(
+        logical.device,
+        "Swapchain Image View", 
+        ([^]u64)(raw_data(swapchain.views)),
+        u32(len(swapchain.views)),
+        .IMAGE_VIEW
+    )
 
     i: int = 0 
     for &view in swapchain.views {
-        // Add label here <- . ->
         log.assertf(view != {}, "Swapchain View #%d is nil!", i)
         i += 1
     }

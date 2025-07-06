@@ -30,7 +30,7 @@ Pipelines :: proc(
     delete(data.pipelines)
 
     // NOTE(me): Idk should I  move it to other file?
-    // Prob i should, but i am too lazy to do it now
+    // NOTE(me): Prob i should, but i am too lazy to do it now
     delete(data.viewports)
     delete(data.scissors)
 

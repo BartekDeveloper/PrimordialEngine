@@ -26,19 +26,21 @@ RenderPasses :: proc(data: ^t.VulkanData) -> () {
             /* Position */
             AttachmentDescription(
                 .R32G32B32A32_SFLOAT,
-                finalLayout = .SHADER_READ_ONLY_OPTIMAL
+                finalLayout = .SHADER_READ_ONLY_OPTIMAL,
+                initialLayout = .UNDEFINED
             ),
             /* Albedo */
             AttachmentDescription(
-
                 .R16G16B16A16_UNORM,
-                finalLayout = .SHADER_READ_ONLY_OPTIMAL
+                finalLayout = .SHADER_READ_ONLY_OPTIMAL,
+                initialLayout = .UNDEFINED
             ),
             /* Normal */
             AttachmentDescription(
                 .R8G8B8A8_SINT,
-                finalLayout = .SHADER_READ_ONLY_OPTIMAL
-            )
+                finalLayout = .SHADER_READ_ONLY_OPTIMAL,
+                initialLayout = .UNDEFINED
+            ),
         }
 
         geometryPass.color.references = []vk.AttachmentReference{
@@ -76,24 +78,6 @@ RenderPasses :: proc(data: ^t.VulkanData) -> () {
             )
         }
 
-        log.debug("\t\t Dependencies")
-        geometryPass.dependencies = []vk.SubpassDependency{
-            SubpassDependency(
-                { .BOTTOM_OF_PIPE },
-                { .COLOR_ATTACHMENT_OUTPUT },
-                { .MEMORY_READ },
-                { .COLOR_ATTACHMENT_READ, .COLOR_ATTACHMENT_WRITE },
-                { .BY_REGION },
-            ),
-            SubpassDependency(
-                { .COLOR_ATTACHMENT_OUTPUT },
-                { .FRAGMENT_SHADER },
-                { .COLOR_ATTACHMENT_WRITE },
-                { .SHADER_READ },
-                { .BY_REGION }
-            )
-        }
-
         log.debug("\t\t Attachments")
         geometryPass.attachments = []vk.AttachmentDescription{
             geometryPass.color.attachments[0], // Position
@@ -109,17 +93,27 @@ RenderPasses :: proc(data: ^t.VulkanData) -> () {
             pAttachments    = raw_data(geometryPass.attachments),
             subpassCount    = u32(len(geometryPass.subpasses)),
             pSubpasses      = raw_data(geometryPass.subpasses),
-            dependencyCount = u32(len(geometryPass.dependencies)),
-            pDependencies   = raw_data(geometryPass.dependencies),
+            dependencyCount = 0,
+            pDependencies   = nil,
         }
 
         log.debug("\t\t Create `Geometry` Render Pass")
-        good := RenderPass(data, &geometryPass.createInfo, &geometryPass.renderPass)
+        good := RenderPass(
+            data,
+            &geometryPass.createInfo,
+            &geometryPass.renderPass
+        )
         if !good {
             panic("Failed to create Render Pass!")
         }
-
         assert(geometryPass.renderPass != {}, "Render Pass is nil!")
+
+        Label_single(
+            logical.device,
+            "render pass - geometry",
+            geometryPass.renderPass,
+            .RENDER_PASS
+        )
     }
 
     log.debug("\t Light Pass")
@@ -165,12 +159,14 @@ RenderPasses :: proc(data: ^t.VulkanData) -> () {
         log.debug("\t\t Dependencies")
         lightPass.dependencies = []vk.SubpassDependency{
             SubpassDependency(
-                { .COLOR_ATTACHMENT_OUTPUT },
-                { .FRAGMENT_SHADER },
-                { .COLOR_ATTACHMENT_WRITE },
-                { .SHADER_READ },
-                { .BY_REGION }
-            )
+                srcSubpass      = vk.SUBPASS_EXTERNAL,
+                dstSubpass      = 0,
+                srcStageMask    = { .COLOR_ATTACHMENT_OUTPUT },
+                dstStageMask    = { .FRAGMENT_SHADER },
+                srcAccessMask   = { .COLOR_ATTACHMENT_WRITE },
+                dstAccessMask   = { .SHADER_READ },
+                dependencyFlags = { .BY_REGION },
+            ),
         }
 
         log.debug("\t\t Attachments")
@@ -191,12 +187,22 @@ RenderPasses :: proc(data: ^t.VulkanData) -> () {
         }
 
         log.debug("\t\t Creating Render Pass")
-        good := RenderPass(data, &lightPass.createInfo, &lightPass.renderPass)
+        good := RenderPass(
+            data,
+            &lightPass.createInfo,
+            &lightPass.renderPass
+        )
         if !good {
             panic("Failed to create Render Pass!")
         }
-
         assert(lightPass.renderPass != {}, "Render Pass is nil!")
+
+        Label_single(
+            logical.device,
+            "render pass - light",
+            lightPass.renderPass,
+            .RENDER_PASS
+        )
     }
 
     return
@@ -246,7 +252,7 @@ SubpassDependency :: proc(
     srcAccessMask: vk.AccessFlags       = {},
     dstAccessMask: vk.AccessFlags       = {},
     dependencyFlags: vk.DependencyFlags = {},
-    srcSubpass: u32                     = 0xFFFFFFFF,
+    srcSubpass: u32                     = vk.SUBPASS_EXTERNAL,
     dstSubpass: u32                     = 0,
 ) -> (dependency: vk.SubpassDependency) {
     return {

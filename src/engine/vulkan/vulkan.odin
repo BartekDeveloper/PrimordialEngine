@@ -1,5 +1,7 @@
 package vulkan_renderer
 
+import "core:math/linalg"
+import "core:math"
 import "core:log"
 import "core:c"
 
@@ -11,6 +13,7 @@ import vk "vendor:vulkan"
 
 import "destroy"
 import "load"
+import "utils"
 import t "types"
 import o "objects"
 import "../window"
@@ -74,16 +77,32 @@ Render :: proc(
             }
         */
 
-        proj := Perspective(45.0, 1.0, 0.1, 128.0)
-        view := LookAt({0, 0, 5}, {0, 0, 0}, {0, 1, 0})
-        
-        invProj := Inverse(proj)
-        invView := Inverse(view)
-
-        WORLD_UP :: emath.Vec3{ 0, 1, 0 }
+        // proj := Perspective(45.0, 1.0, 0.1, 128.0)
+        // view := LookAt({0, 0, 5}, {0, 0, 0}, {0, 1, 0})
         
         CameraPos := Vec3{ 0, 0, 0 }
         CameraUp  := Vec3{ 0, 1, 0 }
+
+        aspect: f32 = (f32(swapchain.extent.width) / f32(swapchain.extent.height))
+
+        proj := linalg.matrix4_infinite_perspective_f32(
+            60.0 * (math.PI / 180.0),
+            aspect,
+            5
+        )
+        view := linalg.matrix4_look_at_f32(
+            { 0, 0, 5 },
+            CameraPos,
+            CameraUp
+        ) 
+
+        // invProj := Inverse(proj)
+        // invView := Inverse(view)
+
+        invProj := linalg.inverse(proj)
+        invView := linalg.inverse(view)
+
+        WORLD_UP :: emath.Vec3{ 0, 1, 0 }
         
         winWidth  := f32(swapchain.extent.width)
         winHeight := f32(swapchain.extent.height)
@@ -104,6 +123,13 @@ Render :: proc(
             
             worldUp   = WORLD_UP,
             worldTime = worldTime,
+
+            model = {
+                0.5, 0.0, 0.0, 0.0,
+                0.0, 0.5, 0.0, 0.0,
+                0.0, 0.0, 0.5, 0.0,
+                0.0, 0.0, 0.0, 1.0,
+            }
         }
         worldTime += 1
         if worldTime > int(~u16(0)-1) { 
@@ -131,9 +157,17 @@ Render :: proc(
         panic("Failed to begin command buffer!")
     }
 
-    uboDescriptor := descriptors["ubo"]
-    uboCurrentSet := uboDescriptor.sets[currentFrame]
-    assert(uboCurrentSet != {}, "UBO set is nil!")
+    positionGBuffer    := &gBuffers["geometry.position"]
+    albedoGBuffer      := &gBuffers["geometry.albedo"]
+    normalGBuffer      := &gBuffers["geometry.normal"]
+
+    uboDescriptor      := descriptors["ubo"]
+    gBuffersDescriptor := descriptors["gBuffers"]
+
+    uboCurrentSet      := uboDescriptor.sets[currentFrame]
+    gBuffersCurrentSet := gBuffersDescriptor.sets[currentFrame]
+    assert(uboCurrentSet      != {}, "UBO set is nil!")
+    assert(gBuffersCurrentSet != {}, "G-Buffers set is nil!")
 
     lightPass := passes["light"]
     geometryPass   := passes["geometry"]
@@ -220,12 +254,13 @@ Render :: proc(
         
         vk.CmdBindPipeline(gcbc^, .GRAPHICS, pipelines["light"].pipeline)
         
+        lightDescriptors: []vk.DescriptorSet = { uboCurrentSet, gBuffersCurrentSet }
         vk.CmdBindDescriptorSets(
             gcbc^,
             .GRAPHICS,
             pipelines["light"].layout,
-            0, 1,
-            &uboCurrentSet,
+            0, u32(len(lightDescriptors)),
+            raw_data(lightDescriptors),
             0, nil
         )
 

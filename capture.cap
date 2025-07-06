@@ -1,13 +1,13 @@
 {
     "rdocCaptureSettings": 1,
     "settings": {
-        "autoStart": false,
+        "autoStart": true,
         "commandLine": "",
         "environment": [
         ],
         "executable": "/home/zota/projects/multi/vk_new/vk_new",
         "inject": false,
-        "numQueuedFrames": 1,
+        "numQueuedFrames": 2,
         "options": {
             "allowFullscreen": true,
             "allowVSync": true,

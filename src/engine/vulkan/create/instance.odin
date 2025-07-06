@@ -22,7 +22,7 @@ VulkanDebugCallback :: proc "system" (
 	pCallbackData: ^vk.DebugUtilsMessengerCallbackDataEXT,
 	pUserData: rawptr,
 ) -> b32 {
-	context = rn.default_context()
+	context = ctx
 
     switch(messageSeverity) {
         case { .INFO }:
@@ -49,6 +49,7 @@ VulkanDebugCallback :: proc "system" (
 Instance :: proc(data: ^t.VulkanData) {
 	using data
 	loc := #location()
+    ctx = context
 
 	log.infof("\t%s", loc)
 

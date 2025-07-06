@@ -47,13 +47,18 @@ Resources :: proc(data: ^t.VulkanData) -> () {
         .R32G32B32A32_SFLOAT,
         screen.width, screen.height,
         .OPTIMAL,
-        { .COLOR_ATTACHMENT, .INPUT_ATTACHMENT },
+        { .COLOR_ATTACHMENT, .INPUT_ATTACHMENT, .SAMPLED },
         { .DEVICE_LOCAL },
         { .COLOR }
     )
     if !good {
         panic("Failed to create Position Buffer!")
     }
+    Label(
+        logical.device,
+        "Geometry Position Buffer",
+        positionBuffer
+    )
 
     log.debug("\t\t Albedo Buffer")
     good = GBuffer(
@@ -62,13 +67,18 @@ Resources :: proc(data: ^t.VulkanData) -> () {
         .R16G16B16A16_UNORM,
         screen.width, screen.height,
         .OPTIMAL,
-        { .COLOR_ATTACHMENT, .INPUT_ATTACHMENT },
+        { .COLOR_ATTACHMENT, .INPUT_ATTACHMENT, .SAMPLED },
         { .DEVICE_LOCAL },
         { .COLOR }
     )
     if !good {
         panic("Failed to create Albedo Buffer!")
     }
+    Label(
+        logical.device,
+        "Geometry Albedo Buffer",
+        albedoBuffer
+    )
 
     log.debug("\t\t Normal Buffer")
     good = GBuffer(
@@ -77,13 +87,18 @@ Resources :: proc(data: ^t.VulkanData) -> () {
         .R8G8B8A8_SINT,
         screen.width, screen.height,
         .OPTIMAL,
-        { .COLOR_ATTACHMENT, .INPUT_ATTACHMENT },
+        { .COLOR_ATTACHMENT, .INPUT_ATTACHMENT, .SAMPLED },
         { .DEVICE_LOCAL },
         { .COLOR }
     )
     if !good {
         panic("Failed to create Normal Buffer!")
     }
+    Label(
+        logical.device,
+        "Geometry Normal Buffer",
+        normalBuffer
+    )
     
     log.debug("\t\t Depth Buffer")
     good = GBuffer(
@@ -99,6 +114,11 @@ Resources :: proc(data: ^t.VulkanData) -> () {
     if !good {
         panic("Failed to create Depth Buffer!")
     }
+    Label(
+        logical.device,
+        "Geometry Depth Buffer",
+        depthBufferG
+    )
     
     log.debug("\t `Light` GBuffers")
     log.debug("\t\t Color Buffer")
@@ -115,6 +135,11 @@ Resources :: proc(data: ^t.VulkanData) -> () {
     if !good {
         panic("Failed to create Color Buffer!")
     }
+    Label(
+        logical.device,
+        "Light Color Buffer",
+        colorBuffer
+    )
 
     log.debug("\t\t Depth Buffer")
     good = GBuffer(
@@ -130,6 +155,11 @@ Resources :: proc(data: ^t.VulkanData) -> () {
     if !good {
         panic("Failed to create Depth Buffer!")
     }
+    Label(
+        logical.device,
+        "Light Depth Buffer",
+        depthBuffer
+    )
 
     return
 }

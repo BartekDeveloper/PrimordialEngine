@@ -123,16 +123,6 @@ GetInstanceExtensions :: proc() -> (ext: []cstring) {
     return
 }
 
-ProcAddr := sdl.Vulkan_GetVkGetInstanceProcAddr 
-
-VulkanCreateSurface :: proc(instance: ^vk.Instance, surface: ^vk.SurfaceKHR, data: ^WindowData = defaultWindowData, allocations: ^vk.AllocationCallbacks = nil) -> () {
-    if !sdl.Vulkan_CreateSurface(data.ptr, instance^, allocations, surface) {
-        panic("SDL3 Failed to create Vulkan Surface")
-    }
-
-    return
-}
-
 GetFrameBufferSize_return :: proc(window: ^sdl.Window = defaultWindowData.ptr) -> (width, height: u32) {
     width_int, height_int: c.int
     sdl.GetWindowSizeInPixels(window, &width_int, &height_int)

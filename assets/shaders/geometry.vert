@@ -1,3 +1,4 @@
+
 #version 450
 
 layout(binding=0) uniform UBO {
@@ -23,21 +24,19 @@ layout(location = 0) in vec3 inPos;
 layout(location = 1) in vec3 inNorm;
 layout(location = 2) in vec2 inUv;
 
-layout(location = 0) out vec3 pos;
+layout(location = 0) out vec4 pos;
 layout(location = 1) out vec3 norm;
 layout(location = 2) out vec2 uv;
 
 void main() {
-    mat4 modelView = ubo.view * ubo.model;
-    mat4 worldView = ubo.proj * modelView;
-    vec4 position  = worldView * vec4(inPos, 1.0);
+    vec4 position = ubo.proj * ubo.view * ubo.model * vec4(inPos, 1.0);
     
-    pos = position.xyz;
-    gl_Position = vec4(inPos, 1.0); 
-
-    norm = vec3(1.0, 1.0, 1.0);
-
     float u = 0.75;
     float v = 0.5;
-    uv = vec2(u, v);
+    
+    uv          = vec2(u, v);
+    norm        = vec3(1.0, 1.0, 1.0);
+    pos         = position;
+    gl_Position = position;
+    // gl_Position = vec4(inPos, 1.0); 
 }

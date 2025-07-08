@@ -20,7 +20,7 @@ Transition :: proc(
     srcAccessMask: vk.AccessFlags   = { .COLOR_ATTACHMENT_WRITE },
     dstAccessMask: vk.AccessFlags   = { .SHADER_READ },
     srcLayout: vk.ImageLayout       = .COLOR_ATTACHMENT_OPTIMAL,
-    dstLayout: vk.ImageLayout       = .SHADER_READ_ONLY_OPTIMAL,
+    dstLayout: vk.ImageLayout       = .GENERAL,
     srcQueueFamilyIndex: u32        = 0,
     dstQueueFamilyIndex: u32        = 0,
     aspectMask: vk.ImageAspectFlags = { .COLOR },
@@ -74,7 +74,7 @@ TransitionGBuffers :: proc(data: ^t.VulkanData) {
             {},
             { .SHADER_READ },
             .UNDEFINED,
-            .SHADER_READ_ONLY_OPTIMAL,
+            .GENERAL,
             aspectMask = { .COLOR },
         )
         Transition(
@@ -86,7 +86,7 @@ TransitionGBuffers :: proc(data: ^t.VulkanData) {
             {},
             { .SHADER_READ },
             .UNDEFINED,
-            .SHADER_READ_ONLY_OPTIMAL,
+            .GENERAL,
             aspectMask = { .COLOR },
         )
         Transition(
@@ -98,7 +98,7 @@ TransitionGBuffers :: proc(data: ^t.VulkanData) {
             {},
             { .SHADER_READ },
             .UNDEFINED,
-            .SHADER_READ_ONLY_OPTIMAL,
+            .GENERAL,
             aspectMask = { .COLOR },
         )
     }

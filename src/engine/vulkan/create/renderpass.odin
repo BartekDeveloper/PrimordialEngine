@@ -26,41 +26,40 @@ RenderPasses :: proc(data: ^t.VulkanData) -> () {
             // Position
             AttachmentDescription(
                 .R32G32B32A32_SFLOAT,
-                finalLayout = .SHADER_READ_ONLY_OPTIMAL,
+                finalLayout = .GENERAL,
                 initialLayout = .UNDEFINED,
             ),
             // Albedo
             AttachmentDescription(
                 .R16G16B16A16_UNORM,
-                finalLayout = .SHADER_READ_ONLY_OPTIMAL,
+                finalLayout = .GENERAL,
                 initialLayout = .UNDEFINED,
             ),
             // Normal
             AttachmentDescription(
                 .R8G8B8A8_SINT,
-                finalLayout = .SHADER_READ_ONLY_OPTIMAL,
+                finalLayout = .GENERAL,
                 initialLayout = .UNDEFINED,
             ),
             // Swapchain Color
             AttachmentDescription(
                 swapchain.formats.surface.format,
                 finalLayout = .PRESENT_SRC_KHR,
-                initialLayout = .UNDEFINED,
-                loadOp = .CLEAR,
+                initialLayout = .UNDEFINED
             ),
         };
 
         combinedPass.color.references = []vk.AttachmentReference{
-            t.vkar{ attachment = 0, layout = .GENERAL },
-            t.vkar{ attachment = 1, layout = .GENERAL },
-            t.vkar{ attachment = 2, layout = .GENERAL },
+            t.vkar{ attachment = 0, layout = .COLOR_ATTACHMENT_OPTIMAL },
+            t.vkar{ attachment = 1, layout = .COLOR_ATTACHMENT_OPTIMAL },
+            t.vkar{ attachment = 2, layout = .COLOR_ATTACHMENT_OPTIMAL },
             t.vkar{ attachment = 3, layout = .COLOR_ATTACHMENT_OPTIMAL },
         };
 
         log.debug("\t Depth Attachment");
         combinedPass.depth.attachment = AttachmentDescription(
             swapchain.formats.depth,
-            finalLayout = .DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+            finalLayout = .GENERAL,
             initialLayout = .UNDEFINED,
         );
 
@@ -80,6 +79,12 @@ RenderPasses :: proc(data: ^t.VulkanData) -> () {
             combinedPass.color.references[3],
         }
         
+        subpass2InputReferences: []vk.AttachmentReference = {
+            t.vkar{ attachment = 0, layout = .GENERAL },
+            t.vkar{ attachment = 1, layout = .GENERAL },
+            t.vkar{ attachment = 2, layout = .GENERAL },
+        };
+
         log.debug("\t Subpasses");
         combinedPass.subpasses = []vk.SubpassDescription{
             // Subpass 0: G-buffer rendering (first 3 color attachments + depth)
@@ -97,40 +102,22 @@ RenderPasses :: proc(data: ^t.VulkanData) -> () {
                 nil,
                 nil,
                 .GRAPHICS,
+                3,
+                raw_data(subpass2InputReferences),
             ),
         };
 
         log.debug("\t Dependencies");
         combinedPass.dependencies = []vk.SubpassDependency{
-            // External -> Subpass 0
-            SubpassDependency(
-                srcSubpass      = vk.SUBPASS_EXTERNAL,
-                dstSubpass      = 0,
-                srcStageMask    = { .BOTTOM_OF_PIPE },
-                dstStageMask    = { .COLOR_ATTACHMENT_OUTPUT },
-                srcAccessMask   = { .MEMORY_READ },
-                dstAccessMask   = { .COLOR_ATTACHMENT_WRITE },
-                dependencyFlags = { .BY_REGION },
-            ),
             // Subpass 0 -> Subpass 1
             SubpassDependency(
                 srcSubpass      = 0,
                 dstSubpass      = 1,
                 srcStageMask    = { .COLOR_ATTACHMENT_OUTPUT },
-                dstStageMask    = { .FRAGMENT_SHADER },
-                srcAccessMask   = { .COLOR_ATTACHMENT_WRITE },
-                dstAccessMask   = { .SHADER_READ },
-                dependencyFlags = { .BY_REGION },
-            ),
-            // Subpass 1 -> External
-            SubpassDependency(
-                srcSubpass      = 1,
-                dstSubpass      = vk.SUBPASS_EXTERNAL,
-                srcStageMask    = { .COLOR_ATTACHMENT_OUTPUT },
-                dstStageMask    = { .BOTTOM_OF_PIPE },
-                srcAccessMask   = { .COLOR_ATTACHMENT_WRITE },
-                dstAccessMask   = { .MEMORY_READ },
-                dependencyFlags = { .BY_REGION },
+                dstStageMask    = { .FRAGMENT_SHADER         },
+                srcAccessMask   = { .COLOR_ATTACHMENT_WRITE  },
+                dstAccessMask   = { .SHADER_READ             },
+                dependencyFlags = { .BY_REGION               },
             ),
         };
 
@@ -177,7 +164,7 @@ AttachmentDescription :: proc(
     format: vk.Format                    = .R8G8B8A8_UNORM,
     loadOp: vk.AttachmentLoadOp          = .CLEAR,
     storeOp: vk.AttachmentStoreOp        = .STORE,
-    finalLayout: vk.ImageLayout          = .SHADER_READ_ONLY_OPTIMAL,
+    finalLayout: vk.ImageLayout          = .GENERAL,
     stencilLoadOp: vk.AttachmentLoadOp   = .DONT_CARE,
     stencilStoreOp: vk.AttachmentStoreOp = .DONT_CARE,
     initialLayout: vk.ImageLayout        = .UNDEFINED,
@@ -196,18 +183,22 @@ AttachmentDescription :: proc(
 }
 
 Subpass :: proc(
-    #any_int count: u32,
+    #any_int color_count: u32,
     colorAttachments: [^]vk.AttachmentReference = nil,
     depthAttachment:  ^vk.AttachmentReference   = nil,
     resolve:          [^]vk.AttachmentReference = nil,
     point:            vk.PipelineBindPoint      = .GRAPHICS,
+    #any_int input_count: u32 = 0,
+    inputAttachments: [^]vk.AttachmentReference = nil,
 ) -> (subpass: vk.SubpassDescription) {
     return {
         pipelineBindPoint       = point,
-        colorAttachmentCount    = count,
-        pColorAttachments       = nil if (count == 0) else colorAttachments,
-        pResolveAttachments     = nil if (count == 0) else resolve,
+        colorAttachmentCount    = color_count,
+        pColorAttachments       = nil if (color_count == 0) else colorAttachments,
+        pResolveAttachments     = nil if (color_count == 0) else resolve,
         pDepthStencilAttachment = depthAttachment,
+        inputAttachmentCount    = input_count,
+        pInputAttachments       = nil if (input_count == 0) else inputAttachments,
     }
 }
 

@@ -83,8 +83,7 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
         pViewportState         := DefaultViewportState(1, 1)
         pRasterizationInfo     := DefaultRasterization(polygonMode = .FILL)
         pMultisampleState      := DefaultMultisample()
-        pDepthStencil          := DefaultDepthStencil(depthTestEnable = true, depthWriteEnable = true)
-
+        pDepthStencil          := DefaultDepthStencil(depthTestEnable = false, depthWriteEnable = true)
         pColorBlendAttachments := DefaultFillColorBlendAttachments(3, blendEnable = false)
         pColorBlending         := DefaultColorBlending(u32(len(pColorBlendAttachments)), raw_data(pColorBlendAttachments))
         pDynamicState          := DefaultDynamicStates(&pDynamicStates)
@@ -256,7 +255,7 @@ DefaultVertexInput :: proc(
 }
 
 DefaultInputAssembly :: proc(
-    topology: vk.PrimitiveTopology                  = .TRIANGLE_STRIP,
+    topology: vk.PrimitiveTopology                  = .TRIANGLE_LIST,
     restartEnable: b32                              = false,
     flags: vk.PipelineInputAssemblyStateCreateFlags = {}
 ) -> (inputAssembly: vk.PipelineInputAssemblyStateCreateInfo) {
@@ -352,8 +351,8 @@ DefaultDepthStencil :: proc(
     depthBoundsTestEnable: b8                      = false,
     stencilTestEnable: b8                          = false,
     flags: vk.PipelineDepthStencilStateCreateFlags = {},
-    minDepthBounds: f32                            = 0,
-    maxDepthBounds: f32                            = 1,
+    minDepthBounds: f32                            = 0.0,
+    maxDepthBounds: f32                            = 1.0,
     front: vk.StencilOpState                       = {},
     back: vk.StencilOpState                        = {},
     pNext: rawptr                                  = nil,
@@ -378,8 +377,8 @@ DefaultDepthStencil :: proc(
 DefaultBlendAttachment :: proc(
     blendEnable: b8                        = false,
     colorWriteMask: vk.ColorComponentFlags = { .R, .G, .B, .A },
-    srcColorBlendFactor: vk.BlendFactor    = .SRC_ALPHA,
-    dstColorBlendFactor: vk.BlendFactor    = .ONE_MINUS_SRC_ALPHA,
+    srcColorBlendFactor: vk.BlendFactor    = .ONE,
+    dstColorBlendFactor: vk.BlendFactor    = .ZERO,
     colorBlendOp: vk.BlendOp               = .ADD,
     srcAlphaBlendFactor: vk.BlendFactor    = .ONE,
     dstAlphaBlendFactor: vk.BlendFactor    = .ZERO,

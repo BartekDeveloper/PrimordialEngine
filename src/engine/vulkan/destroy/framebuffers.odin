@@ -29,8 +29,8 @@ FrameBuffers :: proc(
         }
 
         delete(pass.frameBuffers)
-        if len(pass.clearValues) > 0 {
-            delete(pass.clearValues)
+        if len(pass.clearValues) > 0 && pass.clearValues != nil {
+            // delete(pass.clearValues)
         }
     }
     delete(data.passes)

@@ -40,7 +40,7 @@ LoadTestData :: proc() -> () {
 
     scene, ok   = obj.GetModel("Cube")
     object      = scene.objects["mesh_Cube_#0"]
-    mesh        = object.meshes["Cube_0"]
+    mesh        = object.meshes["Cube.001_0"]
     firstVertex = mesh.vertices[0]
 
     return
@@ -169,67 +169,73 @@ Render :: proc(
     assert(uboCurrentSet      != {}, "UBO set is nil!")
     assert(gBuffersCurrentSet != {}, "G-Buffers set is nil!")
 
-    combinedPass := passes["combined"]
-    fb           := combinedPass.frameBuffers[ii]
+    combinedPass := &passes["combined"]
+    fb           := &combinedPass.frameBuffers[ii]
+
+    posGBuffer    := &gBuffers["geometry.position"]
+    albedoGBuffer := &gBuffers["geometry.albedo"]
+    normalGBuffer := &gBuffers["geometry.normal"]
 
     combinedPass.clearValues = {
-        { color = { float32 = { 0.0, 0.0, 0.0, 1.0 }}}, // Position
-        { color = { float32 = { 0.0, 0.0, 0.0, 1.0 }}}, // Albedo
-        { color = { float32 = { 0.0, 0.0, 0.0, 1.0 }}}, // Normal
-        { color = { float32 = { 0.0, 0.0, 0.0, 1.0 }}}, // Swapchain
-        { depthStencil = { depth = 1.0, stencil = 0 }},   // Depth
+        { color        = { float32 = { 0.0, 0.0, 0.0, 1.0 }}}, // Position
+        { color        = { float32 = { 0.0, 0.0, 0.0, 1.0 }}}, // Albedo
+        { color        = { float32 = { 0.0, 0.0, 0.0, 1.0 }}}, // Normal
+        { color        = { float32 = { 0.0, 0.0, 0.0, 1.0 }}}, // Swapchain
+        { depthStencil = { depth   = 0.0,     stencil = 0  }}, // Depth
     }
     renderPassBeginInfo: vk.RenderPassBeginInfo = {
-        sType                   = .RENDER_PASS_BEGIN_INFO,
-        renderPass              = combinedPass.renderPass,
-        framebuffer             = fb,
-        renderArea = {
-            offset = {0, 0},
-            extent = swapchain.extent,
-        },
+        sType           = .RENDER_PASS_BEGIN_INFO,
+        renderPass      = combinedPass.renderPass,
+        framebuffer     = fb^,
+        renderArea      = {{0, 0}, swapchain.extent},
         clearValueCount = u32(len(combinedPass.clearValues)),
         pClearValues    = raw_data(combinedPass.clearValues),
-    }
+    };
+
     vk.CmdBeginRenderPass(
         gcbc^,
         &renderPassBeginInfo,
-        .INLINE,
-    )
+        .INLINE
+    );
     {
-        // Subpass 0: Geometry
-        vk.CmdSetViewport(gcbc^, 0, 1, &viewports["global"])
-        vk.CmdSetScissor(gcbc^, 0, 1, &scissors["global"])
-        
-        vk.CmdBindPipeline(gcbc^, .GRAPHICS, pipelines["geometry"].pipeline)
-        
+        vk.CmdSetViewport(gcbc^, 0, 1, &viewports["global"]);
+        vk.CmdSetScissor(gcbc^, 0, 1, &scissors["global"]);
+
+        vk.CmdBindPipeline(gcbc^, .GRAPHICS, pipelines["geometry"].pipeline);
         vk.CmdBindDescriptorSets(
             gcbc^,
             .GRAPHICS,
             pipelines["geometry"].layout,
-            0, 1,
-            &uboCurrentSet,
-            0, nil,
+            0,
+            1,
+            &uboDescriptor.sets[currentFrame],
+            0,
+            nil,
+        );
+        o.VkDrawMesh(
+            gcbc,
+            "Cube",
+            "Cube.001_0",
         )
-        o.VkDrawMesh(gcbc, "Cube", "Cube_0")
 
-        // Subpass 1: Lighting
-        vk.CmdNextSubpass(gcbc^, .INLINE)
+        vk.CmdNextSubpass(gcbc^, .INLINE);
 
-        vk.CmdBindPipeline(gcbc^, .GRAPHICS, pipelines["light"].pipeline)
-        
-        lightDescriptors: []vk.DescriptorSet = { uboCurrentSet, gBuffersCurrentSet }
+        vk.CmdBindPipeline(gcbc^, .GRAPHICS, pipelines["light"].pipeline);
+        forLightDescriptors: []vk.DescriptorSet = { uboDescriptor.sets[currentFrame], gBuffersDescriptor.sets[currentFrame] }
         vk.CmdBindDescriptorSets(
             gcbc^,
             .GRAPHICS,
             pipelines["light"].layout,
-            0, u32(len(lightDescriptors)),
-            raw_data(lightDescriptors),
-            0, nil,
-        )
+            0,
+            u32(len(forLightDescriptors)),
+            raw_data(forLightDescriptors),
+            0,
+            nil,
+        );
+        vk.CmdDraw(gcbc^, 6, 1, 0, 0);
 
-        vk.CmdDraw(gcbc^, 6, 1, 0, 0)
     }
-    vk.CmdEndRenderPass(gcbc^)
+    vk.CmdEndRenderPass(gcbc^);
 
     result = vk.EndCommandBuffer(gcbc^)
     if result != .SUCCESS {

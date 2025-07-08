@@ -20,12 +20,7 @@ camera: Camera = {
     rot = { 0.0, 0.0, 0.0 },
 }
 
-modelMatrix: em.Mat4 = {
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    0, 0, 0, 1,
-}
+modelMatrix: em.Mat4 = linalg.MATRIX4F32_IDENTITY
 
 Move :: proc(
     event:     ^sdl.Event
@@ -34,47 +29,81 @@ Move :: proc(
 
     if event.type == .KEY_DOWN {
         if event.key.scancode == .W {
-            camera.pos.z += 0.1
-        } else if event.key.scancode == .S {
-            camera.pos.z -= 0.1
-        } else if event.key.scancode == .A {
-            camera.pos.x -= 0.1
-        } else if event.key.scancode == .D {
-            camera.pos.x += 0.1
-        } else if event.key.scancode == .SPACE || event.key.scancode == .KP_SPACE {
-            camera.pos.y += 0.1
-        } else if event.key.scancode == .LSHIFT || event.key.scancode == .RSHIFT {
-            camera.pos.y -= 0.1
-        } else if event.key.scancode == .Q {
-            camera.rot.z += 0.1
+            camera.pos.z += 2.5
+        }
+        
+        if event.key.scancode == .S {
+            camera.pos.z -= 2.5
+        }
+        
+        if event.key.scancode == .A {
+            camera.pos.x -= 2.5
+        }
+        
+        if event.key.scancode == .D {
+            camera.pos.x += 2.5
+        }
+        
+        if event.key.scancode == .SPACE || event.key.scancode == .KP_SPACE {
+            camera.pos.y += 2.5
+        }
+        
+        if event.key.scancode == .LSHIFT || event.key.scancode == .RSHIFT {
+            camera.pos.y -= 2.5
+        }
+        
+        if event.key.scancode == .Q {
+            camera.rot.z = math.sin(camera.rot.z + 0.1)
             fmt.eprintfln("New Camera Rot: %v", camera.rot)
-        } else if event.key.scancode == .E {
-            camera.rot.z -= 0.1
+        }
+        
+        if event.key.scancode == .E {
+            camera.rot.z = math.sin(camera.rot.z - 0.1)
             fmt.eprintfln("New Camera Rot: %v", camera.rot)
         }
 
         if event.key.scancode == .J {
-            modelMatrix[3, 2] += 0.1
-        } else if event.key.scancode == .L {
-            modelMatrix[3, 2] -= 0.1
-        } else if event.key.scancode == .I {
-            modelMatrix[3, 1] += 0.1
-        } else if event.key.scancode == .K {
-            modelMatrix[3, 1] -= 0.1
-        } else if event.key.scancode == .U {
-            modelMatrix[3, 0] += 0.1
-        } else if event.key.scancode == .O {
-            modelMatrix[3, 0] -= 0.1
+            modelMatrix[3, 2] += 0.5
+            fmt.eprintfln("Translate model on axis Z by 0.5")
+        }
+        
+        if event.key.scancode == .L {
+            modelMatrix[3, 2] -= 0.5
+            fmt.eprintfln("Translate model on axis Z by -0.5")
+        }
+        
+        if event.key.scancode == .I {
+            modelMatrix[3, 1] += 0.5
+            fmt.eprintfln("Translate model on axis Y by 0.5")
+        }
+        
+        if event.key.scancode == .K {
+            modelMatrix[3, 1] -= 0.5
+            fmt.eprintfln("Translate model on axis Y by -0.5")
+        }
+        
+        if event.key.scancode == .U {
+            modelMatrix[3, 0] += 0.5
+            fmt.eprintfln("Translate model on axis X by 0.5")
+        }
+        
+        if event.key.scancode == .O {
+            modelMatrix[3, 0] -= 0.5
+            fmt.eprintfln("Translate model on axis X by -0.5")
         }
 
         if event.key.scancode == .N {
             modelMatrix[0, 0] += 0.5
             modelMatrix[1, 1] += 0.5
             modelMatrix[2, 2] += 0.5
-        } else if event.key.scancode == .M {
+            fmt.eprintfln("Up scale by 0.5x")
+        }
+        
+        if event.key.scancode == .M {
             modelMatrix[0, 0] -= 0.5
             modelMatrix[1, 1] -= 0.5
             modelMatrix[2, 2] -= 0.5
+            fmt.eprintfln("Down scale by 0.5x")
         }
     }
 
@@ -88,7 +117,9 @@ Move :: proc(
 
     if event.type == .MOUSE_BUTTON_DOWN {
         rotating = true
-    } else if event.type == .MOUSE_BUTTON_UP {
+    }
+    
+    if event.type == .MOUSE_BUTTON_UP {
         rotating = false
     }
 

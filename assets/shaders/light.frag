@@ -31,8 +31,9 @@ void main() {
         gl_FragCoord.y / ubo.winHeight
     };
 
-    outColor = vec4(
-        texture(position, uv).xyz,
-        1.0
-    ); 
+    vec3 posColor = texture(position, uv).xyz;
+    vec3 uvColor  = vec3(uv, 0);
+    vec3 camPosColor = (ubo.cameraPos / ubo.winHeight) * ubo.winWidth * 0.001;
+    
+    outColor = vec4(posColor * 0.7 + camPosColor * 0.05 + uvColor * 0.25, 1.0); 
 }

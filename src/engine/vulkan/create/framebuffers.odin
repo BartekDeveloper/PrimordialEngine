@@ -20,27 +20,29 @@ Framebuffers :: proc(data: ^t.VulkanData) -> () {
     screen    := swapchain.extent
     screen3D  := vk.Extent3D{ width = screen.width, height = screen.height, depth = 1 }
     
-    geometryPass := &passes["geometry"]
+    combinedPass := &passes["combined"]
     {
-        geometryPass.frameBuffers = make([]vk.Framebuffer, swapchain.imageCount)
+        combinedPass.frameBuffers = make([]vk.Framebuffer, swapchain.imageCount)
 
-        for &fb, i in geometryPass.frameBuffers {
+        for &fb, i in combinedPass.frameBuffers {
             log.assertf(gBuffers["geometry.position"].views[i] != {}, "Geometry Position Buffer View is nil at index %d", i)
             log.assertf(gBuffers["geometry.albedo"].views[i]   != {}, "Geometry Albedo Buffer View is nil at index %d", i)
             log.assertf(gBuffers["geometry.normal"].views[i]   != {}, "Geometry Normal Buffer View is nil at index %d", i)
-            log.assertf(gBuffers["geometry.depth"].views[i]    != {}, "Geometry Depth Buffer View is nil at index %d", i)
+            log.assertf(swapchain.views[i]                     != {}, "Swapchain View is nil at index %d", i)
+            log.assertf(gBuffers["light.depth"].views[i]       != {}, "Geometry Depth Buffer View is nil at index %d", i)
 
             attachments: []vk.ImageView = {
                 gBuffers["geometry.position"].views[i], // Attachment 0: Position
                 gBuffers["geometry.albedo"].views[i],   // Attachment 1: Albedo
                 gBuffers["geometry.normal"].views[i],   // Attachment 2: Normal
-                gBuffers["geometry.depth"].views[i],    // Attachment 3: Depth
+                swapchain.views[i],                     // Attachment 3: Swapchain
+                gBuffers["light.depth"].views[i],       // Attachment 4: Depth
             }
 
             FrameBuffer(
                 data,
                 screen3D,
-                geometryPass^,
+                combinedPass^,
                 &attachments,
                 &fb
             )
@@ -48,36 +50,10 @@ Framebuffers :: proc(data: ^t.VulkanData) -> () {
             fmt.eprintfln("Created `geometry` Framebuffer #%d", i)
         }
 
-        fmt.eprintfln("Total created `geometry` Framebuffer count: %d", len(geometryPass.frameBuffers))
+        fmt.eprintfln("Total created `geometry` Framebuffer count: %d", len(combinedPass.frameBuffers))
     }
-
     
-    lightPass := &passes["light"]
-    {  
-        lightPass.frameBuffers = make([]vk.Framebuffer, swapchain.imageCount)
-        for &fb, i in lightPass.frameBuffers {
-            log.assertf(swapchain.views[i]           != {}, "Swapchain View #%d is nil!", i)
-            log.assertf(gBuffers["light.depth"].views[i] != {}, "Light Depth Buffer View is nil!")
-
-            attachments: []vk.ImageView = {
-                swapchain.views[i],
-                gBuffers["light.depth"].views[i],
-            }
-
-            FrameBuffer(
-                data,
-                screen3D,
-                lightPass^,
-                &attachments,
-                &fb
-            )
-            fmt.eprintfln("Created `light` Framebuffer #%d", i) 
-        }
-        
-        fmt.eprintfln("Total created `light` Framebuffer count: %d", len(lightPass.frameBuffers))  
-    }
-
-    return  
+    return
 }
 
 FrameBuffer :: proc(

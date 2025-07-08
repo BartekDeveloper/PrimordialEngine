@@ -193,7 +193,7 @@ Pipeline :: #type struct {
 	shaders:    []ShaderReference,
 	stages:     []vk.PipelineShaderStageCreateInfo,
 	setLayouts: []vk.DescriptorSetLayout,
-	states:     []any,
+	states:     GraphicsInfoStates,
 	layout:     vk.PipelineLayout,
 	cache:      vk.PipelineCache,
 	createInfo: PipelinesCreateInfos,
@@ -258,4 +258,35 @@ GetModuleProc :: #type proc(pName: string) -> (module: vk.ShaderModule)
 ShaderLang :: enum u8 {
 	GLSL,
 	SPIRV,
+}
+
+/*
+    Graphics Pipeline States
+    @input vertex
+    @input assembly
+    @input viewport
+    @input raster
+    @input multisample
+    @input depthStencil
+    @input colorBlend
+    @input dynamics
+    @input tesselation
+
+    @return self struct(GraphicsInfoStates)
+*/
+GraphicsInfoStates   :: #type struct{
+    vertex:        ^vk.PipelineVertexInputStateCreateInfo,
+    assembly:      ^vk.PipelineInputAssemblyStateCreateInfo,
+    viewport:      ^vk.PipelineViewportStateCreateInfo,
+    raster:        ^vk.PipelineRasterizationStateCreateInfo,
+    multisample:   ^vk.PipelineMultisampleStateCreateInfo,
+    depthStencil:  ^vk.PipelineDepthStencilStateCreateInfo,
+    colorBlend:    ^vk.PipelineColorBlendStateCreateInfo,
+    dynamics:      ^vk.PipelineDynamicStateCreateInfo,
+    tesselation:   ^vk.PipelineTessellationStateCreateInfo,
+}
+GraphicsPipelineData :: #type struct{
+    cache:     ^vk.PipelineCache,
+    infoCount: u32,
+    info:      [^]vk.GraphicsPipelineCreateInfo,
 }

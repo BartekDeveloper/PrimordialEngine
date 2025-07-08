@@ -7,7 +7,7 @@
         ],
         "executable": "/home/zota/projects/multi/vk_new/vk_new",
         "inject": false,
-        "numQueuedFrames": 2,
+        "numQueuedFrames": 5,
         "options": {
             "allowFullscreen": true,
             "allowVSync": true,
@@ -22,7 +22,7 @@
             "softMemoryLimit": 0,
             "verifyBufferAccess": true
         },
-        "queuedFrameCap": 20,
+        "queuedFrameCap": 1,
         "workingDir": ""
     }
 }

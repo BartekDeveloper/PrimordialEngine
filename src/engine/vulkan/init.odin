@@ -13,6 +13,7 @@ import vk "vendor:vulkan"
 
 import "load"
 import "create"
+import "utils"
 import t "types"
 import vk_obj "objects"
 import s "../../shared"
@@ -21,9 +22,9 @@ import win "../window"
 Init :: proc(rData: ^s.RenderData) {
     InitFromZero(&vkData, rData)
 
-    lightPass := vkData.passes["light"]
-    fmt.eprintfln("Framebuffers count: %d", len(lightPass.frameBuffers))
-    assert(len(lightPass.frameBuffers) > 0, "Framebuffers are empty?!")
+    combinedPass := vkData.passes["combined"]
+    fmt.eprintfln("Framebuffers count: %d", len(combinedPass.frameBuffers))
+    assert(len(combinedPass.frameBuffers) > 0, "Framebuffers are empty?!")
 
     return
 }
@@ -84,6 +85,10 @@ InitFromZero :: proc(
     vk_obj.SetDataPointer(data)
     vk_obj.CreateBuffersForAllModels()
     defer vk_obj.UnSetDataPointer()
+
+    utils.TransitionGBuffers(data)
+
+    LoadTestData()
 
     return
 }

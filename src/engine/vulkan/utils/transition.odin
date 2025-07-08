@@ -8,14 +8,8 @@ import "base:runtime"
 
 import vk "vendor:vulkan"
 
-import "../destroy"
-import "../load"
-import "../create"
 import t "../types"
-import "../../window"
-import obj "../objects"
 import s "../../../shared"
-
 
 Transition :: proc(
     data: ^t.VulkanData             = nil,
@@ -64,4 +58,49 @@ Transition :: proc(
     )
 
     return
+}
+
+TransitionGBuffers :: proc(data: ^t.VulkanData) {
+    using data
+    log.debug("Transitioning Geometry GBuffers")
+    cmd := BeginSingleTimeCommands(data)
+    for i := 0; i < int(data.swapchain.imageCount); i += 1 {
+        Transition(
+            data,
+            cmd,
+            gBuffers["geometry.position"].images[i],
+            .TOP_OF_PIPE,
+            .FRAGMENT_SHADER,
+            {},
+            { .SHADER_READ },
+            .UNDEFINED,
+            .SHADER_READ_ONLY_OPTIMAL,
+            aspectMask = { .COLOR },
+        )
+        Transition(
+            data,
+            cmd,
+            gBuffers["geometry.albedo"].images[i],
+            .TOP_OF_PIPE,
+            .FRAGMENT_SHADER,
+            {},
+            { .SHADER_READ },
+            .UNDEFINED,
+            .SHADER_READ_ONLY_OPTIMAL,
+            aspectMask = { .COLOR },
+        )
+        Transition(
+            data,
+            cmd,
+            gBuffers["geometry.normal"].images[i],
+            .TOP_OF_PIPE,
+            .FRAGMENT_SHADER,
+            {},
+            { .SHADER_READ },
+            .UNDEFINED,
+            .SHADER_READ_ONLY_OPTIMAL,
+            aspectMask = { .COLOR },
+        )
+    }
+    EndSingleTimeCommands(data, &cmd)
 }

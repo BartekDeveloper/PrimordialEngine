@@ -11,20 +11,41 @@ import "base:runtime"
 
 import vk "vendor:vulkan"
 
+import "create"
 import "destroy"
 import "load"
 import "utils"
 import t "types"
 import o "objects"
 import "../window"
+import "../input"
 import obj "../objects"
 import s "../../shared"
 import emath "../../maths"
 
 vkData: t.VulkanData = {}
 
+WORLD_UP  :: emath.Vec3{ 0.0, 0.0, 1.0 } 
+
 worldTime: int = 0 /* World  Time */
 ii:        u32 = 0 /* Image Index */
+
+scene:  obj.SceneData = {}
+object: obj.Model     = {}
+mesh:   obj.Mesh      = {}
+firstVertex: s.Vertex = {}
+
+LoadTestData :: proc() -> () {
+    ok: bool = true
+
+    scene, ok   = obj.GetModel("Cube")
+    object      = scene.objects["mesh_Cube_#0"]
+    mesh        = object.meshes["Cube_0"]
+    firstVertex = mesh.vertices[0]
+
+    return
+}
+
 Render :: proc(
     rData: ^s.RenderData = nil
 ) -> () {
@@ -53,56 +74,26 @@ Render :: proc(
     uboBuffer := &uniformBuffers["ubo"].this[currentFrame]
     {
         using emath
-        
-        /*
-            ! UniformBufferObject :: #type struct {
-                ? Important
-                * proj:      emath.Mat4,
-                * iProj:     emath.Mat4,
-                * view:      emath.Mat4,
-                * iView:     emath.Mat4,
-                * deltaTime: f32,
 
-                ? Window
-                * winWidth:  f32,
-                * winHeight: f32,
-
-                ? Camera
-                * cameraPos: emath.Vec3,
-                * cameraUp:  emath.Vec3,
-                
-                ? World
-                * worldUp:   emath.Vec3,
-                * worldTime: int,
-            }
-        */
-
-        // proj := Perspective(45.0, 1.0, 0.1, 128.0)
-        // view := LookAt({0, 0, 5}, {0, 0, 0}, {0, 1, 0})
-        
-        CameraPos := Vec3{ 0, 0, 0 }
-        CameraUp  := Vec3{ 0, 1, 0 }
+        CameraPos := input.camera.pos
+        CameraUp  := Vec3{ 0.0, 1.0, 0.0 }
 
         aspect: f32 = (f32(swapchain.extent.width) / f32(swapchain.extent.height))
 
-        proj := linalg.matrix4_infinite_perspective_f32(
+        proj := linalg.matrix4_perspective_f32(
             60.0 * (math.PI / 180.0),
             aspect,
-            5
+            0.1,
+            2048.0
         )
         view := linalg.matrix4_look_at_f32(
-            { 0, 0, 5 },
+            { 0, 0, 0 },
             CameraPos,
             CameraUp
         ) 
 
-        // invProj := Inverse(proj)
-        // invView := Inverse(view)
-
         invProj := linalg.inverse(proj)
         invView := linalg.inverse(view)
-
-        WORLD_UP :: emath.Vec3{ 0, 1, 0 }
         
         winWidth  := f32(swapchain.extent.width)
         winHeight := f32(swapchain.extent.height)
@@ -124,17 +115,30 @@ Render :: proc(
             worldUp   = WORLD_UP,
             worldTime = worldTime,
 
-            model = {
-                0.5, 0.0, 0.0, 0.0,
-                0.0, 0.5, 0.0, 0.0,
-                0.0, 0.0, 0.5, 0.0,
-                0.0, 0.0, 0.0, 1.0,
-            }
+            model     = input.modelMatrix
         }
         worldTime += 1
         if worldTime > int(~u16(0)-1) { 
             worldTime = 0
         }
+
+        /*
+        mat4 modelView = ubo.view * ubo.model;
+        mat4 worldView = ubo.proj * modelView;
+        vec4 position  = worldView * vec4(inPos, 1.0);
+        */
+
+        position: Vec4 = {}
+        position.x = firstVertex.pos.x
+        position.y = firstVertex.pos.y
+        position.z = firstVertex.pos.z
+        position.z = 1.0
+
+        // fmt.eprintfln("{}", position)
+
+        // fmt.eprintfln("{}", 
+        //     ubo.proj * ubo.view * ubo.model * position
+        // )
 
         uboBuffer.ptr = mem.copy(uboBuffer.ptr, rawptr(&ubo), size_of(s.UBO))
     }
@@ -146,7 +150,7 @@ Render :: proc(
 
     beginInfo: vk.CommandBufferBeginInfo = {
         sType = .COMMAND_BUFFER_BEGIN_INFO,
-        flags = { .SIMULTANEOUS_USE },
+        flags = {},
         pInheritanceInfo = nil,
         pNext = nil,
     }
@@ -157,10 +161,6 @@ Render :: proc(
         panic("Failed to begin command buffer!")
     }
 
-    positionGBuffer    := &gBuffers["geometry.position"]
-    albedoGBuffer      := &gBuffers["geometry.albedo"]
-    normalGBuffer      := &gBuffers["geometry.normal"]
-
     uboDescriptor      := descriptors["ubo"]
     gBuffersDescriptor := descriptors["gBuffers"]
 
@@ -169,43 +169,34 @@ Render :: proc(
     assert(uboCurrentSet      != {}, "UBO set is nil!")
     assert(gBuffersCurrentSet != {}, "G-Buffers set is nil!")
 
-    lightPass := passes["light"]
-    geometryPass   := passes["geometry"]
+    combinedPass := passes["combined"]
+    fb           := combinedPass.frameBuffers[ii]
 
-    lFb       := lightPass.frameBuffers[ii]
-    gFb       := geometryPass.frameBuffers[ii] 
-
-    geometryPass.clearValues = {
-        {
-            color = { float32 = { 0.0, 0.0, 0.0, 1.0 }},
-        },
-        {
-            color = { float32 = { 0.0, 0.0, 0.0, 1.0 }},
-        },
-        {
-            color = { float32 = { 0.0, 0.0, 0.0, 1.0 }},
-        },
-        {
-            depthStencil = { depth = 0.0, stencil = 0 },
-        }
+    combinedPass.clearValues = {
+        { color = { float32 = { 0.0, 0.0, 0.0, 1.0 }}}, // Position
+        { color = { float32 = { 0.0, 0.0, 0.0, 1.0 }}}, // Albedo
+        { color = { float32 = { 0.0, 0.0, 0.0, 1.0 }}}, // Normal
+        { color = { float32 = { 0.0, 0.0, 0.0, 1.0 }}}, // Swapchain
+        { depthStencil = { depth = 1.0, stencil = 0 }},   // Depth
     }
     renderPassBeginInfo: vk.RenderPassBeginInfo = {
         sType                   = .RENDER_PASS_BEGIN_INFO,
-        renderPass              = geometryPass.renderPass,
-        framebuffer             = gFb,
+        renderPass              = combinedPass.renderPass,
+        framebuffer             = fb,
         renderArea = {
             offset = {0, 0},
             extent = swapchain.extent,
         },
-        clearValueCount = u32(len(geometryPass.clearValues)),
-        pClearValues    = raw_data(geometryPass.clearValues),
+        clearValueCount = u32(len(combinedPass.clearValues)),
+        pClearValues    = raw_data(combinedPass.clearValues),
     }
     vk.CmdBeginRenderPass(
         gcbc^,
         &renderPassBeginInfo,
-        .INLINE
+        .INLINE,
     )
     {
+        // Subpass 0: Geometry
         vk.CmdSetViewport(gcbc^, 0, 1, &viewports["global"])
         vk.CmdSetScissor(gcbc^, 0, 1, &scissors["global"])
         
@@ -217,41 +208,13 @@ Render :: proc(
             pipelines["geometry"].layout,
             0, 1,
             &uboCurrentSet,
-            0, nil
+            0, nil,
         )
-        // o.DisplayAllModelBuffers()
-        o.VkDrawMesh(gcbc, "Monke", "Cube_0")
-    }
-    vk.CmdEndRenderPass(gcbc^)
+        o.VkDrawMesh(gcbc, "Cube", "Cube_0")
 
-    lightPass.clearValues = {
-        {
-            color = { float32 = { 0.0, 0.0, 0.0, 1.0 }},
-        },
-        {
-            depthStencil = { depth = 0.0, stencil = 0 },
-        }
-    }
-    renderPassBeginInfo = vk.RenderPassBeginInfo{
-        sType                   = .RENDER_PASS_BEGIN_INFO,
-        renderPass              = lightPass.renderPass,
-        framebuffer             = lFb,
-        renderArea = {
-            offset = {0, 0},
-            extent = swapchain.extent,
-        },
-        clearValueCount = u32(len(lightPass.clearValues)),
-        pClearValues    = raw_data(lightPass.clearValues),
-    }
-    vk.CmdBeginRenderPass(
-        gcbc^,
-        &renderPassBeginInfo,
-        .INLINE
-    )
-    {
-        vk.CmdSetViewport(gcbc^, 0, 1, &viewports["global"])
-        vk.CmdSetScissor(gcbc^, 0, 1, &scissors["global"])
-        
+        // Subpass 1: Lighting
+        vk.CmdNextSubpass(gcbc^, .INLINE)
+
         vk.CmdBindPipeline(gcbc^, .GRAPHICS, pipelines["light"].pipeline)
         
         lightDescriptors: []vk.DescriptorSet = { uboCurrentSet, gBuffersCurrentSet }
@@ -261,7 +224,7 @@ Render :: proc(
             pipelines["light"].layout,
             0, u32(len(lightDescriptors)),
             raw_data(lightDescriptors),
-            0, nil
+            0, nil,
         )
 
         vk.CmdDraw(gcbc^, 6, 1, 0, 0)
@@ -326,12 +289,10 @@ Render :: proc(
             log.error("Failed to present swapchain image! %s", result)
             panic("Failed to present swapchain image!")
         }
-
     }
 
     rData.currentFrame += 1
     rData.currentFrame %= rData.MAX_FRAMES_IN_FLIGHT
-    // if rData.currentFrame > 1 do panic("Frame!")
 
     return
 }

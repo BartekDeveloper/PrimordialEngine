@@ -75,12 +75,5 @@ Pipeline :: proc(
     // if pipeline.shaders != nil {
     //     delete(pipeline.shaders)
     // }
-    if pipeline.stages != nil {
-        delete(pipeline.stages)
-    }
-    if pipeline.states != nil {
-        delete(pipeline.states)
-    }
-
     return
 }

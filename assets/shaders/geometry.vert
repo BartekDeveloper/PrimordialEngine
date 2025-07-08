@@ -29,9 +29,11 @@ layout(location = 2) out vec2 uv;
 
 void main() {
     mat4 modelView = ubo.view * ubo.model;
-    vec4 position  = ubo.proj * modelView * vec4(inPos, 1.0);
+    mat4 worldView = ubo.proj * modelView;
+    vec4 position  = worldView * vec4(inPos, 1.0);
+    
     pos = position.xyz;
-    gl_Position = position;
+    gl_Position = vec4(inPos, 1.0); 
 
     norm = vec3(1.0, 1.0, 1.0);
 

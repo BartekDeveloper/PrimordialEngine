@@ -7,6 +7,7 @@ import "base:runtime"
 
 import sdl "vendor:sdl3"
 import vk  "vendor:vulkan"
+import "../input"
 
 WindowData :: #type struct {
     width, height: i32,
@@ -93,8 +94,9 @@ Poll :: proc(data: ^WindowData = defaultWindowData) -> (result: string = "", goo
         } else if data.event.type == .WINDOW_CLOSE_REQUESTED {
             // result = fmt.tprintf("%s\t%s", result, "window close requested")
             data.closing = true
-
+            
         } else {
+            input.Move(&data.event)
             // result = fmt.tprintf("%s\tunhandled event:\t%s", result, data.event.type)
         }
     }

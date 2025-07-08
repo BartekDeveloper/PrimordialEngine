@@ -19,7 +19,7 @@ Label_single :: proc(
 ) -> () {
     when ODIN_DEBUG {
         label: vk.DebugUtilsObjectNameInfoEXT = {
-            sType        = .DEBUG_UTILS_LABEL_EXT,
+            sType        = .DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
             pNext        = nil,
             pObjectName  = what,
             objectHandle = auto_cast handle,

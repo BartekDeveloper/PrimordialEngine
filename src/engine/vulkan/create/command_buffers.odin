@@ -66,3 +66,46 @@ CommandBuffer :: proc(
     }
     return
 }
+
+OneTimeSubmit :: proc(
+    data: ^t.VulkanData,
+    command: proc(cmd: vk.CommandBuffer),
+) {
+    using data
+
+    allocInfo := vk.CommandBufferAllocateInfo{
+        sType              = .COMMAND_BUFFER_ALLOCATE_INFO,
+        level              = .PRIMARY,
+        commandPool        = commandPools["global"].this,
+        commandBufferCount = 1,
+    }
+
+    cmdBuffer: vk.CommandBuffer
+    vk.AllocateCommandBuffers(logical.device, &allocInfo, &cmdBuffer)
+
+    beginInfo := vk.CommandBufferBeginInfo{
+        sType = .COMMAND_BUFFER_BEGIN_INFO,
+        flags = { .ONE_TIME_SUBMIT },
+    }
+
+    vk.BeginCommandBuffer(cmdBuffer, &beginInfo)
+
+    command(cmdBuffer)
+
+    vk.EndCommandBuffer(cmdBuffer)
+
+    submitInfo := vk.SubmitInfo{
+        sType              = .SUBMIT_INFO,
+        commandBufferCount = 1,
+        pCommandBuffers    = &cmdBuffer,
+    }
+
+    vk.QueueSubmit(
+        physical.queues.graphics,
+        1,
+        &submitInfo,
+        {}
+        )
+    vk.QueueWaitIdle(physical.queues.graphics)
+    vk.FreeCommandBuffers(logical.device, commandPools["global"].this, 1, &cmdBuffer)
+}

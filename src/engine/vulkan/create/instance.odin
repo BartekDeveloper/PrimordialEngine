@@ -27,7 +27,7 @@ VulkanDebugCallback :: proc "system" (
     switch(messageSeverity) {
         case { .INFO }:
             /* FOR NOW NOT NEEDED */
-            // fmt.eprintfln("! %s\n", pCallbackData.pMessage)
+            fmt.eprintfln("! %s\n", pCallbackData.pMessage)
             break
         case { .WARNING }:
             fmt.eprintfln("! %s\n", pCallbackData.pMessage)
@@ -37,7 +37,7 @@ VulkanDebugCallback :: proc "system" (
             break
         case { .VERBOSE }:
             /* REMBEMBER(me): Verbose is too much verbose */
-            // fmt.eprintfln("! %s\n", pCallbackData.pMessage)
+            fmt.eprintfln("! %s\n", pCallbackData.pMessage)
             break
         case:
             break
@@ -86,8 +86,8 @@ Instance :: proc(data: ^t.VulkanData) {
 		log.debug("\t Creating debug messenger info")
 		instance.messengerInfo = {
 			sType           = .DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
-			messageSeverity = {.VERBOSE, .WARNING, .ERROR, .INFO},
-			messageType     = {.PERFORMANCE, .VALIDATION, .GENERAL},
+			messageSeverity = { .VERBOSE, .WARNING, .ERROR, .INFO   },
+			messageType     = { .PERFORMANCE, .VALIDATION, .GENERAL },
 			pfnUserCallback = VulkanDebugCallback,
 			pUserData       = nil,
 		}

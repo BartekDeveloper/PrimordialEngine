@@ -160,6 +160,7 @@ CreateBuffersForAllModels :: proc() -> () {
     fmt.eprintln("Finished creating Vulkan buffers for all loaded models.")
     return
 }
+
 CleanUpBuffersForModel :: proc(name: string) {
     if data == nil {
         fmt.eprintln("[ERROR] CleanUpBuffersForModel: VulkanData pointer is nil! Call SetDataPointer first.")
@@ -211,7 +212,6 @@ CleanUpAllBuffers :: proc() -> () {
     return
 }
 
-
 VkDrawMesh :: proc(
     cmd: ^vk.CommandBuffer = nil,
     name: string           = "",
@@ -243,12 +243,12 @@ VkDrawMesh :: proc(
         raw_data(offsets)
     )
 
-    if meshBuffer.hasIndices {
-        vk.CmdBindIndexBuffer(cmd^, meshBuffer.index.this, 0, .UINT32)
-        vk.CmdDrawIndexed(cmd^, meshBuffer.indexCount, 1, 0, 0, 0)
+    // if meshBuffer.hasIndices {
+    //     vk.CmdBindIndexBuffer(cmd^, meshBuffer.index.this, 0, .UINT32)
+    //     vk.CmdDrawIndexed(cmd^, meshBuffer.indexCount, 1, 0, 0, 0)
         
-        return
-    }
+    //     return
+    // }
 
     vk.CmdDraw(cmd^, meshBuffer.vertexCount, 1, 0, 0) 
     return

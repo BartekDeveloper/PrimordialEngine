@@ -18,191 +18,156 @@ RenderPasses :: proc(data: ^t.VulkanData) -> () {
 
     log.debug("Creating Render Passes")
     {
-        passes["geometry"] = {}
-        geometryPass := &passes["geometry"]
+        passes["combined"] = {};
+        combinedPass := &passes["combined"];
 
-        log.debug("\t\t Color Attachment")
-        geometryPass.color.attachments = []vk.AttachmentDescription{
-            /* Position */
+        log.debug("\t Color Attachments (G-buffer)");
+        combinedPass.color.attachments = []vk.AttachmentDescription{
+            // Position
             AttachmentDescription(
                 .R32G32B32A32_SFLOAT,
                 finalLayout = .SHADER_READ_ONLY_OPTIMAL,
-                initialLayout = .UNDEFINED
+                initialLayout = .UNDEFINED,
             ),
-            /* Albedo */
+            // Albedo
             AttachmentDescription(
                 .R16G16B16A16_UNORM,
                 finalLayout = .SHADER_READ_ONLY_OPTIMAL,
-                initialLayout = .UNDEFINED
+                initialLayout = .UNDEFINED,
             ),
-            /* Normal */
+            // Normal
             AttachmentDescription(
                 .R8G8B8A8_SINT,
                 finalLayout = .SHADER_READ_ONLY_OPTIMAL,
-                initialLayout = .UNDEFINED
+                initialLayout = .UNDEFINED,
             ),
-        }
-
-        geometryPass.color.references = []vk.AttachmentReference{
-            t.vkar{
-                attachment = 0,
-                layout     = .COLOR_ATTACHMENT_OPTIMAL
-            },
-            t.vkar{
-                attachment = 1,
-                layout     = .COLOR_ATTACHMENT_OPTIMAL
-            },
-            t.vkar{
-                attachment = 2,
-                layout     = .COLOR_ATTACHMENT_OPTIMAL
-            }
-        }
-
-        log.debug("\t\t Depth Attachment")
-        geometryPass.depth.attachment = AttachmentDescription(
-            swapchain.formats.depth,
-            finalLayout = .DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-        )
-
-        geometryPass.depth.reference = t.vkar{
-            attachment = 3,
-            layout     = .DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-        }
-
-        log.debug("\t\t Subpass")
-        geometryPass.subpasses = []vk.SubpassDescription{
-            Subpass(
-                u32(len(geometryPass.color.references)),
-                raw_data(geometryPass.color.references),
-                &geometryPass.depth.reference
-            )
-        }
-
-        log.debug("\t\t Attachments")
-        geometryPass.attachments = []vk.AttachmentDescription{
-            geometryPass.color.attachments[0], // Position
-            geometryPass.color.attachments[1], // Albedo
-            geometryPass.color.attachments[2], // Normals
-            geometryPass.depth.attachment      // Depth
-        }
-
-        log.debug("\t\t Create Info")
-        geometryPass.createInfo = {
-            sType           = .RENDER_PASS_CREATE_INFO,
-            attachmentCount = u32(len(geometryPass.attachments)),
-            pAttachments    = raw_data(geometryPass.attachments),
-            subpassCount    = u32(len(geometryPass.subpasses)),
-            pSubpasses      = raw_data(geometryPass.subpasses),
-            dependencyCount = 0,
-            pDependencies   = nil,
-        }
-
-        log.debug("\t\t Create `Geometry` Render Pass")
-        good := RenderPass(
-            data,
-            &geometryPass.createInfo,
-            &geometryPass.renderPass
-        )
-        if !good {
-            panic("Failed to create Render Pass!")
-        }
-        assert(geometryPass.renderPass != {}, "Render Pass is nil!")
-
-        Label_single(
-            logical.device,
-            "render pass - geometry",
-            geometryPass.renderPass,
-            .RENDER_PASS
-        )
-    }
-
-    log.debug("\t Light Pass")
-    {
-        passes["light"] = {}
-        lightPass := &passes["light"]
-
-        log.debug("\t\t Color Attachment")
-        lightPass.color.attachments = []vk.AttachmentDescription{
+            // Swapchain Color
             AttachmentDescription(
                 swapchain.formats.surface.format,
-                finalLayout = .PRESENT_SRC_KHR
-            )
-        }
+                finalLayout = .PRESENT_SRC_KHR,
+                initialLayout = .UNDEFINED,
+                loadOp = .CLEAR,
+            ),
+        };
 
-        lightPass.color.references = []vk.AttachmentReference{
-            t.vkar{
-                attachment = 0,
-                layout     = .COLOR_ATTACHMENT_OPTIMAL
-            }
-        }
+        combinedPass.color.references = []vk.AttachmentReference{
+            t.vkar{ attachment = 0, layout = .GENERAL },
+            t.vkar{ attachment = 1, layout = .GENERAL },
+            t.vkar{ attachment = 2, layout = .GENERAL },
+            t.vkar{ attachment = 3, layout = .COLOR_ATTACHMENT_OPTIMAL },
+        };
 
-        log.debug("\t\t Depth Attachment")
-        lightPass.depth.attachment = AttachmentDescription(
+        log.debug("\t Depth Attachment");
+        combinedPass.depth.attachment = AttachmentDescription(
             swapchain.formats.depth,
-            finalLayout = .DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-        )
+            finalLayout = .DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+            initialLayout = .UNDEFINED,
+        );
 
-        lightPass.depth.reference = t.vkar{
-            attachment = 1,
-            layout     = .DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+        combinedPass.depth.reference = t.vkar{
+            attachment = 4,
+            layout = .DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+        };
+
+        subpass1ColorReferences: []vk.AttachmentReference ={ 
+            combinedPass.color.references[0],
+            combinedPass.color.references[1],
+            combinedPass.color.references[2],
+            combinedPass.color.references[3],
         }
 
-        log.debug("\t\t Subpass")
-        lightPass.subpasses = []vk.SubpassDescription{
+        subpass2ColorReferences: []vk.AttachmentReference ={ 
+            combinedPass.color.references[3],
+        }
+        
+        log.debug("\t Subpasses");
+        combinedPass.subpasses = []vk.SubpassDescription{
+            // Subpass 0: G-buffer rendering (first 3 color attachments + depth)
             Subpass(
-                u32(len(lightPass.color.references)),
-                raw_data(lightPass.color.references),
-                &lightPass.depth.reference
-            )
-        }
+                3,
+                raw_data(subpass1ColorReferences),
+                &combinedPass.depth.reference,
+                nil,
+                .GRAPHICS,
+            ),
+            // Subpass 1: Lighting pass (uses swapchain color attachment)
+            Subpass(
+                1,
+                raw_data(subpass2ColorReferences),
+                nil,
+                nil,
+                .GRAPHICS,
+            ),
+        };
 
-        log.debug("\t\t Dependencies")
-        lightPass.dependencies = []vk.SubpassDependency{
+        log.debug("\t Dependencies");
+        combinedPass.dependencies = []vk.SubpassDependency{
+            // External -> Subpass 0
             SubpassDependency(
                 srcSubpass      = vk.SUBPASS_EXTERNAL,
                 dstSubpass      = 0,
+                srcStageMask    = { .BOTTOM_OF_PIPE },
+                dstStageMask    = { .COLOR_ATTACHMENT_OUTPUT },
+                srcAccessMask   = { .MEMORY_READ },
+                dstAccessMask   = { .COLOR_ATTACHMENT_WRITE },
+                dependencyFlags = { .BY_REGION },
+            ),
+            // Subpass 0 -> Subpass 1
+            SubpassDependency(
+                srcSubpass      = 0,
+                dstSubpass      = 1,
                 srcStageMask    = { .COLOR_ATTACHMENT_OUTPUT },
                 dstStageMask    = { .FRAGMENT_SHADER },
                 srcAccessMask   = { .COLOR_ATTACHMENT_WRITE },
                 dstAccessMask   = { .SHADER_READ },
                 dependencyFlags = { .BY_REGION },
             ),
-        }
+            // Subpass 1 -> External
+            SubpassDependency(
+                srcSubpass      = 1,
+                dstSubpass      = vk.SUBPASS_EXTERNAL,
+                srcStageMask    = { .COLOR_ATTACHMENT_OUTPUT },
+                dstStageMask    = { .BOTTOM_OF_PIPE },
+                srcAccessMask   = { .COLOR_ATTACHMENT_WRITE },
+                dstAccessMask   = { .MEMORY_READ },
+                dependencyFlags = { .BY_REGION },
+            ),
+        };
 
-        log.debug("\t\t Attachments")
-        lightPass.attachments = []vk.AttachmentDescription{
-            lightPass.color.attachments[0],
-            lightPass.depth.attachment
-        }
+        log.debug("\t Attachments");
+        combinedPass.attachments = []vk.AttachmentDescription{
+            combinedPass.color.attachments[0],
+            combinedPass.color.attachments[1],
+            combinedPass.color.attachments[2],
+            combinedPass.color.attachments[3],
+            combinedPass.depth.attachment,
+        };
 
-        log.debug("\t\t Create Info")
-        lightPass.createInfo = {
+        log.debug("\t Create Info");
+        combinedPass.createInfo = vk.RenderPassCreateInfo{
             sType           = .RENDER_PASS_CREATE_INFO,
-            attachmentCount = u32(len(lightPass.attachments)),
-            pAttachments    = raw_data(lightPass.attachments),
-            subpassCount    = u32(len(lightPass.subpasses)),
-            pSubpasses      = raw_data(lightPass.subpasses),
-            dependencyCount = u32(len(lightPass.dependencies)),
-            pDependencies   = raw_data(lightPass.dependencies),
-        }
+            attachmentCount = u32(len(combinedPass.attachments)),
+            pAttachments    = raw_data(combinedPass.attachments),
+            subpassCount    = u32(len(combinedPass.subpasses)),
+            pSubpasses      = raw_data(combinedPass.subpasses),
+            dependencyCount = u32(len(combinedPass.dependencies)),
+            pDependencies   = raw_data(combinedPass.dependencies),
+        };
 
-        log.debug("\t\t Creating Render Pass")
-        good := RenderPass(
+        log.debug("\t Creating Render Pass - combined");
+        RenderPass(
             data,
-            &lightPass.createInfo,
-            &lightPass.renderPass
+            &combinedPass.createInfo,
+            &combinedPass.renderPass,
         )
-        if !good {
-            panic("Failed to create Render Pass!")
-        }
-        assert(lightPass.renderPass != {}, "Render Pass is nil!")
+        assert(combinedPass.renderPass != {}, "Combined Render Pass is nil!");
 
         Label_single(
-            logical.device,
-            "render pass - light",
-            lightPass.renderPass,
-            .RENDER_PASS
-        )
+            data.logical.device,
+            "render pass - combined",
+            combinedPass.renderPass,
+            .RENDER_PASS,
+        );
     }
 
     return
@@ -270,10 +235,16 @@ RenderPass :: proc(
     data:       ^t.VulkanData            = nil,
     createInfo: ^vk.RenderPassCreateInfo = nil,
     renderPass: ^vk.RenderPass           = nil
-) -> (good: bool = true) {
-    result := vk.CreateRenderPass(data.logical.device, createInfo, data.allocations, renderPass)
-    if result != .SUCCESS {
-        good = false
+) -> () {
+    result := vk.CreateRenderPass(
+        data.logical.device,
+        createInfo,
+        data.allocations,
+        renderPass
+    ); if result != .SUCCESS {
+        fmt.eprintfln("{}", result)
+        panic("Failed to create combined Render Pass!");
     }
+
     return
 }

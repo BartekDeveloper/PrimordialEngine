@@ -12,6 +12,7 @@ import vk "vendor:vulkan"
 import "../choose"
 import t "../types"
 import win "../../window"
+import utils "../utils"
 
 Resources :: proc(data: ^t.VulkanData) -> () {
     using data
@@ -23,7 +24,6 @@ Resources :: proc(data: ^t.VulkanData) -> () {
     gBuffers["geometry.position"] = {}
     gBuffers["geometry.albedo"]   = {}
     gBuffers["geometry.normal"]   = {}
-    gBuffers["geometry.depth"]    = {}
     gBuffers["light.color"]       = {}
     gBuffers["light.depth"]       = {}
 
@@ -33,7 +33,6 @@ Resources :: proc(data: ^t.VulkanData) -> () {
     positionBuffer := &gBuffers["geometry.position"]
     albedoBuffer   := &gBuffers["geometry.albedo"]
     normalBuffer   := &gBuffers["geometry.normal"]
-    depthBufferG   := &gBuffers["geometry.depth"]
     
     colorBuffer := &gBuffers["light.color"]
     depthBuffer := &gBuffers["light.depth"]
@@ -99,27 +98,7 @@ Resources :: proc(data: ^t.VulkanData) -> () {
         "Geometry Normal Buffer",
         normalBuffer
     )
-    
-    log.debug("\t\t Depth Buffer")
-    good = GBuffer(
-        data,
-        depthBufferG,
-        swapchain.formats.depth,
-        screen.width, screen.height,
-        .OPTIMAL,
-        { .DEPTH_STENCIL_ATTACHMENT },
-        { .DEVICE_LOCAL },
-        { .DEPTH }
-    )
-    if !good {
-        panic("Failed to create Depth Buffer!")
-    }
-    Label(
-        logical.device,
-        "Geometry Depth Buffer",
-        depthBufferG
-    )
-    
+
     log.debug("\t `Light` GBuffers")
     log.debug("\t\t Color Buffer")
     good = GBuffer(
@@ -148,9 +127,9 @@ Resources :: proc(data: ^t.VulkanData) -> () {
         swapchain.formats.depth,
         screen.width, screen.height,
         .OPTIMAL,
-        { .DEPTH_STENCIL_ATTACHMENT },
+        { .DEPTH_STENCIL_ATTACHMENT, .SAMPLED },
         { .DEVICE_LOCAL },
-        { .DEPTH }
+        { .DEPTH, .STENCIL }
     )
     if !good {
         panic("Failed to create Depth Buffer!")
@@ -204,6 +183,8 @@ GBuffer :: proc(
         if !good {
             panic("Failed to create GBuffer View!")
         }
+
+        
     }
 
     return

@@ -208,7 +208,7 @@ ReadFloat :: proc(accessor: ^tf.accessor, data: [^]f32, #any_int count: u32) {
 
     ok := tf.accessor_read_float(accessor, auto_cast currentIndex, data, auto_cast count)
     if !ok {
-        panic("Failed to read accessor data!")
+        fmt.eprintfln("Failed to read accessor data! {}", accessor.name)
     }
 }
 

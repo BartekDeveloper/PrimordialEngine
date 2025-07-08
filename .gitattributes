@@ -4,3 +4,4 @@ assets/models/Monke.fbx filter=lfs diff=lfs merge=lfs -text
 assets/models/Monke.glb filter=lfs diff=lfs merge=lfs -text
 assets/models/Monke.blend filter=lfs diff=lfs merge=lfs -text
 assets/models/Monke.blend1 filter=lfs diff=lfs merge=lfs -text
+assets/models/Cube.glb filter=lfs diff=lfs merge=lfs -text

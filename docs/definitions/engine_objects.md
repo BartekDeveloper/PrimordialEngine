@@ -57,7 +57,7 @@ package objects
 
 
 	fullpath:
-		/home/zota/projects/multi/vk_new/src/engine/objects
+		/home/zota/projects/multi/vk_dynamic/src/engine/objects
 	files:
 		prepare.odin
 		read.odin

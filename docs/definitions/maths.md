@@ -142,12 +142,12 @@ package engine_math
 		uVec3d :: [3]u64
 		uVec3h :: [3]u16
 		uVec4 :: [4]u32
-		uVec4d :: [4]u64
+		uVec4d :: [2]u64
 		uVec4h :: [4]u16
 
 
 	fullpath:
-		/home/zota/projects/multi/vk_new/src/maths
+		/home/zota/projects/multi/vk_dynamic/src/maths
 	files:
 		clib.odin
 		cross.odin

@@ -8,6 +8,6 @@ package engine_shared
 
 
 	fullpath:
-		/home/zota/projects/multi/vk_new/src/shared
+		/home/zota/projects/multi/vk_dynamic/src/shared
 	files:
 		shared.odin

@@ -9,7 +9,7 @@ package engine
 
 
 	fullpath:
-		/home/zota/projects/multi/vk_new/src/engine
+		/home/zota/projects/multi/vk_dynamic/src/engine
 	files:
 		engine.odin
 		types.odin

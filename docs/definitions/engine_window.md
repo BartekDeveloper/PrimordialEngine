@@ -22,7 +22,7 @@ package window
 
 
 	fullpath:
-		/home/zota/projects/multi/vk_new/src/engine/window
+		/home/zota/projects/multi/vk_dynamic/src/engine/window
 	files:
 		vulkan.odin
 		window.odin

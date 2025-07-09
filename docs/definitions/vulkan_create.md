@@ -121,7 +121,7 @@ package vk_create
 
 
 	fullpath:
-		/home/zota/projects/multi/vk_new/src/engine/vulkan/create
+		/home/zota/projects/multi/vk_dynamic/src/engine/vulkan/create
 	files:
 		additional_data.odin
 		appinfo.odin
@@ -137,7 +137,6 @@ package vk_create
 		logical_device.odin
 		physical_device_data.odin
 		pipelines.odin
-		renderpass.odin
 		resources.odin
 		samplers.odin
 		shaders.odin

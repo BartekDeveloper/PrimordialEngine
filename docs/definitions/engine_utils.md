@@ -4,6 +4,6 @@ package eng_utils
 
 
 	fullpath:
-		/home/zota/projects/multi/vk_new/src/engine/utils
+		/home/zota/projects/multi/vk_dynamic/src/engine/utils
 	files:
 		empty.odin

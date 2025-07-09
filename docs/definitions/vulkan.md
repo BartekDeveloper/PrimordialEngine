@@ -13,7 +13,7 @@ package vulkan_renderer
 
 
 	fullpath:
-		/home/zota/projects/multi/vk_new/src/engine/vulkan
+		/home/zota/projects/multi/vk_dynamic/src/engine/vulkan
 	files:
 		destroy.odin
 		init.odin

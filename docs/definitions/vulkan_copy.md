@@ -8,6 +8,6 @@ package vk_copy
 
 
 	fullpath:
-		/home/zota/projects/multi/vk_new/src/engine/vulkan/copy
+		/home/zota/projects/multi/vk_dynamic/src/engine/vulkan/copy
 	files:
 		buffers.odin

@@ -15,7 +15,7 @@ package vk_choose
 
 
 	fullpath:
-		/home/zota/projects/multi/vk_new/src/engine/vulkan/choose
+		/home/zota/projects/multi/vk_dynamic/src/engine/vulkan/choose
 	files:
 		format.odin
 		memory.odin

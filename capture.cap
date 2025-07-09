@@ -5,7 +5,7 @@
         "commandLine": "",
         "environment": [
         ],
-        "executable": "/home/zota/projects/multi/vk_new/vk_new",
+        "executable": "/home/zota/projects/multi/vk_dynamic/vk_dynamic",
         "inject": false,
         "numQueuedFrames": 5,
         "options": {

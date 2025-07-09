@@ -24,18 +24,21 @@ Resources :: proc(data: ^t.VulkanData) -> () {
     gBuffers["geometry.position"] = {}
     gBuffers["geometry.albedo"]   = {}
     gBuffers["geometry.normal"]   = {}
-    gBuffers["light.color"]       = {}
+    // gBuffers["light.color"]       = {}
     gBuffers["light.depth"]       = {}
-
-    geometryPass := &passes["geometry"]
-    lightPass    := &passes["light"]
 
     positionBuffer := &gBuffers["geometry.position"]
     albedoBuffer   := &gBuffers["geometry.albedo"]
     normalBuffer   := &gBuffers["geometry.normal"]
     
-    colorBuffer := &gBuffers["light.color"]
+    // colorBuffer := &gBuffers["light.color"]
     depthBuffer := &gBuffers["light.depth"]
+
+    positionBuffer.format = .R32G32B32A32_SFLOAT
+    albedoBuffer.format   = .R16G16B16A16_UNORM
+    normalBuffer.format   = .R8G8B8A8_SINT
+    depthBuffer.format    = swapchain.formats.depth
+    // colorBuffer.format    = swapchain.formats.color
 
     log.debug("Creating Resources")
     log.debug("\t `Geometry` GBuffers")
@@ -43,10 +46,10 @@ Resources :: proc(data: ^t.VulkanData) -> () {
     good = GBuffer(
         data,
         positionBuffer,
-        .R32G32B32A32_SFLOAT,
+        positionBuffer.format,
         screen.width, screen.height,
         .OPTIMAL,
-        { .COLOR_ATTACHMENT, .INPUT_ATTACHMENT, .SAMPLED },
+        { .COLOR_ATTACHMENT, .SAMPLED },
         { .DEVICE_LOCAL },
         { .COLOR }
     )
@@ -63,10 +66,10 @@ Resources :: proc(data: ^t.VulkanData) -> () {
     good = GBuffer(
         data,
         albedoBuffer,
-        .R16G16B16A16_UNORM,
+        albedoBuffer.format,
         screen.width, screen.height,
         .OPTIMAL,
-        { .COLOR_ATTACHMENT, .INPUT_ATTACHMENT, .SAMPLED },
+        { .COLOR_ATTACHMENT, .SAMPLED },
         { .DEVICE_LOCAL },
         { .COLOR }
     )
@@ -83,10 +86,10 @@ Resources :: proc(data: ^t.VulkanData) -> () {
     good = GBuffer(
         data,
         normalBuffer,
-        .R8G8B8A8_SINT,
+        normalBuffer.format,
         screen.width, screen.height,
         .OPTIMAL,
-        { .COLOR_ATTACHMENT, .INPUT_ATTACHMENT, .SAMPLED },
+        { .COLOR_ATTACHMENT, .SAMPLED },
         { .DEVICE_LOCAL },
         { .COLOR }
     )
@@ -100,31 +103,31 @@ Resources :: proc(data: ^t.VulkanData) -> () {
     )
 
     log.debug("\t `Light` GBuffers")
-    log.debug("\t\t Color Buffer")
-    good = GBuffer(
-        data,
-        colorBuffer,
-        swapchain.formats.color,
-        screen.width, screen.height,
-        .OPTIMAL,
-        { .COLOR_ATTACHMENT },
-        { .DEVICE_LOCAL },
-        { .COLOR }
-    )
-    if !good {
-        panic("Failed to create Color Buffer!")
-    }
-    Label(
-        logical.device,
-        "Light Color Buffer",
-        colorBuffer
-    )
+    // log.debug("\t\t Color Buffer")
+    // good = GBuffer(
+    //     data,
+    //     colorBuffer,
+    //     colorBuffer.format,
+    //     screen.width, screen.height,
+    //     .OPTIMAL,
+    //     { .COLOR_ATTACHMENT },
+    //     { .DEVICE_LOCAL },
+    //     { .COLOR }
+    // )
+    // if !good {
+    //     panic("Failed to create Color Buffer!")
+    // }
+    // Label(
+    //     logical.device,
+    //     "Light Color Buffer",
+    //     colorBuffer
+    // )
 
     log.debug("\t\t Depth Buffer")
     good = GBuffer(
         data,
         depthBuffer,
-        swapchain.formats.depth,
+        depthBuffer.format,
         screen.width, screen.height,
         .OPTIMAL,
         { .DEPTH_STENCIL_ATTACHMENT, .SAMPLED },

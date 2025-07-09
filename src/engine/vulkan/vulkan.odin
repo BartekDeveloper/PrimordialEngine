@@ -24,6 +24,7 @@ import s "../../shared"
 import emath "../../maths"
 
 vkData: t.VulkanData = {}
+colorAttachments: []vk.RenderingAttachmentInfo = make([]vk.RenderingAttachmentInfo, 4)
 
 WORLD_UP  :: emath.Vec3{ 0.0, 0.0, 1.0 } 
 
@@ -34,6 +35,7 @@ scene:  obj.SceneData = {}
 object: obj.Model     = {}
 mesh:   obj.Mesh      = {}
 firstVertex: s.Vertex = {}
+position: emath.Vec4  = {}
 
 LoadTestData :: proc() -> () {
     ok: bool = true
@@ -42,6 +44,11 @@ LoadTestData :: proc() -> () {
     object      = scene.objects["mesh_Cube_#0"]
     mesh        = object.meshes["Cube.001_0"]
     firstVertex = mesh.vertices[0]
+
+    position.x = firstVertex.pos.x
+    position.y = firstVertex.pos.y
+    position.z = firstVertex.pos.z
+    position.z = 1.0
 
     return
 }
@@ -80,15 +87,15 @@ Render :: proc(
 
         aspect: f32 = (f32(swapchain.extent.width) / f32(swapchain.extent.height))
 
-        proj := linalg.matrix4_perspective_f32(
+        proj := Perspective(
             60.0 * (math.PI / 180.0),
             aspect,
             0.1,
-            2048.0
+            1024.0
         )
         view := linalg.matrix4_look_at_f32(
-            { 0, 0, 0 },
             CameraPos,
+            { 0, 0, 0 },
             CameraUp
         ) 
 
@@ -128,12 +135,6 @@ Render :: proc(
         vec4 position  = worldView * vec4(inPos, 1.0);
         */
 
-        position: Vec4 = {}
-        position.x = firstVertex.pos.x
-        position.y = firstVertex.pos.y
-        position.z = firstVertex.pos.z
-        position.z = 1.0
-
         // fmt.eprintfln("{}", position)
 
         // fmt.eprintfln("{}", 
@@ -169,73 +170,349 @@ Render :: proc(
     assert(uboCurrentSet      != {}, "UBO set is nil!")
     assert(gBuffersCurrentSet != {}, "G-Buffers set is nil!")
 
-    combinedPass := &passes["combined"]
-    fb           := &combinedPass.frameBuffers[ii]
-
     posGBuffer    := &gBuffers["geometry.position"]
     albedoGBuffer := &gBuffers["geometry.albedo"]
     normalGBuffer := &gBuffers["geometry.normal"]
+    depthGBuffer  := &gBuffers["light.depth"]
 
-    combinedPass.clearValues = {
-        { color        = { float32 = { 0.0, 0.0, 0.0, 1.0 }}}, // Position
-        { color        = { float32 = { 0.0, 0.0, 0.0, 1.0 }}}, // Albedo
-        { color        = { float32 = { 0.0, 0.0, 0.0, 1.0 }}}, // Normal
-        { color        = { float32 = { 0.0, 0.0, 0.0, 1.0 }}}, // Swapchain
-        { depthStencil = { depth   = 0.0,     stencil = 0  }}, // Depth
+    depthBarrier: vk.ImageMemoryBarrier = {
+        sType               = .IMAGE_MEMORY_BARRIER,
+        srcAccessMask       = { .DEPTH_STENCIL_ATTACHMENT_WRITE },
+        dstAccessMask       = { .MEMORY_READ },
+        oldLayout           = .UNDEFINED,
+        newLayout           = .DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+        srcQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
+        dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
+        image               = depthGBuffer.images[ii],
+        subresourceRange    = {
+            aspectMask     = {. DEPTH, .STENCIL },
+            baseMipLevel   = 0,
+            levelCount     = 1,
+            baseArrayLayer = 0,
+            layerCount     = 1,
+        },
     }
-    renderPassBeginInfo: vk.RenderPassBeginInfo = {
-        sType           = .RENDER_PASS_BEGIN_INFO,
-        renderPass      = combinedPass.renderPass,
-        framebuffer     = fb^,
-        renderArea      = {{0, 0}, swapchain.extent},
-        clearValueCount = u32(len(combinedPass.clearValues)),
-        pClearValues    = raw_data(combinedPass.clearValues),
-    };
-
-    vk.CmdBeginRenderPass(
+    vk.CmdPipelineBarrier(
         gcbc^,
-        &renderPassBeginInfo,
-        .INLINE
+        { .EARLY_FRAGMENT_TESTS }, // srcStageMask 
+        { .FRAGMENT_SHADER },      // dstStageMask
+        {},                        // dependencyFlags
+        0, nil,                    // memoryBarriers
+        0, nil,                    // bufferMemoryBarriers
+        1, &depthBarrier,          // imageMemoryBarriers
     );
-    {
-        vk.CmdSetViewport(gcbc^, 0, 1, &viewports["global"]);
-        vk.CmdSetScissor(gcbc^, 0, 1, &scissors["global"]);
 
-        vk.CmdBindPipeline(gcbc^, .GRAPHICS, pipelines["geometry"].pipeline);
-        vk.CmdBindDescriptorSets(
-            gcbc^,
-            .GRAPHICS,
-            pipelines["geometry"].layout,
-            0,
-            1,
-            &uboDescriptor.sets[currentFrame],
-            0,
-            nil,
-        );
-        o.VkDrawMesh(
-            gcbc,
-            "Cube",
-            "Cube.001_0",
-        )
-
-        vk.CmdNextSubpass(gcbc^, .INLINE);
-
-        vk.CmdBindPipeline(gcbc^, .GRAPHICS, pipelines["light"].pipeline);
-        forLightDescriptors: []vk.DescriptorSet = { uboDescriptor.sets[currentFrame], gBuffersDescriptor.sets[currentFrame] }
-        vk.CmdBindDescriptorSets(
-            gcbc^,
-            .GRAPHICS,
-            pipelines["light"].layout,
-            0,
-            u32(len(forLightDescriptors)),
-            raw_data(forLightDescriptors),
-            0,
-            nil,
-        );
-        vk.CmdDraw(gcbc^, 6, 1, 0, 0);
-
+    preGeometryPassBarriers: []vk.ImageMemoryBarrier = {
+        {
+            sType               = .IMAGE_MEMORY_BARRIER,
+            srcAccessMask       = { .SHADER_READ }, // From previous frame's read, or initial state
+            dstAccessMask       = { .COLOR_ATTACHMENT_WRITE },
+            oldLayout           = .SHADER_READ_ONLY_OPTIMAL,
+            newLayout           = .COLOR_ATTACHMENT_OPTIMAL,
+            srcQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
+            dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
+            image               = posGBuffer.images[ii],
+            subresourceRange    = {
+                aspectMask     = {. COLOR },
+                baseMipLevel   = 0,
+                levelCount     = 1,
+                baseArrayLayer = 0,
+                layerCount     = 1,
+            },
+        },
+        {
+            sType               = .IMAGE_MEMORY_BARRIER,
+            srcAccessMask       = { .SHADER_READ },
+            dstAccessMask       = { .COLOR_ATTACHMENT_WRITE },
+            oldLayout           = .SHADER_READ_ONLY_OPTIMAL,
+            newLayout           = .COLOR_ATTACHMENT_OPTIMAL,
+            srcQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
+            dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
+            image               = albedoGBuffer.images[ii],
+            subresourceRange    = {
+                aspectMask     = { .COLOR },
+                baseMipLevel   = 0,
+                levelCount     = 1,
+                baseArrayLayer = 0,
+                layerCount     = 1,
+            },
+        },
+        {
+            sType               = .IMAGE_MEMORY_BARRIER,
+            srcAccessMask       = { .SHADER_READ },
+            dstAccessMask       = { .COLOR_ATTACHMENT_WRITE },
+            oldLayout           = .SHADER_READ_ONLY_OPTIMAL,
+            newLayout           = .COLOR_ATTACHMENT_OPTIMAL,
+            srcQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
+            dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
+            image               = normalGBuffer.images[ii],
+            subresourceRange    = {
+                aspectMask     = {. COLOR },
+                baseMipLevel   = 0,
+                levelCount     = 1,
+                baseArrayLayer = 0,
+                layerCount     = 1,
+            },
+        },
     }
-    vk.CmdEndRenderPass(gcbc^);
+    vk.CmdPipelineBarrier(
+        gcbc^,
+        { .FRAGMENT_SHADER },        // srcStageMask (where they were last read)
+        { .COLOR_ATTACHMENT_OUTPUT }, // dstStageMask (where they will be written)
+        {},                            // dependencyFlags
+        0, nil,                        // memoryBarriers
+        0, nil,                        // bufferMemoryBarriers
+        u32(len(preGeometryPassBarriers)), raw_data(preGeometryPassBarriers), // imageMemoryBarriers
+    );
+
+    fmt.eprintfln("Geometry pass!")
+    colorAttachments[0] = vk.RenderingAttachmentInfo{
+        sType       = .RENDERING_ATTACHMENT_INFO,
+        imageView   = posGBuffer.views[ii],
+        imageLayout = .COLOR_ATTACHMENT_OPTIMAL,
+        loadOp      = .CLEAR,
+        storeOp     = .STORE,
+        clearValue  = { color = { float32 = { 0.0, 0.0, 0.0, 1.0 }}},
+    }
+    colorAttachments[1] = vk.RenderingAttachmentInfo{
+        sType       = .RENDERING_ATTACHMENT_INFO,
+        imageView   = albedoGBuffer.views[ii],
+        imageLayout = .COLOR_ATTACHMENT_OPTIMAL,
+        loadOp      = .CLEAR,
+        storeOp     = .STORE,
+        clearValue  = { color = { float32 = { 0.0, 0.0, 0.0, 1.0 }}},
+    }
+    colorAttachments[2] = vk.RenderingAttachmentInfo{
+        sType       = .RENDERING_ATTACHMENT_INFO,
+        imageView   = normalGBuffer.views[ii],
+        imageLayout = .COLOR_ATTACHMENT_OPTIMAL,
+        loadOp      = .CLEAR,
+        storeOp     = .STORE,
+        clearValue  = { color = { float32 = { 0.0, 0.0, 0.0, 1.0 }}},
+    }
+    colorAttachments[3] = vk.RenderingAttachmentInfo{
+        sType       = .RENDERING_ATTACHMENT_INFO,
+        imageView   = swapchain.views[ii],
+        imageLayout = .COLOR_ATTACHMENT_OPTIMAL,
+        loadOp      = .CLEAR,
+        storeOp     = .STORE,
+        clearValue  = { color = { float32 = { 0.0, 0.0, 0.0, 1.0 }}},
+    }
+
+    depthAttachment: vk.RenderingAttachmentInfo = {
+        sType       = .RENDERING_ATTACHMENT_INFO,
+        imageView   = depthGBuffer.views[ii],
+        imageLayout = .DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+        loadOp      = .CLEAR,
+        storeOp     = .DONT_CARE,
+        clearValue  = { depthStencil = { depth = 1.0, stencil = 0 }},
+    }
+
+    renderingInfo: vk.RenderingInfo = {
+        sType                = .RENDERING_INFO,
+        renderArea           = { offset = { 0, 0 }, extent = swapchain.extent },
+        layerCount           = 1,
+        colorAttachmentCount = u32(len(colorAttachments)),
+        pColorAttachments    = raw_data(colorAttachments),
+        pDepthAttachment     = &depthAttachment,
+        pStencilAttachment   = nil,
+    }
+
+    vk.CmdBeginRendering(gcbc^, &renderingInfo)
+
+    vk.CmdSetViewport(gcbc^, 0, 1, &viewports["global"]);
+    vk.CmdSetScissor(gcbc^, 0, 1, &scissors["global"]);
+
+    vk.CmdBindPipeline(gcbc^, .GRAPHICS, pipelines["geometry"].pipeline);
+    vk.CmdBindDescriptorSets(
+        gcbc^,
+        .GRAPHICS,
+        pipelines["geometry"].layout,
+        0,
+        1,
+        &uboDescriptor.sets[currentFrame],
+        0,
+        nil,
+    );
+    o.VkDrawMesh(
+        gcbc,
+        "Monke",
+        "Suzanne_0",
+    )
+
+    vk.CmdEndRendering(gcbc^); // End geometry pass
+
+    // Image barriers to transition G-buffers for shader reading
+    gBufferImageBarriers: []vk.ImageMemoryBarrier = {
+        // Position G-buffer
+        {
+            sType               = .IMAGE_MEMORY_BARRIER,
+            srcAccessMask       = { .COLOR_ATTACHMENT_WRITE },
+            dstAccessMask       = { .SHADER_READ },
+            oldLayout           = .COLOR_ATTACHMENT_OPTIMAL,
+            newLayout           = .SHADER_READ_ONLY_OPTIMAL,
+            srcQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
+            dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
+            image               = posGBuffer.images[ii],
+            subresourceRange    = { { .COLOR }, 0, 1, 0, 1 },
+        },
+        // Albedo G-buffer
+        {
+            sType               = .IMAGE_MEMORY_BARRIER,
+            srcAccessMask       = { .COLOR_ATTACHMENT_WRITE },
+            dstAccessMask       = { .SHADER_READ },
+            oldLayout           = .COLOR_ATTACHMENT_OPTIMAL,
+            newLayout           = .SHADER_READ_ONLY_OPTIMAL,
+            srcQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
+            dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
+            image               = albedoGBuffer.images[ii],
+            subresourceRange    = { { .COLOR }, 0, 1, 0, 1 },
+        },
+        // Normal G-buffer
+        {
+            sType               = .IMAGE_MEMORY_BARRIER,
+            srcAccessMask       = { .COLOR_ATTACHMENT_WRITE },
+            dstAccessMask       = { .SHADER_READ },
+            oldLayout           = .COLOR_ATTACHMENT_OPTIMAL,
+            newLayout           = .SHADER_READ_ONLY_OPTIMAL,
+            srcQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
+            dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
+            image               = normalGBuffer.images[ii],
+            subresourceRange    = { { .COLOR }, 0, 1, 0, 1 },
+        },
+    }
+    vk.CmdPipelineBarrier(
+        gcbc^,
+        { .COLOR_ATTACHMENT_OUTPUT }, // srcStageMask 
+        { .FRAGMENT_SHADER },                                   // dstStageMask
+        {},                                                     // dependencyFlags
+        0, nil,                                                 // memoryBarriers
+        0, nil,                                                 // bufferMemoryBarriers
+        u32(len(gBufferImageBarriers)), raw_data(gBufferImageBarriers), // imageMemoryBarriers
+    );
+    
+
+    preLightDepthBarrier: vk.ImageMemoryBarrier = {
+        sType               = .IMAGE_MEMORY_BARRIER,
+        srcAccessMask       = {}, // or { .MEMORY_READ } if relevant
+        dstAccessMask       = { .DEPTH_STENCIL_ATTACHMENT_WRITE },
+        oldLayout           = .UNDEFINED,
+        newLayout           = .DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+        srcQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
+        dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
+        image               = depthGBuffer.images[ii],
+        subresourceRange    = {
+            aspectMask     = {. DEPTH, .STENCIL },
+            baseMipLevel   = 0,
+            levelCount     = 1,
+            baseArrayLayer = 0,
+            layerCount     = 1,
+        },
+    }
+    vk.CmdPipelineBarrier(
+        gcbc^,
+        { .COLOR_ATTACHMENT_OUTPUT },
+        { .EARLY_FRAGMENT_TESTS },
+        {},
+        0, nil,
+        0, nil,
+        1, &preLightDepthBarrier,
+    )
+
+    // Swapchain image for color attachment in light pass
+    swapchainPreLightBarrier: vk.ImageMemoryBarrier = {
+        sType               = .IMAGE_MEMORY_BARRIER,
+        srcAccessMask       = {}, // or { .MEMORY_READ } if relevant
+        dstAccessMask       = { .COLOR_ATTACHMENT_WRITE },
+        oldLayout           = .UNDEFINED,
+        newLayout           = .COLOR_ATTACHMENT_OPTIMAL,
+        srcQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
+        dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
+        image               = swapchain.images[ii],
+        subresourceRange    = {
+            aspectMask     = { .COLOR },
+            baseMipLevel   = 0,
+            levelCount     = 1,
+            baseArrayLayer = 0,
+            layerCount     = 1,
+        },
+    }
+    vk.CmdPipelineBarrier(
+        gcbc^,
+        { .TOP_OF_PIPE },
+        { .COLOR_ATTACHMENT_OUTPUT },
+        {},
+        0, nil,
+        0, nil,
+        1, &swapchainPreLightBarrier,
+    )
+
+    fmt.eprintfln("Light pass!")
+    // Now, start the light pass
+    lightColorAttachment: vk.RenderingAttachmentInfo = {
+        sType       = .RENDERING_ATTACHMENT_INFO,
+        imageView   = swapchain.views[ii],
+        imageLayout = .COLOR_ATTACHMENT_OPTIMAL,
+        loadOp      = .CLEAR, // Or .LOAD if you want to blend with previous content
+        storeOp     = .STORE,
+        clearValue  = { color = { float32 = { 0.0, 0.0, 0.0, 1.0 }}},
+    }
+
+    renderingInfoLight: vk.RenderingInfo = {
+        sType                = .RENDERING_INFO,
+        renderArea           = { offset = { 0, 0 }, extent = swapchain.extent },
+        layerCount           = 1,
+        colorAttachmentCount = 1,
+        pColorAttachments    = &lightColorAttachment,
+        pDepthAttachment     = nil, // Light pass typically doesn't write to depth
+        pStencilAttachment   = nil,
+    }
+
+    vk.CmdBeginRendering(gcbc^, &renderingInfoLight);
+
+    vk.CmdBindPipeline(gcbc^, .GRAPHICS, pipelines["light"].pipeline);
+    forLightDescriptors: []vk.DescriptorSet = { uboDescriptor.sets[currentFrame], gBuffersDescriptor.sets[currentFrame] }
+    vk.CmdBindDescriptorSets(
+        gcbc^,
+        .GRAPHICS,
+        pipelines["light"].layout,
+        0,
+        u32(len(forLightDescriptors)),
+        raw_data(forLightDescriptors),
+        0,
+        nil,
+    );
+    vk.CmdDraw(gcbc^, 6, 1, 0, 0);
+
+    vk.CmdEndRendering(gcbc^); // End light pass
+
+    // Add image memory barrier for swapchain image
+    imageMemoryBarrier: vk.ImageMemoryBarrier = {
+        sType               = .IMAGE_MEMORY_BARRIER,
+        srcAccessMask       = { .COLOR_ATTACHMENT_WRITE },
+        dstAccessMask       = { .MEMORY_READ },
+        oldLayout           = .COLOR_ATTACHMENT_OPTIMAL,
+        newLayout           = .PRESENT_SRC_KHR,
+        srcQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
+        dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
+        image               = swapchain.images[ii],
+        subresourceRange    = {
+            aspectMask     = {. COLOR },
+            baseMipLevel   = 0,
+            levelCount     = 1,
+            baseArrayLayer = 0,
+            layerCount     = 1,
+        },
+    }
+    vk.CmdPipelineBarrier(
+        gcbc^,
+        { .COLOR_ATTACHMENT_OUTPUT }, // srcStageMask
+        { .BOTTOM_OF_PIPE },          // dstStageMask
+        {},                           // dependencyFlags
+        0, nil,                       // memoryBarriers
+        0, nil,                       // bufferMemoryBarriers
+        1, &imageMemoryBarrier,       // imageMemoryBarriers
+    );
 
     result = vk.EndCommandBuffer(gcbc^)
     if result != .SUCCESS {

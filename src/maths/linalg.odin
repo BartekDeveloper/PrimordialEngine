@@ -13,25 +13,26 @@ import "core:math/noise"
 import "core:math/rand"
 
 @(require_results)
-Perspective :: proc "fastcall" (
+Perspective :: proc "contextless" (
     fovy: f32,
     aspect: f32,
     near: f32,
     far: f32
 ) -> (o: Mat4 = {}) {
-    TanHalfFovy := Tan(0.5 * fovy)
+    TanHalfFovy := math.tan_f32(0.5 * fovy)
 
     o[0, 0] = 1.0 / (aspect * TanHalfFovy)
     o[1, 1] = 1.0 / (TanHalfFovy)
-    o[2, 2] = -(far + near) / (far - near)
-    o[2, 3] = (-1.0)
-    o[3, 2] = (-2.0 * far * near) / (far - near)
+    o[2, 2] = far / (near - far)
+    o[2, 3] = (far * near) / (near - far)
+    o[3, 2] = -1
+    o[3, 3] = 0
 
     return
 }
 
 @(require_results)
-Perspective_InfDistance :: proc "fastcall" (
+Perspective_InfDistance :: proc "contextless" (
     fovy: f32,
     aspect: f32,
     near: f32
@@ -48,7 +49,7 @@ Perspective_InfDistance :: proc "fastcall" (
 }
 
 @(require_results)
-Orthographic :: proc "fastcall" (
+Orthographic :: proc "contextless" (
     top: f32,
     right: f32,
     bottom: f32,
@@ -70,7 +71,7 @@ Orthographic :: proc "fastcall" (
 }
 
 @(require_results)
-LookAt :: proc "fastcall" (
+LookAt :: proc "contextless" (
     eye: Vec3,
     center: Vec3,
     up: Vec3

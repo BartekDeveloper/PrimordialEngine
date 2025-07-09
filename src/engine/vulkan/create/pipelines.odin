@@ -31,6 +31,11 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
         extent = swapchain.extent,
     }
 
+    positionGBuffer := &gBuffers["geometry.position"]
+    albedoGBuffer   := &gBuffers["geometry.albedo"]
+    normalGBuffer   := &gBuffers["geometry.normal"]
+    depthGBuffer    := &gBuffers["light.depth"]
+
     log.debug("Creating Pipelines")
     log.debug("\t Geometry")
     {
@@ -79,12 +84,12 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
 
         pDynamicStates:       [2]vk.DynamicState = {}
         pVertexInputInfo       := DefaultVertexInput(&pVertexData)
-        pInputAssemblyInfo     := DefaultInputAssembly(topology = .TRIANGLE_LIST)
+        pInputAssemblyInfo     := DefaultInputAssembly(topology = .TRIANGLE_FAN)
         pViewportState         := DefaultViewportState(1, 1)
         pRasterizationInfo     := DefaultRasterization(polygonMode = .FILL)
         pMultisampleState      := DefaultMultisample()
-        pDepthStencil          := DefaultDepthStencil(depthTestEnable = false, depthWriteEnable = true)
-        pColorBlendAttachments := DefaultFillColorBlendAttachments(3, blendEnable = false)
+        pDepthStencil          := DefaultDepthStencil()
+        pColorBlendAttachments := DefaultFillColorBlendAttachments(4, blendEnable = false)
         pColorBlending         := DefaultColorBlending(u32(len(pColorBlendAttachments)), raw_data(pColorBlendAttachments))
         pDynamicState          := DefaultDynamicStates(&pDynamicStates)
 
@@ -110,10 +115,30 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
             panic("Failed to create Pipeline Layout")
         }
 
-        pCacheCreateInfo := DefaultPipelineEmptyCacheCreateInfo()
-        good = PipelineCache(data, &pCacheCreateInfo, &geometry.cache)
-        if !good {
-            panic("Failed to create Pipeline Cache")
+        fmt.eprintfln("Color Attachments")
+        geometry.colorAttachmentFormats = make([]vk.Format, 4)
+        fmt.eprintfln("Geometry Color Attachments Allocated: %v", len(geometry.colorAttachmentFormats))
+        geometry.colorAttachmentFormats[0] = positionGBuffer.format
+        geometry.colorAttachmentFormats[1] = albedoGBuffer.format
+        geometry.colorAttachmentFormats[2] = normalGBuffer.format
+        geometry.colorAttachmentFormats[3] = swapchain.formats.surface.format
+        fmt.eprintfln("Geometry Color Attachment Formats: %v", geometry.colorAttachmentFormats)
+
+        // Check format support for geometry pipeline
+        for format in geometry.colorAttachmentFormats {
+            if !CheckFormatsColorSupport(data, format) {
+                panic("Unsupported format for geometry pipeline color attachment!")
+            }
+        }
+        if !CheckFormatsDepthSupport(data, swapchain.formats.depth) {
+            panic("Unsupported format for geometry pipeline depth attachment!")
+        }
+        
+        geometry.renderingInfo = vk.PipelineRenderingCreateInfo{
+            sType                   = .PIPELINE_RENDERING_CREATE_INFO,
+            colorAttachmentCount    = u32(len(geometry.colorAttachmentFormats)),
+            pColorAttachmentFormats = raw_data(geometry.colorAttachmentFormats),
+            depthAttachmentFormat   = swapchain.formats.depth,
         }
 
         geometry.createInfo = GraphicsPipelineInfo(
@@ -121,22 +146,25 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
             len(geometry.stages),
             raw_data(geometry.stages),
             geometry.layout,
-            passes["combined"].renderPass,
-            subpass = 0
+            pNext = &geometry.renderingInfo,
         )
 
+        geometry.graphicsPipelineData = t.GraphicsPipelineData{
+            cache     = nil,
+            infoCount = 1,
+            info      = &geometry.createInfo.(vk.GraphicsPipelineCreateInfo),
+        }
+
+        geometry.pipeline = vk.Pipeline{}
         good = GraphicsPipeline(
             data,
             &geometry.pipeline,
-            t.GraphicsPipelineData{
-                cache     = &geometry.cache,
-                infoCount = 1,
-                info      = &geometry.createInfo.(vk.GraphicsPipelineCreateInfo),
-            }
-        )
-        if !good {
+            geometry.graphicsPipelineData
+        ); if !good {
             panic("Failed to create Graphics Pipeline")
         }
+
+        fmt.eprintfln("Labelling pipeline `geometry`")
         Label_single(
             logical.device,
             "pipeline - geometry",
@@ -162,6 +190,7 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
 
         pVertexData:          PipelineVertexData = {{}, {}}
         
+        fmt.eprintfln("Creating states")
         pDynamicStates:       [2]vk.DynamicState = {}
         pVertexInputInfo       := DefaultVertexInput(&pVertexData)
         pInputAssemblyInfo     := DefaultInputAssembly()
@@ -175,6 +204,7 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
         
         defer delete(pColorBlendAttachments)
 
+        fmt.eprintfln("Assigning states")
         light.states = t.GraphicsInfoStates{ 
             vertex        = &pVertexInputInfo,
             assembly      = &pInputAssemblyInfo,
@@ -195,26 +225,50 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
             panic("Failed to create Pipeline Layout")
         }
 
-        pCacheCreateInfo := DefaultPipelineEmptyCacheCreateInfo()
-        good = PipelineCache(data, &pCacheCreateInfo, &light.cache)
-        if !good {
-            panic("Failed to create Pipeline Cache")
+        fmt.eprintfln("Color Attachments")
+        light.colorAttachmentFormats = make([]vk.Format, 1)
+        light.colorAttachmentFormats[0] = swapchain.formats.surface.format
+
+        // Check format support for light pipeline
+        for format in light.colorAttachmentFormats {
+            if !CheckFormatsColorSupport(data, format) {
+                panic("Unsupported format for light pipeline color attachment!")
+            }
+        }
+        if !CheckFormatsDepthSupport(data, swapchain.formats.depth) {
+            panic("Unsupported format for light pipeline depth attachment!")
         }
 
+        fmt.eprintfln("Getting number of attachments")
+        colorAttachmentCount := u32(len(light.colorAttachmentFormats))
+        fmt.eprintfln("Color Attachments Count: %v", colorAttachmentCount)
+
+        fmt.eprintfln("Getting ptr to attachments")
+        pColorAttachmentFormats := raw_data(light.colorAttachmentFormats)
+        fmt.eprintfln("Color Attachments Ptr: %v", pColorAttachmentFormats)
+
+        light.renderingInfo = vk.PipelineRenderingCreateInfo{
+            sType                   = .PIPELINE_RENDERING_CREATE_INFO,
+            colorAttachmentCount    = colorAttachmentCount,
+            pColorAttachmentFormats = pColorAttachmentFormats,
+            depthAttachmentFormat   = swapchain.formats.depth,
+        }
+
+        fmt.eprintfln("Creating pipeline info")
         light.createInfo = GraphicsPipelineInfo(
             light.states,
             len(light.stages),
             raw_data(light.stages),
             light.layout,
-            passes["combined"].renderPass,
-            subpass = 1
+            pNext = &light.renderingInfo,
         )
 
+        fmt.eprintfln("Creating pipeline `light`")
         good = GraphicsPipeline(
             data,
             &light.pipeline,
             t.GraphicsPipelineData{
-                cache     = &light.cache,
+                cache     = nil,
                 infoCount = 1,
                 info      = &light.createInfo.(vk.GraphicsPipelineCreateInfo),
             }
@@ -255,7 +309,7 @@ DefaultVertexInput :: proc(
 }
 
 DefaultInputAssembly :: proc(
-    topology: vk.PrimitiveTopology                  = .TRIANGLE_LIST,
+    topology: vk.PrimitiveTopology                  = .TRIANGLE_STRIP,
     restartEnable: b32                              = false,
     flags: vk.PipelineInputAssemblyStateCreateFlags = {}
 ) -> (inputAssembly: vk.PipelineInputAssemblyStateCreateInfo) {
@@ -624,7 +678,14 @@ GraphicsPipeline :: proc(
     using data
 
     log.debug("Creating Graphics Pipeline")
-    result := vk.CreateGraphicsPipelines(logical.device, gpData.cache^, gpData.infoCount, gpData.info, allocations, pipeline)
+    result := vk.CreateGraphicsPipelines(
+        logical.device,
+        gpData.cache^ if gpData.cache != nil else {},
+        gpData.infoCount,
+        gpData.info,
+        allocations,
+        pipeline
+    )
     if result != .SUCCESS {
         log.error("Failed to create graphics pipeline!")
         ok = false
@@ -640,9 +701,7 @@ GraphicsPipelineInfo_1 :: proc(
 	stageCount:           int = 0,
 	stages:               [^]vk.PipelineShaderStageCreateInfo = nil,
 	layout:               vk.PipelineLayout = {},
-    renderPass:           vk.RenderPass = {},
     pNext:                rawptr = nil,
-	subpass:              u32 = 0,
     flags:                vk.PipelineCreateFlags = {},
     basePipelineIndex:    i32 = -1,
 	basePipelineHandle:   vk.Pipeline = {},
@@ -654,8 +713,6 @@ GraphicsPipelineInfo_1 :: proc(
         pStages    = stages,
         stageCount = u32(stageCount),
         layout     = layout,
-        renderPass = renderPass,
-        subpass    = subpass,
         
         /* States */
         pVertexInputState   = states.vertex,
@@ -679,9 +736,7 @@ GraphicsPipelineInfo_2 :: proc(
 	stageCount:          u32 = 0,
 	stages:              [^]vk.PipelineShaderStageCreateInfo = nil,
 	layout:              vk.PipelineLayout = {},
-    renderPass:          vk.RenderPass = {},
     pNext:               rawptr = nil,
-	subpass:             u32 = 0,
     flags:               vk.PipelineCreateFlags = {},
     basePipelineIndex:   i32 = -1,
 	basePipelineHandle:  vk.Pipeline = {},
@@ -693,8 +748,6 @@ GraphicsPipelineInfo_2 :: proc(
         pStages    = stages,
         stageCount = stageCount,
         layout     = layout,
-        renderPass = renderPass,
-        subpass    = subpass,
         
         /* States */
         pVertexInputState   = states.vertex,
@@ -727,9 +780,7 @@ GraphicsPipelineInfo_3 :: proc(
     stageCount:          int = 0,
 	stages:              [^]vk.PipelineShaderStageCreateInfo,
 	layout:              vk.PipelineLayout = {},
-    renderPass:          vk.RenderPass = {},
     pNext:               rawptr = nil,
-    subpass:             u32 = 0,
     flags:               vk.PipelineCreateFlags = {},
     basePipelineIndex:   i32 = -1,
 	basePipelineHandle:  vk.Pipeline = {},
@@ -741,8 +792,6 @@ GraphicsPipelineInfo_3 :: proc(
         pStages    = stages,
         stageCount = u32(stageCount),
         layout     = layout,
-        renderPass = renderPass,
-        subpass    = subpass,
         
         /* States */
         pVertexInputState   = vertex,
@@ -775,9 +824,7 @@ GraphicsPipelineInfo_4 :: proc(
     stageCount:          u32 = 0,
 	stages:              [^]vk.PipelineShaderStageCreateInfo,
 	layout:              vk.PipelineLayout = {},
-    renderPass:          vk.RenderPass = {},
     pNext:               rawptr = nil,
-    subpass:             u32 = 0,
     flags:               vk.PipelineCreateFlags = {},
     basePipelineIndex:   i32 = -1,
 	basePipelineHandle:  vk.Pipeline = {},
@@ -789,8 +836,6 @@ GraphicsPipelineInfo_4 :: proc(
         pStages    = stages,
         stageCount = stageCount,
         layout     = layout,
-        renderPass = renderPass,
-        subpass    = subpass,
         
         /* States */
         pVertexInputState   = vertex,
@@ -814,4 +859,32 @@ GraphicsPipelineInfo :: proc{
     GraphicsPipelineInfo_2,
     GraphicsPipelineInfo_3,
     GraphicsPipelineInfo_4,
+}
+
+CheckFormatsColorSupport :: proc(data: ^t.VulkanData, format: vk.Format) -> (supported: bool) {
+    using data
+    properties: vk.FormatProperties
+    vk.GetPhysicalDeviceFormatProperties(physical.device, format, &properties)
+
+    colorAttachmentSupported        := (properties.optimalTilingFeatures & { .COLOR_ATTACHMENT }) == { .COLOR_ATTACHMENT }
+    
+    if !colorAttachmentSupported {
+        log.errorf("Format %v does not support color attachment!", format)
+    }
+
+    return colorAttachmentSupported
+}
+
+CheckFormatsDepthSupport :: proc(data: ^t.VulkanData, format: vk.Format) -> (supported: bool) {
+    using data
+    properties: vk.FormatProperties
+    vk.GetPhysicalDeviceFormatProperties(physical.device, format, &properties)
+
+    depthAttachmentSupported := (properties.optimalTilingFeatures & { .DEPTH_STENCIL_ATTACHMENT }) == { .DEPTH_STENCIL_ATTACHMENT }
+    
+    if !depthAttachmentSupported {
+        log.errorf("Format %v does not support depth attachment!", format)
+    }
+
+    return depthAttachmentSupported
 }

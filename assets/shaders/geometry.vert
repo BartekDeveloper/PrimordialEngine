@@ -30,13 +30,13 @@ layout(location = 2) out vec2 uv;
 
 void main() {
     vec4 position = ubo.proj * ubo.view * ubo.model * vec4(inPos, 1.0);
-    
+    gl_Position = position;
+
     float u = 0.75;
     float v = 0.5;
     
     uv          = vec2(u, v);
     norm        = vec3(1.0, 1.0, 1.0);
     pos         = position;
-    gl_Position = position;
     // gl_Position = vec4(inPos, 1.0); 
 }

@@ -17,7 +17,7 @@ AppInfo :: proc(data: ^t.VulkanData) -> () {
         applicationVersion = vk.MAKE_VERSION(1, 0, 0),
         pEngineName        = "PE",
         engineVersion      = vk.MAKE_VERSION(1, 0, 0),
-        apiVersion         = vk.API_VERSION_1_2
+        apiVersion         = vk.API_VERSION_1_3
     }
 
     return

@@ -28,7 +28,8 @@ VulkanData :: #type struct {
 	samplers:        map[string]vk.Sampler,
 
 	// Render Passes
-	passes:          map[string]RenderPass,
+    // ! DELETED
+    // ? MOVED TO DYNAMIC RENDERING
 
 	// Descriptors
 	descriptorPools: map[string]DescriptorPool,
@@ -116,29 +117,7 @@ Descriptor :: #type struct {
     writes:      []vk.WriteDescriptorSet
 }
 
-ColorPass :: #type struct {
-	attachments: []vk.AttachmentDescription,
-	references:  []vk.AttachmentReference,
-	resolves:    []vk.AttachmentReference,
-}
 
-DepthPass :: #type struct {
-	attachment: vk.AttachmentDescription,
-	reference:  vk.AttachmentReference,
-	resolve:    vk.AttachmentReference,
-}
-
-RenderPass :: #type struct {
-	color:        ColorPass,
-	depth:        DepthPass,
-	subpasses:    []vk.SubpassDescription,
-	dependencies: []vk.SubpassDependency,
-    attachments:  []vk.AttachmentDescription,
-	createInfo:   vk.RenderPassCreateInfo,
-	renderPass:   vk.RenderPass,
-	clearValues:  []vk.ClearValue,
-	frameBuffers: []vk.Framebuffer,
-}
 
 PipelinesCreateInfos :: #type union #no_nil {
 	vk.GraphicsPipelineCreateInfo,
@@ -190,14 +169,17 @@ CommandBuffer :: #type struct {
 }
 
 Pipeline :: #type struct {
-	shaders:    []ShaderReference,
-	stages:     []vk.PipelineShaderStageCreateInfo,
-	setLayouts: []vk.DescriptorSetLayout,
-	states:     GraphicsInfoStates,
-	layout:     vk.PipelineLayout,
-	cache:      vk.PipelineCache,
-	createInfo: PipelinesCreateInfos,
-	pipeline:   vk.Pipeline,
+	shaders:                []ShaderReference,
+	stages:                 []vk.PipelineShaderStageCreateInfo,
+	setLayouts:             []vk.DescriptorSetLayout,
+	states:                 GraphicsInfoStates,
+	layout:                 vk.PipelineLayout,
+    cache:                  vk.PipelineCache,
+	createInfo:             PipelinesCreateInfos,
+	pipeline:               vk.Pipeline,
+	renderingInfo:          vk.PipelineRenderingCreateInfo,
+	colorAttachmentFormats: []vk.Format,
+    graphicsPipelineData:   GraphicsPipelineData,
 }
 
 Buffer :: #type struct {

@@ -21,11 +21,6 @@ import win "../window"
 
 Init :: proc(rData: ^s.RenderData) {
     InitFromZero(&vkData, rData)
-
-    combinedPass := vkData.passes["combined"]
-    fmt.eprintfln("Framebuffers count: %d", len(combinedPass.frameBuffers))
-    assert(len(combinedPass.frameBuffers) > 0, "Framebuffers are empty?!")
-
     return
 }
 
@@ -48,10 +43,12 @@ InitFromZero :: proc(
     }
     instance.extensions = {
         vk.EXT_DEBUG_UTILS_EXTENSION_NAME,
-        vk.KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME
-    }    
+        vk.KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME,
+        vk.KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME
+    }
     logical.extensions = {
-        vk.KHR_SWAPCHAIN_EXTENSION_NAME
+        vk.KHR_SWAPCHAIN_EXTENSION_NAME,
+        vk.KHR_DYNAMIC_RENDERING_EXTENSION_NAME
     }
     logical.requestedFeatures = {
         samplerAnisotropy = true
@@ -68,16 +65,15 @@ InitFromZero :: proc(
     create.LogicalDevice(data)
     load.Shaders()
     create.Swapchain(data)
-    create.RenderPasses(data)    
     create.DescriptorSetLayouts(data)
-    create.Pipelines(data)
     create.Resources(data)
-    create.Framebuffers(data)
     create.CommandPools(data)
     create.CommandBuffers(data)
+    create.Pipelines(data)
     create.UniformBuffers(data)
     create.DescriptorPools(data)
     create.Samplers(data)
+    utils.TransitionGBuffers_step1(data)
     create.DescriptorSets(data)
     create.SyncObjects(data, rData)
     create.AdditionalData(data)
@@ -86,7 +82,6 @@ InitFromZero :: proc(
     vk_obj.CreateBuffersForAllModels()
     defer vk_obj.UnSetDataPointer()
 
-    utils.TransitionGBuffers(data)
 
     LoadTestData()
 

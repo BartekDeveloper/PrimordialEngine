@@ -60,7 +60,7 @@ Transition :: proc(
     return
 }
 
-TransitionGBuffers :: proc(data: ^t.VulkanData) {
+TransitionGBuffers_step1 :: proc(data: ^t.VulkanData) {
     using data
     log.debug("Transitioning Geometry GBuffers")
     cmd := BeginSingleTimeCommands(data)
@@ -70,11 +70,11 @@ TransitionGBuffers :: proc(data: ^t.VulkanData) {
             cmd,
             gBuffers["geometry.position"].images[i],
             .TOP_OF_PIPE,
-            .FRAGMENT_SHADER,
+            .COLOR_ATTACHMENT_OUTPUT,
             {},
-            { .SHADER_READ },
+            { .COLOR_ATTACHMENT_WRITE },
             .UNDEFINED,
-            .GENERAL,
+            .SHADER_READ_ONLY_OPTIMAL,
             aspectMask = { .COLOR },
         )
         Transition(
@@ -82,11 +82,11 @@ TransitionGBuffers :: proc(data: ^t.VulkanData) {
             cmd,
             gBuffers["geometry.albedo"].images[i],
             .TOP_OF_PIPE,
-            .FRAGMENT_SHADER,
+            .COLOR_ATTACHMENT_OUTPUT,
             {},
-            { .SHADER_READ },
+            { .COLOR_ATTACHMENT_WRITE },
             .UNDEFINED,
-            .GENERAL,
+            .SHADER_READ_ONLY_OPTIMAL,
             aspectMask = { .COLOR },
         )
         Transition(
@@ -94,11 +94,11 @@ TransitionGBuffers :: proc(data: ^t.VulkanData) {
             cmd,
             gBuffers["geometry.normal"].images[i],
             .TOP_OF_PIPE,
-            .FRAGMENT_SHADER,
+            .COLOR_ATTACHMENT_OUTPUT,
             {},
-            { .SHADER_READ },
+            { .COLOR_ATTACHMENT_WRITE },
             .UNDEFINED,
-            .GENERAL,
+            .SHADER_READ_ONLY_OPTIMAL,
             aspectMask = { .COLOR },
         )
     }

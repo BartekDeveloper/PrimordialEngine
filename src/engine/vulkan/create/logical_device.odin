@@ -32,6 +32,11 @@ LogicalDevice :: proc(data: ^t.VulkanData) -> () {
     }   
     fmt.eprintfln("=*=*=*= Requested Device Extensions =*=*=*=")
     
+    dynamicRendering: vk.PhysicalDeviceDynamicRenderingFeatures = {
+        sType            = .PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES,
+        dynamicRendering = true
+    }
+
     logical.createInfo = {     
         sType                   = .DEVICE_CREATE_INFO,
         queueCreateInfoCount    = u32(len(logical.queueCreateInfos)),
@@ -40,7 +45,8 @@ LogicalDevice :: proc(data: ^t.VulkanData) -> () {
         ppEnabledLayerNames     = nil if !ENABLE_VALIDATION_LAYERS else raw_data(instance.layers),
         enabledExtensionCount   = u32(len(logical.extensions)),
         ppEnabledExtensionNames = raw_data(logical.extensions),
-        pEnabledFeatures        = &logical.requestedFeatures
+        pEnabledFeatures        = &logical.requestedFeatures,
+        pNext                   = &dynamicRendering
     }
     result := vk.CreateDevice(physical.device, &logical.createInfo, allocations, &logical.device)
     if result != .SUCCESS {

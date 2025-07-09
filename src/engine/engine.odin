@@ -58,6 +58,8 @@ Start :: proc() {
         window.Poll()
         vulkan.Render(&renderData)
 
+        time.sleep(time.Duration(1_000_000_00)) 
+
         // fps := f32(1.0/(renderData.deltaTime_f32))
         // fmt.eprintf("\t  FPS: %.1f \t\t", fps)
     } 

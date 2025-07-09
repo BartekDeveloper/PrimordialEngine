@@ -21,12 +21,12 @@ layout(location = 0) in vec4 pos;
 layout(location = 1) in vec3 norm;
 layout(location = 2) in vec2 uv;
 
-layout(location = 0) out vec4 Position;
-layout(location = 1) out vec4 Albedo;
-layout(location = 2) out vec4 Normal;
+layout(location = 0) out vec4  Position;
+layout(location = 1) out vec4  Albedo;
+layout(location = 2) out ivec4 Normal;
 
 void main() {
     Position = pos;
     Albedo   = vec4(0.5, 0.5, 0.5, 1.0);
-    Normal   = vec4(0.5, 0.5, 0.5, 1.0);
+    Normal   = ivec4(0.5, 0.5, 0.5, 1.0);
 }

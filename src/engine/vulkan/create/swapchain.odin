@@ -16,6 +16,8 @@ import win "../../window"
 Swapchain :: proc(data: ^t.VulkanData) -> () {
     using data
 
+    swapchain.formats.depth = choose.SwapchainDepthFormat(data)
+
     log.debug("Swapchain data initializing")
     swapchain.extent          = choose.SwapchainExtent(data)
     swapchain.formats.surface = choose.SwapchainFormat(data)

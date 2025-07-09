@@ -32,8 +32,7 @@ CommandPools :: proc(data: ^t.VulkanData) -> () {
             data,
             &globalPool.createInfo,
             &globalPool.this
-        )
-        if !good {
+        ); if !good {
             panic("Fai led to create Command Pool!")
         }
     }

@@ -31,14 +31,14 @@ DescriptorSetLayout_UBO :: proc(data: ^t.VulkanData) -> () {
     using data
     good: bool = true
 
-    MAX_FRAMES_IN_FLIGHT := u32(renderData.MAX_FRAMES_IN_FLIGHT)
+    FRAME_COUNT := swapchain.imageCount
 
     log.debug("\t UBO")
     
     descriptors["ubo"] = {}
     descriptor := &descriptors["ubo"]
     descriptor.poolName = "global"
-    descriptor.sets = make([]vk.DescriptorSet, MAX_FRAMES_IN_FLIGHT)
+    descriptor.sets = make([]vk.DescriptorSet, FRAME_COUNT)
 
     descriptor.bindings = make([]vk.DescriptorSetLayoutBinding, 1)
     descriptor.bindings[0] = LayoutBinding_2(
@@ -59,7 +59,7 @@ DescriptorSetLayout_UBO :: proc(data: ^t.VulkanData) -> () {
     }
     assert(descriptor.setLayout != 0x0, "UBO descriptor set layout is nil!")
 
-    descriptor.setsLayouts = make([]vk.DescriptorSetLayout, MAX_FRAMES_IN_FLIGHT)
+    descriptor.setsLayouts = make([]vk.DescriptorSetLayout, FRAME_COUNT)
     for &l in descriptor.setsLayouts do l = descriptor.setLayout
 
     assert(descriptor.sets             != nil, "UBO descriptor is nil!")
@@ -72,14 +72,14 @@ DescriptorSetLayout_GBuffers :: proc(data: ^t.VulkanData) -> () {
     using data
     good: bool = true
 
-    MAX_FRAMES_IN_FLIGHT := u32(renderData.MAX_FRAMES_IN_FLIGHT)
+    FRAME_COUNT := swapchain.imageCount
 
     log.debug("\t G-Buffer Samplers")
     
     descriptors["gBuffers"] = {}
     descriptor := &descriptors["gBuffers"]
     descriptor.poolName = "global"
-    descriptor.sets = make([]vk.DescriptorSet, MAX_FRAMES_IN_FLIGHT)
+    descriptor.sets = make([]vk.DescriptorSet, FRAME_COUNT)
 
     descriptor.bindings = make([]vk.DescriptorSetLayoutBinding, 3)
     descriptor.bindings[0] = LayoutBinding_2(
@@ -110,7 +110,7 @@ DescriptorSetLayout_GBuffers :: proc(data: ^t.VulkanData) -> () {
     }
     assert(descriptor.setLayout != 0x0, "G-Buffer sampler descriptor set layout is nil!")
 
-    descriptor.setsLayouts = make([]vk.DescriptorSetLayout, MAX_FRAMES_IN_FLIGHT)
+    descriptor.setsLayouts = make([]vk.DescriptorSetLayout, FRAME_COUNT)
     for &l in descriptor.setsLayouts do l = descriptor.setLayout
 
     assert(descriptor.sets             != nil, "G-Buffer samplers descriptor sets are nil!")
@@ -132,18 +132,18 @@ DescriptorPools :: proc(data: ^t.VulkanData) -> () {
     using data
     log.debug("Creating Descriptor Pools")
 
-    MAX_FRAMES_IN_FLIGHT := u32(renderData.MAX_FRAMES_IN_FLIGHT)
+    FRAME_COUNT := swapchain.imageCount
 
     globalPool := descriptorPools["global"]
     {
         globalPool.pools = []vk.DescriptorPoolSize{
             {
                 type            = .UNIFORM_BUFFER,
-                descriptorCount = MAX_FRAMES_IN_FLIGHT,
+                descriptorCount = FRAME_COUNT,
             },
             {
                 type            = .SAMPLED_IMAGE,
-                descriptorCount = 3 * MAX_FRAMES_IN_FLIGHT,
+                descriptorCount = 3 * FRAME_COUNT,
             },
         }
         globalPool.poolCount = u32(len(globalPool.pools))
@@ -154,7 +154,7 @@ DescriptorPools :: proc(data: ^t.VulkanData) -> () {
             &globalPool,
             raw_data(globalPool.pools),
             globalPool.poolCount,
-            maxSets = MAX_FRAMES_IN_FLIGHT + MAX_FRAMES_IN_FLIGHT
+            maxSets = FRAME_COUNT + FRAME_COUNT
         )
 
         res := DescriptorPool(data, &globalPool)
@@ -172,10 +172,11 @@ DescriptorPools :: proc(data: ^t.VulkanData) -> () {
 DescriptorSets_UBO :: proc(data: ^t.VulkanData) -> () {
     using data
     log.debug("\t UBO")
-    MAX_FRAMES_IN_FLIGHT := u32(renderData.MAX_FRAMES_IN_FLIGHT)
-    globalPool      := descriptorPools["global"]
+    FRAME_COUNT := swapchain.imageCount
+    globalPool  := descriptorPools["global"]
     
-    log.debug("\t\t Allocation")
+    log.debug("\t\t Allocation"
+)
     {
         uboDescriptor := &descriptors["ubo"]
         using uboDescriptor;
@@ -235,8 +236,8 @@ DescriptorSets_UBO :: proc(data: ^t.VulkanData) -> () {
 DescriptorSets_GBuffers :: proc(data: ^t.VulkanData) -> () {
     using data
     log.debug("\t G-Buffer Samplers")
-    MAX_FRAMES_IN_FLIGHT := u32(renderData.MAX_FRAMES_IN_FLIGHT)
-    globalPool      := descriptorPools["global"]
+    FRAME_COUNT := swapchain.imageCount
+    globalPool  := descriptorPools["global"]
 
     log.debug("\t\t Allocation")
     {
@@ -269,7 +270,7 @@ DescriptorSets_GBuffers :: proc(data: ^t.VulkanData) -> () {
         albedoGBuffer     := gBuffers["geometry.albedo"]
         normalGBuffer     := gBuffers["geometry.normal"]
 
-        for i: int = 0; i < renderData.MAX_FRAMES_IN_FLIGHT; i += 1 {
+        for i: int = 0; i < int(FRAME_COUNT); i += 1 {
             ds := &gBufferDescriptor.sets[i]
 
             writesForCurrentSet: []vk.WriteDescriptorSet = make([]vk.WriteDescriptorSet, 3)

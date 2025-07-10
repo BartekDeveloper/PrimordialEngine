@@ -16,7 +16,7 @@ Camera :: #type struct {
     rot:      em.Vec3,
 }
 camera: Camera = {
-    pos = { 0.0, 0.0, 0.0 },
+    pos = { 0.0, 0.0, 2.5 },
     rot = { 0.0, 0.0, 0.0 },
 }
 
@@ -124,8 +124,8 @@ Move :: proc(
     }
 
     if rotating && event.type == .MOUSE_MOTION {
-        camera.rot.x = math.sin(camera.rot.x + (event.motion.xrel * 0.1))
-        camera.rot.y = math.sin(camera.rot.y + (event.motion.yrel * 0.1))
+        camera.rot.x = math.sin(camera.rot.x + (event.motion.xrel * 0.1)) * 360
+        camera.rot.y = math.sin(camera.rot.y + (event.motion.yrel * 0.1)) * 360
 
         fmt.eprintfln("New Camera Rot: %v", camera.rot)
         

@@ -165,8 +165,8 @@ Render :: proc(
     uboDescriptor      := descriptors["ubo"]
     gBuffersDescriptor := descriptors["gBuffers"]
 
-    uboCurrentSet      := uboDescriptor.sets[currentFrame]
-    gBuffersCurrentSet := gBuffersDescriptor.sets[currentFrame]
+    uboCurrentSet      := uboDescriptor.sets[ii]
+    gBuffersCurrentSet := gBuffersDescriptor.sets[ii]
     assert(uboCurrentSet      != {}, "UBO set is nil!")
     assert(gBuffersCurrentSet != {}, "G-Buffers set is nil!")
 
@@ -453,7 +453,7 @@ Render :: proc(
         sType       = .RENDERING_ATTACHMENT_INFO,
         imageView   = swapchain.views[ii],
         imageLayout = .COLOR_ATTACHMENT_OPTIMAL,
-        loadOp      = .CLEAR, // Or .LOAD if you want to blend with previous content
+        loadOp      = .LOAD, // Or .LOAD if you want to blend with previous content
         storeOp     = .STORE,
         clearValue  = { color = { float32 = { 0.0, 0.0, 0.0, 1.0 }}},
     }

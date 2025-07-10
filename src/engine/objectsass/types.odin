@@ -1,22 +1,17 @@
 package eobjects
 
+import s  "../../shared"
+import em "../../maths"
+
 // Core vertex structure for rendering
-Vertex :: struct {
-    position:    [3]f32,
-    normal:      [3]f32,
-    tex_coords:  [2]f32,
-    tangent:     [3]f32,
-    bitangent:   [3]f32,
-    bone_ids:    [4]i32,
-    bone_weights:[4]f32,
-}
+Vertex :: #type s.Vertex
 
 // Material data extracted from assimp
 MaterialData :: struct {
-    diffuse_color:    [4]f32,
-    specular_color:   [3]f32,
-    ambient_color:    [3]f32,
-    emissive_color:   [3]f32,
+    diffuse_color:    em.Vec4,
+    specular_color:   em.Vec3,
+    ambient_color:    em.Vec3,
+    emissive_color:   em.Vec3,
     shininess:        f32,
     opacity:          f32,
     diffuse_texture:  cstring,
@@ -37,7 +32,7 @@ TextureData :: struct {
 // Bone/Joint data for skeletal animation
 BoneData :: struct {
     name:           cstring,
-    offset_matrix:  [4][4]f32,
+    offset_matrix:  [4]em.Vec4,
     parent_index:   i32,
 }
 
@@ -56,7 +51,7 @@ SceneData :: struct {
     textures:       []TextureData,
     bones:          []BoneData,
     animations:     []AnimationData, // For future use
-    root_transform: [4][4]f32,
+    root_transform: [4]em.Vec4,
 }
 
 // Animation data structure for future expansion

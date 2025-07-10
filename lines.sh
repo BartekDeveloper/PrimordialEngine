@@ -1,3 +1,3 @@
 #!/bin/bash
 
-cloc --exclude-ext=sh,json,txt,h .
+cloc . --exclude-dir=external

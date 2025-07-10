@@ -36,7 +36,8 @@ main :: proc() {
     // obj.PrintAllModels()
 
     // ass.ReadFromFile("Monke.glb", "/home/zota/projects/multi/vk_dynamic/assets/models")
-    ass.ReadAllFilesFromDir()
+    ass.LoadAllObjects()
+    defer ass.CleanAllObjects()
 
     // engine.Init()
     // defer engine.Destroy()

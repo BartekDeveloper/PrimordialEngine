@@ -8,10 +8,7 @@ import "core:strings"
 
 import ass "../../../external/assimp/odin-assimp"
 
-modelGroups: map[string]any = {}
-modelExists: map[string]b8        = {}
-allLoaded:   bool                 = false
-
+allLoaded: bool = false
 
 /*
     @description Reads a scene from a file and returns scene ptr.
@@ -90,8 +87,7 @@ ReadFromMemory :: proc(
 }
 
 /*
-    @description Reads all files from a directory and fills up global modelGroups map \
-        and modelExists map.
+    @description Reads all files from a directory and fills up global loadedObjects map.
     @input dir: string(#optional) = "./assets/models"
     @output (none)
 */
@@ -128,7 +124,7 @@ ReadAllFilesFromDir :: proc(
     }
 
 
-    fmt.eprintfln("Loaded models: \n\t{}\n", modelExists)
+    fmt.eprintfln("Loaded models: \n\t{}\n", loadedObjects)
     allLoaded = true
 
 
@@ -137,7 +133,7 @@ ReadAllFilesFromDir :: proc(
 
 /*
     @description Reads all memory buffers from an array(and their sizes from corresponding array) and fills up global modelGroups map \
-        and modelExists map.
+        and loadedObjects map.
     @output (none)
 */
 ReadAllFilesFromMemory :: proc(
@@ -152,7 +148,7 @@ ReadAllFilesFromMemory :: proc(
         _ = scene
     }
 
-    fmt.eprintfln("Loaded models: \n\t{}\n", modelExists)
+    fmt.eprintfln("Loaded models: \n\t{}\n", loadedObjects)
     allLoaded = true
 
 

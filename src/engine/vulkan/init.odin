@@ -82,9 +82,6 @@ InitFromZero :: proc(
     vk_obj.CreateBuffersForAllModels()
     defer vk_obj.UnSetDataPointer()
 
-
-    LoadTestData()
-
     return
 }
 

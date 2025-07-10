@@ -74,7 +74,7 @@ TransitionGBuffers_step1 :: proc(data: ^t.VulkanData) {
             {},
             { .COLOR_ATTACHMENT_WRITE },
             .UNDEFINED,
-            .SHADER_READ_ONLY_OPTIMAL,
+            .GENERAL,
             aspectMask = { .COLOR },
         )
         Transition(
@@ -86,7 +86,7 @@ TransitionGBuffers_step1 :: proc(data: ^t.VulkanData) {
             {},
             { .COLOR_ATTACHMENT_WRITE },
             .UNDEFINED,
-            .SHADER_READ_ONLY_OPTIMAL,
+            .GENERAL,
             aspectMask = { .COLOR },
         )
         Transition(
@@ -98,7 +98,7 @@ TransitionGBuffers_step1 :: proc(data: ^t.VulkanData) {
             {},
             { .COLOR_ATTACHMENT_WRITE },
             .UNDEFINED,
-            .SHADER_READ_ONLY_OPTIMAL,
+            .GENERAL,
             aspectMask = { .COLOR },
         )
     }

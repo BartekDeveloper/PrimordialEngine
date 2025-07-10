@@ -19,10 +19,8 @@ Mesh :: #type struct{
     vertices: []s.Vertex,
     indices:  []u32,
     joints:   []joint,
-
     verticesCount: u32,
     indicesCount: u32,
-
     type:     PrimitiveType,
 }
 

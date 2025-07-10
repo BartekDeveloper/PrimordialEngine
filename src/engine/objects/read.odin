@@ -26,9 +26,7 @@ Load_fromFile :: proc(
     if basename == "." do panic("Invalid file name!")
     ext: string = path.ext(file)
     
-    // defer panic("TODO: Finish me!")
     filename: string = basename[:len(basename)-len(ext)]
-    // fmt.eprintfln("a\t\n\tfilename:\t\n\t\t {}\n\t\nb", filename)
 
     path, err := strings.clone_to_cstring(file, context.temp_allocator)
     if err != nil {

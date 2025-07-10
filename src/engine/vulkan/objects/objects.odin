@@ -19,10 +19,8 @@ import emath "../../../maths"
 import s "../../../shared"
 
 data: ^t.VulkanData = nil
-
-SetDataPointer   :: proc(pData: ^t.VulkanData) { data = pData }
-
-UnSetDataPointer :: proc()                     { data = nil }
+SetDataPointer      :: proc(pData: ^t.VulkanData) { data = pData }
+UnSetDataPointer    :: proc()                     { data = nil }
 
 VkDataBuffer :: struct {
     vertex:     t.Buffer,

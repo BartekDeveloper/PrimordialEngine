@@ -31,28 +31,6 @@ WORLD_UP  :: emath.Vec3{ 0.0, 0.0, 1.0 }
 worldTime: int = 0 /* World  Time */
 ii:        u32 = 0 /* Image Index */
 
-scene:  obj.SceneData = {}
-object: obj.Model     = {}
-mesh:   obj.Mesh      = {}
-firstVertex: s.Vertex = {}
-position: emath.Vec4  = {}
-
-LoadTestData :: proc() -> () {
-    ok: bool = true
-
-    scene, ok   = obj.GetModel("Cube")
-    object      = scene.objects["mesh_Cube_#0"]
-    mesh        = object.meshes["Cube.001_0"]
-    firstVertex = mesh.vertices[0]
-
-    position.x = firstVertex.pos.x
-    position.y = firstVertex.pos.y
-    position.z = firstVertex.pos.z
-    position.z = 1.0
-
-    return
-}
-
 Render :: proc(
     rData: ^s.RenderData = nil
 ) -> () {
@@ -72,8 +50,7 @@ Render :: proc(
         imageSem^,
         {},
         &ii
-    )
-    if result != .SUCCESS && result != .SUBOPTIMAL_KHR {
+    ); if result != .SUCCESS && result != .SUBOPTIMAL_KHR {
         log.error("Failed to acquire next image!")
         return
     }
@@ -88,20 +65,15 @@ Render :: proc(
         aspect: f32 = (f32(swapchain.extent.width) / f32(swapchain.extent.height))
 
         proj := Perspective(
-            60.0 * (math.PI / 180.0),
+            60.0 * math.DEG_PER_RAD,
             aspect,
             0.1,
-            1024.0
+            2048.0
         )
-        view := linalg.matrix4_look_at_f32(
-            CameraPos,
-            { 0, 0, 0 },
-            CameraUp
-        ) 
-
         invProj := linalg.inverse(proj)
-        invView := linalg.inverse(view)
         
+        view, invView := SetViewTarget(input.camera.pos, { 0.0, 0.0, 0.0}, WORLD_UP)
+
         winWidth  := f32(swapchain.extent.width)
         winHeight := f32(swapchain.extent.height)
         deltaTime := f32(rData.deltaTime_f64)
@@ -128,18 +100,6 @@ Render :: proc(
         if worldTime > int(~u16(0)-1) { 
             worldTime = 0
         }
-
-        /*
-        mat4 modelView = ubo.view * ubo.model;
-        mat4 worldView = ubo.proj * modelView;
-        vec4 position  = worldView * vec4(inPos, 1.0);
-        */
-
-        // fmt.eprintfln("{}", position)
-
-        // fmt.eprintfln("{}", 
-        //     ubo.proj * ubo.view * ubo.model * position
-        // )
 
         uboBuffer.ptr = mem.copy(uboBuffer.ptr, rawptr(&ubo), size_of(s.UBO))
     }
@@ -207,7 +167,7 @@ Render :: proc(
             sType               = .IMAGE_MEMORY_BARRIER,
             srcAccessMask       = { .SHADER_READ }, // From previous frame's read, or initial state
             dstAccessMask       = { .COLOR_ATTACHMENT_WRITE },
-            oldLayout           = .SHADER_READ_ONLY_OPTIMAL,
+            oldLayout           = .GENERAL,
             newLayout           = .COLOR_ATTACHMENT_OPTIMAL,
             srcQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
             dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
@@ -224,7 +184,7 @@ Render :: proc(
             sType               = .IMAGE_MEMORY_BARRIER,
             srcAccessMask       = { .SHADER_READ },
             dstAccessMask       = { .COLOR_ATTACHMENT_WRITE },
-            oldLayout           = .SHADER_READ_ONLY_OPTIMAL,
+            oldLayout           = .GENERAL,
             newLayout           = .COLOR_ATTACHMENT_OPTIMAL,
             srcQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
             dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
@@ -241,7 +201,7 @@ Render :: proc(
             sType               = .IMAGE_MEMORY_BARRIER,
             srcAccessMask       = { .SHADER_READ },
             dstAccessMask       = { .COLOR_ATTACHMENT_WRITE },
-            oldLayout           = .SHADER_READ_ONLY_OPTIMAL,
+            oldLayout           = .GENERAL,
             newLayout           = .COLOR_ATTACHMENT_OPTIMAL,
             srcQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
             dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
@@ -265,7 +225,6 @@ Render :: proc(
         u32(len(preGeometryPassBarriers)), raw_data(preGeometryPassBarriers), // imageMemoryBarriers
     );
 
-    fmt.eprintfln("Geometry pass!")
     colorAttachments[0] = vk.RenderingAttachmentInfo{
         sType       = .RENDERING_ATTACHMENT_INFO,
         imageView   = posGBuffer.views[ii],
@@ -350,7 +309,7 @@ Render :: proc(
             srcAccessMask       = { .COLOR_ATTACHMENT_WRITE },
             dstAccessMask       = { .SHADER_READ },
             oldLayout           = .COLOR_ATTACHMENT_OPTIMAL,
-            newLayout           = .SHADER_READ_ONLY_OPTIMAL,
+            newLayout           = .GENERAL,
             srcQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
             dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
             image               = posGBuffer.images[ii],
@@ -362,7 +321,7 @@ Render :: proc(
             srcAccessMask       = { .COLOR_ATTACHMENT_WRITE },
             dstAccessMask       = { .SHADER_READ },
             oldLayout           = .COLOR_ATTACHMENT_OPTIMAL,
-            newLayout           = .SHADER_READ_ONLY_OPTIMAL,
+            newLayout           = .GENERAL,
             srcQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
             dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
             image               = albedoGBuffer.images[ii],
@@ -374,7 +333,7 @@ Render :: proc(
             srcAccessMask       = { .COLOR_ATTACHMENT_WRITE },
             dstAccessMask       = { .SHADER_READ },
             oldLayout           = .COLOR_ATTACHMENT_OPTIMAL,
-            newLayout           = .SHADER_READ_ONLY_OPTIMAL,
+            newLayout           = .GENERAL,
             srcQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
             dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
             image               = normalGBuffer.images[ii],
@@ -447,13 +406,12 @@ Render :: proc(
         1, &swapchainPreLightBarrier,
     )
 
-    fmt.eprintfln("Light pass!")
     // Now, start the light pass
     lightColorAttachment: vk.RenderingAttachmentInfo = {
         sType       = .RENDERING_ATTACHMENT_INFO,
         imageView   = swapchain.views[ii],
         imageLayout = .COLOR_ATTACHMENT_OPTIMAL,
-        loadOp      = .LOAD, // Or .LOAD if you want to blend with previous content
+        loadOp      = .CLEAR, // Or .LOAD if you want to blend with previous content
         storeOp     = .STORE,
         clearValue  = { color = { float32 = { 0.0, 0.0, 0.0, 1.0 }}},
     }

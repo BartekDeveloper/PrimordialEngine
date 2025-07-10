@@ -17,7 +17,7 @@ ImageInfo :: proc(
     imageInfo: ^vk.DescriptorImageInfo = nil,
     imageView: ^vk.ImageView           = nil,
     sampler: ^vk.Sampler               = nil,
-    imageLayout: vk.ImageLayout        = .SHADER_READ_ONLY_OPTIMAL,
+    imageLayout: vk.ImageLayout        = .GENERAL,
 ) -> () {
     imageInfo^ = {
         imageLayout = imageLayout,
@@ -84,17 +84,17 @@ DescriptorSetLayout_GBuffers :: proc(data: ^t.VulkanData) -> () {
     descriptor.bindings = make([]vk.DescriptorSetLayoutBinding, 3)
     descriptor.bindings[0] = LayoutBinding_2(
         0,
-        .SAMPLED_IMAGE,
+        .COMBINED_IMAGE_SAMPLER,
         { .FRAGMENT }
     )
     descriptor.bindings[1] = LayoutBinding_2(
         1,
-        .SAMPLED_IMAGE,
+        .COMBINED_IMAGE_SAMPLER,
         { .FRAGMENT }
     )
     descriptor.bindings[2] = LayoutBinding_2(
         2,
-        .SAMPLED_IMAGE,
+        .COMBINED_IMAGE_SAMPLER,
         { .FRAGMENT }
     )
 
@@ -142,7 +142,7 @@ DescriptorPools :: proc(data: ^t.VulkanData) -> () {
                 descriptorCount = FRAME_COUNT,
             },
             {
-                type            = .SAMPLED_IMAGE,
+                type            = .COMBINED_IMAGE_SAMPLER,
                 descriptorCount = 3 * FRAME_COUNT,
             },
         }
@@ -280,12 +280,12 @@ DescriptorSets_GBuffers :: proc(data: ^t.VulkanData) -> () {
                 &positionImageInfo,
                 &positionGBuffer.views[i],
                 gBufferSampler,
-                .SHADER_READ_ONLY_OPTIMAL,
+                .GENERAL,
             )
             DescriptorWrite(
                 &writesForCurrentSet[0],
                 ds,
-                .SAMPLED_IMAGE,
+                .COMBINED_IMAGE_SAMPLER,
                 binding = 0,
                 imageInfo = &positionImageInfo,
             )
@@ -295,12 +295,12 @@ DescriptorSets_GBuffers :: proc(data: ^t.VulkanData) -> () {
                 &albedoImageInfo,
                 &albedoGBuffer.views[i],
                 gBufferSampler,
-                .SHADER_READ_ONLY_OPTIMAL,
+                .GENERAL,
             )
             DescriptorWrite(
                 &writesForCurrentSet[1],
                 ds,
-                .SAMPLED_IMAGE,
+                .COMBINED_IMAGE_SAMPLER,
                 binding = 1,
                 imageInfo = &albedoImageInfo,
             )
@@ -310,12 +310,12 @@ DescriptorSets_GBuffers :: proc(data: ^t.VulkanData) -> () {
                 &normalImageInfo,
                 &normalGBuffer.views[i],
                 gBufferSampler,
-                .SHADER_READ_ONLY_OPTIMAL,
+                .GENERAL,
             )
             DescriptorWrite(
                 &writesForCurrentSet[2],
                 ds,
-                .SAMPLED_IMAGE,
+                .COMBINED_IMAGE_SAMPLER,
                 binding = 2,
                 imageInfo = &normalImageInfo,
             )

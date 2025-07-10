@@ -25,6 +25,9 @@ layout(set=1, binding=2) uniform sampler2D normal;
 
 layout(location = 0) out vec4 outColor;
 
+const float BRIGHTNESS = 0.1;
+const float CONTRAST   = 2.0;
+
 void main() {
     vec2 uv = {
         gl_FragCoord.x / ubo.winWidth,
@@ -35,5 +38,19 @@ void main() {
     vec3 uvColor  = vec3(uv, 0);
     vec3 camPosColor = (ubo.cameraPos / ubo.winHeight) * ubo.winWidth * 0.001;
     
-    outColor = vec4(posColor * 0.7 + camPosColor * 0.05 + uvColor * 0.25, 1.0); 
+    float brightness = BRIGHTNESS;
+    if(ubo.cameraPos.x >= 0.0f && ubo.cameraPos.x <= 0.5f) {
+        brightness *= 0.5;
+    } else {
+        brightness *= 2.0;
+    }
+
+    if (ubo.cameraPos.x >= 0.5f && ubo.cameraPos.x <= 1.0f) {
+        brightness *= 0.5;
+    } else {
+        brightness *= 2.0;
+    }
+
+    posColor = (posColor + brightness) * CONTRAST;
+    outColor = vec4(posColor * 5.0, 1.0); 
 }

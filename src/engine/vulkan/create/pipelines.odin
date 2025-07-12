@@ -84,7 +84,7 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
 
         pDynamicStates:       [2]vk.DynamicState = {}
         pVertexInputInfo       := DefaultVertexInput(&pVertexData)
-        pInputAssemblyInfo     := DefaultInputAssembly(topology = .TRIANGLE_FAN)
+        pInputAssemblyInfo     := DefaultInputAssembly(topology = .TRIANGLE_LIST)
         pViewportState         := DefaultViewportState(1, 1)
         pRasterizationInfo     := DefaultRasterization(polygonMode = .FILL)
         pMultisampleState      := DefaultMultisample()

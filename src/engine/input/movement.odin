@@ -20,11 +20,11 @@ camera: Camera = {
     rot = { 0.0, 0.0, 0.0 },
 }
 
-MOVE_SPEED : f32 : 1.0
-LOOK_SPEED : f32 : 0.05
-ROLL_SPEED : f32 : 0.1
+MOVE_SPEED : f32 : 10.0
+LOOK_SPEED : f32 : 0.25
+ROLL_SPEED : f32 : 0.25
 
-SCALE_FACTOR : f32 : 1.1
+SCALE_FACTOR     : f32 : 2.0
 TRANSLATE_AMOUNT : f32 : 0.5
 
 modelMatrix: em.Mat4 = linalg.MATRIX4F32_IDENTITY

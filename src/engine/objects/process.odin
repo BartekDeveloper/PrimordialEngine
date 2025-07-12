@@ -46,26 +46,19 @@ ProcessVertices :: proc(mesh: ^ass.Mesh) -> []Vertex {
 
 
 ProcessIndices :: proc(mesh: ^ass.Mesh) -> []u32 {
-    indices := make([]u32, mesh.mNumFaces * 3)
+    total_indices := 0
     for i in 0..<mesh.mNumFaces {
         face := mesh.mFaces[i]
-        if face.mNumIndices == 3 {
-            indices[i * 3 + 0] = face.mIndices[0]
-            indices[i * 3 + 1] = face.mIndices[1]
-            indices[i * 3 + 2] = face.mIndices[2]
-        } else if face.mNumIndices == 2 {
-            indices[i * 2 + 0] = face.mIndices[0]
-            indices[i * 2 + 1] = face.mIndices[1]
-        } else if face.mNumIndices == 1 {
-            indices[i * 1 + 0] = face.mIndices[0]
-        } else if face.mNumIndices == 4 {
-            indices[i * 4 + 0] = face.mIndices[0]
-            indices[i * 4 + 1] = face.mIndices[1]
-            indices[i * 4 + 2] = face.mIndices[2]
-            indices[i * 4 + 3] = face.mIndices[3]
-        } else {
-            fmt.eprintfln("WARNING: Face has {} indices! Skipping...", face.mNumIndices)
-            continue
+        total_indices += int(face.mNumIndices)
+    }
+
+    indices := make([]u32, total_indices)
+    current_index := 0
+    for i in 0..<mesh.mNumFaces {
+        face := mesh.mFaces[i]
+        for j in 0..<face.mNumIndices {
+            indices[current_index] = face.mIndices[j]
+            current_index += 1
         }
     }
     return indices

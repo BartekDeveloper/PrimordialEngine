@@ -34,11 +34,11 @@ VkDrawMesh :: proc(
         raw_data(offsets)
     )
 
-    // if meshBuffer.hasIndices {
-    //     vk.CmdBindIndexBuffer(cmd^, meshBuffer.index.this, 0, .UINT32)
-    //     vk.CmdDrawIndexed(cmd^, meshBuffer.indexCount, 1, 0, 0, 0)
-    //     return
-    // }
+    if meshBuffer.hasIndices {
+        vk.CmdBindIndexBuffer(cmd^, meshBuffer.index.this, 0, .UINT32)
+        vk.CmdDrawIndexed(cmd^, meshBuffer.indexCount, 1, 0, 0, 0)
+        return
+    }
 
     vk.CmdDraw(cmd^, meshBuffer.vertexCount, 1, 0, 0)
     return

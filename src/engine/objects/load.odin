@@ -9,11 +9,7 @@ import ass "../../../external/assimp/odin-assimp"
 
 loadedObjects: map[cstring]bool = {};
 
-/*
-    @description Loads all model files from a directory, processes them, and populates the global sceneDataMap.
-    @input dir: string(#optional) = "./assets/models"
-    @output (none)
-*/
+
 LoadAllObjects :: proc(dir: string = "./assets/models") {
     handle: os.Handle
     err:    os.Error
@@ -49,15 +45,14 @@ LoadAllObjects :: proc(dir: string = "./assets/models") {
     fmt.eprintfln("Loaded objects: \n\t{}\n", loadedObjects)
 }
 
-/*
-    @description Cleans up all loaded objects and clears the global sceneDataMap.
-    @output (none)
-*/
+
 CleanAllObjects :: proc() {
     fmt.eprintln("\n=== Cleaning All Objects ===")
     for name, _ in loadedObjects {
         CleanupSceneData(name)
     }
-    loadedObjects = {};
+    delete(loadedObjects)
+    delete(sceneDataMap)
+    
     fmt.eprintln("All objects cleaned.")
 }

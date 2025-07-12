@@ -88,7 +88,7 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
         pViewportState         := DefaultViewportState(1, 1)
         pRasterizationInfo     := DefaultRasterization(polygonMode = .FILL)
         pMultisampleState      := DefaultMultisample()
-        pDepthStencil          := DefaultDepthStencil()
+        pDepthStencil          := DefaultDepthStencil(depthTestEnable = true, depthWriteEnable = true)
         pColorBlendAttachments := DefaultFillColorBlendAttachments(4, blendEnable = false)
         pColorBlending         := DefaultColorBlending(u32(len(pColorBlendAttachments)), raw_data(pColorBlendAttachments))
         pDynamicState          := DefaultDynamicStates(&pDynamicStates)

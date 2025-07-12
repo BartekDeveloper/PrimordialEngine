@@ -55,6 +55,8 @@ Render :: proc(
         return
     }
 
+    fmt.eprintf("{}\t", ii)
+
     uboBuffer := &uniformBuffers["ubo"].this[currentFrame]
     {
         using emath
@@ -72,7 +74,7 @@ Render :: proc(
         )
         invProj := linalg.inverse(proj)
         
-        view, invView := SetViewTarget(input.camera.pos, { 0.0, 0.0, 0.0}, WORLD_UP)
+        view, invView := SetViewTarget(input.camera.pos, { 0.0, 0.0, 0.0 }, WORLD_UP)
 
         winWidth  := f32(swapchain.extent.width)
         winHeight := f32(swapchain.extent.height)
@@ -110,10 +112,10 @@ Render :: proc(
     vk.ResetCommandBuffer(gcbc^, {})
 
     beginInfo: vk.CommandBufferBeginInfo = {
-        sType = .COMMAND_BUFFER_BEGIN_INFO,
-        flags = {},
+        sType            = .COMMAND_BUFFER_BEGIN_INFO,
+        flags            = {},
         pInheritanceInfo = nil,
-        pNext = nil,
+        pNext            = nil,
     }
     
     result = vk.BeginCommandBuffer(gcbc^, &beginInfo)
@@ -145,7 +147,7 @@ Render :: proc(
         dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
         image               = depthGBuffer.images[ii],
         subresourceRange    = {
-            aspectMask     = {. DEPTH, .STENCIL },
+            aspectMask     = { .DEPTH, .STENCIL },
             baseMipLevel   = 0,
             levelCount     = 1,
             baseArrayLayer = 0,
@@ -154,18 +156,18 @@ Render :: proc(
     }
     vk.CmdPipelineBarrier(
         gcbc^,
-        { .EARLY_FRAGMENT_TESTS }, // srcStageMask 
-        { .FRAGMENT_SHADER },      // dstStageMask
-        {},                        // dependencyFlags
-        0, nil,                    // memoryBarriers
-        0, nil,                    // bufferMemoryBarriers
-        1, &depthBarrier,          // imageMemoryBarriers
+        { .EARLY_FRAGMENT_TESTS },                    
+        { .FRAGMENT_SHADER },                         
+        {},                                        
+        0, nil,               
+        0, nil,          
+        1, &depthBarrier 
     );
 
     preGeometryPassBarriers: []vk.ImageMemoryBarrier = {
         {
             sType               = .IMAGE_MEMORY_BARRIER,
-            srcAccessMask       = { .SHADER_READ }, // From previous frame's read, or initial state
+            srcAccessMask       = { .SHADER_READ }, 
             dstAccessMask       = { .COLOR_ATTACHMENT_WRITE },
             oldLayout           = .GENERAL,
             newLayout           = .COLOR_ATTACHMENT_OPTIMAL,
@@ -207,7 +209,7 @@ Render :: proc(
             dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
             image               = normalGBuffer.images[ii],
             subresourceRange    = {
-                aspectMask     = {. COLOR },
+                aspectMask     = { .COLOR },
                 baseMipLevel   = 0,
                 levelCount     = 1,
                 baseArrayLayer = 0,
@@ -217,12 +219,12 @@ Render :: proc(
     }
     vk.CmdPipelineBarrier(
         gcbc^,
-        { .FRAGMENT_SHADER },        // srcStageMask (where they were last read)
-        { .COLOR_ATTACHMENT_OUTPUT }, // dstStageMask (where they will be written)
-        {},                            // dependencyFlags
-        0, nil,                        // memoryBarriers
-        0, nil,                        // bufferMemoryBarriers
-        u32(len(preGeometryPassBarriers)), raw_data(preGeometryPassBarriers), // imageMemoryBarriers
+        { .FRAGMENT_SHADER },        
+        { .COLOR_ATTACHMENT_OUTPUT }, 
+        {},                            
+        0, nil,                        
+        0, nil,                        
+        u32(len(preGeometryPassBarriers)), raw_data(preGeometryPassBarriers), 
     );
 
     colorAttachments[0] = vk.RenderingAttachmentInfo{
@@ -263,7 +265,7 @@ Render :: proc(
         imageView   = depthGBuffer.views[ii],
         imageLayout = .DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
         loadOp      = .CLEAR,
-        storeOp     = .DONT_CARE,
+        storeOp     = .STORE,
         clearValue  = { depthStencil = { depth = 1.0, stencil = 0 }},
     }
 
@@ -295,15 +297,15 @@ Render :: proc(
     );
     o.VkDrawMesh(
         gcbc,
-        "Monke",
-        "Suzanne_0",
+        "Monke.glb",
+        ":0",
     )
 
-    vk.CmdEndRendering(gcbc^); // End geometry pass
+    vk.CmdEndRendering(gcbc^); 
 
-    // Image barriers to transition G-buffers for shader reading
+    
     gBufferImageBarriers: []vk.ImageMemoryBarrier = {
-        // Position G-buffer
+        
         {
             sType               = .IMAGE_MEMORY_BARRIER,
             srcAccessMask       = { .COLOR_ATTACHMENT_WRITE },
@@ -313,9 +315,15 @@ Render :: proc(
             srcQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
             dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
             image               = posGBuffer.images[ii],
-            subresourceRange    = { { .COLOR }, 0, 1, 0, 1 },
+            subresourceRange    = {
+                aspectMask     = {. COLOR },
+                baseMipLevel   = 0,
+                levelCount     = 1,
+                baseArrayLayer = 0,
+                layerCount     = 1,
+            },
         },
-        // Albedo G-buffer
+        
         {
             sType               = .IMAGE_MEMORY_BARRIER,
             srcAccessMask       = { .COLOR_ATTACHMENT_WRITE },
@@ -325,9 +333,15 @@ Render :: proc(
             srcQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
             dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
             image               = albedoGBuffer.images[ii],
-            subresourceRange    = { { .COLOR }, 0, 1, 0, 1 },
+            subresourceRange    = {
+                aspectMask     = { .COLOR },
+                baseMipLevel   = 0,
+                levelCount     = 1,
+                baseArrayLayer = 0,
+                layerCount     = 1,
+            }
         },
-        // Normal G-buffer
+        
         {
             sType               = .IMAGE_MEMORY_BARRIER,
             srcAccessMask       = { .COLOR_ATTACHMENT_WRITE },
@@ -337,23 +351,29 @@ Render :: proc(
             srcQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
             dstQueueFamilyIndex = vk.QUEUE_FAMILY_IGNORED,
             image               = normalGBuffer.images[ii],
-            subresourceRange    = { { .COLOR }, 0, 1, 0, 1 },
+            subresourceRange    = {
+                aspectMask     = { .COLOR },
+                baseMipLevel   = 0,
+                levelCount     = 1,
+                baseArrayLayer = 0,
+                layerCount     = 1,
+            }
         },
     }
     vk.CmdPipelineBarrier(
         gcbc^,
-        { .COLOR_ATTACHMENT_OUTPUT }, // srcStageMask 
-        { .FRAGMENT_SHADER },                                   // dstStageMask
-        {},                                                     // dependencyFlags
-        0, nil,                                                 // memoryBarriers
-        0, nil,                                                 // bufferMemoryBarriers
-        u32(len(gBufferImageBarriers)), raw_data(gBufferImageBarriers), // imageMemoryBarriers
+        { .COLOR_ATTACHMENT_OUTPUT },
+        { .FRAGMENT_SHADER },                                 
+        {},                                                     
+        0, nil,                                                 
+        0, nil,                                                 
+        u32(len(gBufferImageBarriers)), raw_data(gBufferImageBarriers), 
     );
     
 
     preLightDepthBarrier: vk.ImageMemoryBarrier = {
         sType               = .IMAGE_MEMORY_BARRIER,
-        srcAccessMask       = {}, // or { .MEMORY_READ } if relevant
+        srcAccessMask       = {},
         dstAccessMask       = { .DEPTH_STENCIL_ATTACHMENT_WRITE },
         oldLayout           = .UNDEFINED,
         newLayout           = .DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
@@ -378,10 +398,10 @@ Render :: proc(
         1, &preLightDepthBarrier,
     )
 
-    // Swapchain image for color attachment in light pass
+    
     swapchainPreLightBarrier: vk.ImageMemoryBarrier = {
         sType               = .IMAGE_MEMORY_BARRIER,
-        srcAccessMask       = {}, // or { .MEMORY_READ } if relevant
+        srcAccessMask       = {}, 
         dstAccessMask       = { .COLOR_ATTACHMENT_WRITE },
         oldLayout           = .UNDEFINED,
         newLayout           = .COLOR_ATTACHMENT_OPTIMAL,
@@ -406,12 +426,12 @@ Render :: proc(
         1, &swapchainPreLightBarrier,
     )
 
-    // Now, start the light pass
+    
     lightColorAttachment: vk.RenderingAttachmentInfo = {
         sType       = .RENDERING_ATTACHMENT_INFO,
         imageView   = swapchain.views[ii],
         imageLayout = .COLOR_ATTACHMENT_OPTIMAL,
-        loadOp      = .CLEAR, // Or .LOAD if you want to blend with previous content
+        loadOp      = .CLEAR, 
         storeOp     = .STORE,
         clearValue  = { color = { float32 = { 0.0, 0.0, 0.0, 1.0 }}},
     }
@@ -422,7 +442,7 @@ Render :: proc(
         layerCount           = 1,
         colorAttachmentCount = 1,
         pColorAttachments    = &lightColorAttachment,
-        pDepthAttachment     = nil, // Light pass typically doesn't write to depth
+        pDepthAttachment     = nil, 
         pStencilAttachment   = nil,
     }
 
@@ -442,9 +462,9 @@ Render :: proc(
     );
     vk.CmdDraw(gcbc^, 6, 1, 0, 0);
 
-    vk.CmdEndRendering(gcbc^); // End light pass
+    vk.CmdEndRendering(gcbc^); 
 
-    // Add image memory barrier for swapchain image
+    
     imageMemoryBarrier: vk.ImageMemoryBarrier = {
         sType               = .IMAGE_MEMORY_BARRIER,
         srcAccessMask       = { .COLOR_ATTACHMENT_WRITE },
@@ -464,12 +484,12 @@ Render :: proc(
     }
     vk.CmdPipelineBarrier(
         gcbc^,
-        { .COLOR_ATTACHMENT_OUTPUT }, // srcStageMask
-        { .BOTTOM_OF_PIPE },          // dstStageMask
-        {},                           // dependencyFlags
-        0, nil,                       // memoryBarriers
-        0, nil,                       // bufferMemoryBarriers
-        1, &imageMemoryBarrier,       // imageMemoryBarriers
+        { .COLOR_ATTACHMENT_OUTPUT }, 
+        { .BOTTOM_OF_PIPE },          
+        {},                           
+        0, nil,                       
+        0, nil,                       
+        1, &imageMemoryBarrier,       
     );
 
     result = vk.EndCommandBuffer(gcbc^)

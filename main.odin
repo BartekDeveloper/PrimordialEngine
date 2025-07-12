@@ -6,7 +6,7 @@ import "core:mem"
 import "src/engine"
 import "src/maths"
 import obj "src/engine/objects"
-import ass "src/engine/objectsass"
+import o "src/engine/vulkan/objects"
 
 main :: proc() {
     
@@ -31,16 +31,13 @@ main :: proc() {
         }
     }
 
-    // obj.LoadModels()
-    // defer obj.CleanUpModels()
-    // obj.PrintAllModels()
-
     // ass.ReadFromFile("Monke.glb", "/home/zota/projects/multi/vk_dynamic/assets/models")
-    ass.LoadAllObjects()
-    defer ass.CleanAllObjects()
+    obj.LoadAllObjects()
+    defer obj.CleanAllObjects()
 
-    // engine.Init()
-    // defer engine.Destroy()
-    
-    // engine.Start()
+    engine.Init()
+    defer engine.Destroy()
+    fmt.eprintfln("{}", o.buffers)
+
+    engine.Start()
 }

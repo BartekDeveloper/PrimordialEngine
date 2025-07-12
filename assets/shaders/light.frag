@@ -21,12 +21,12 @@ layout(set=0, binding=0) uniform UBO {
 
 layout(set=1, binding=0) uniform sampler2D position;
 layout(set=1, binding=1) uniform sampler2D albedo;
-layout(set=1, binding=2) uniform sampler2D normal;
+layout(set=1, binding=2) uniform isampler2D normal;
 
 layout(location = 0) out vec4 outColor;
 
-const float BRIGHTNESS = 0.1;
-const float CONTRAST   = 2.0;
+const float BRIGHTNESS = 0.0;
+const float CONTRAST   = 1.0; 
 
 void main() {
     vec2 uv = {
@@ -34,23 +34,12 @@ void main() {
         gl_FragCoord.y / ubo.winHeight
     };
 
+    vec3 albedo   = texture(albedo, uv).xyz;
+    vec3 normal   = texture(normal, uv).xyz;
     vec3 posColor = texture(position, uv).xyz;
-    vec3 uvColor  = vec3(uv, 0);
-    vec3 camPosColor = (ubo.cameraPos / ubo.winHeight) * ubo.winWidth * 0.001;
+
     
-    float brightness = BRIGHTNESS;
-    if(ubo.cameraPos.x >= 0.0f && ubo.cameraPos.x <= 0.5f) {
-        brightness *= 0.5;
-    } else {
-        brightness *= 2.0;
-    }
-
-    if (ubo.cameraPos.x >= 0.5f && ubo.cameraPos.x <= 1.0f) {
-        brightness *= 0.5;
-    } else {
-        brightness *= 2.0;
-    }
-
-    posColor = (posColor + brightness) * CONTRAST;
-    outColor = vec4(posColor * 5.0, 1.0); 
+    vec3 color = albedo * posColor + posColor;
+    color = (color + BRIGHTNESS) * CONTRAST;
+    outColor = vec4(color, 1.0); 
 }

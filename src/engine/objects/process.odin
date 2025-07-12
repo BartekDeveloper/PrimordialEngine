@@ -1,6 +1,7 @@
 package eobjects
 
 import "core:c"
+import "core:io"
 import "core:fmt"
 import "core:strings"
 import "core:slice"
@@ -11,11 +12,7 @@ import ass "../../../external/assimp/odin-assimp"
 // Global storage for processed scene data
 sceneDataMap: map[cstring]SceneData = {}
 
-/*
-    @description Processes vertices from assimp mesh
-    @input mesh: ^ass.Mesh
-    @output vertices: []Vertex
-*/
+
 ProcessVertices :: proc(mesh: ^ass.Mesh) -> []Vertex {
     vertices := make([]Vertex, mesh.mNumVertices)
     for i in 0..<mesh.mNumVertices {
@@ -47,11 +44,7 @@ ProcessVertices :: proc(mesh: ^ass.Mesh) -> []Vertex {
     return vertices
 }
 
-/*
-    @description Processes indices from assimp mesh
-    @input mesh: ^ass.Mesh
-    @output indices: []u32
-*/
+
 ProcessIndices :: proc(mesh: ^ass.Mesh) -> []u32 {
     indices := make([]u32, mesh.mNumFaces * 3)
     for i in 0..<mesh.mNumFaces {
@@ -60,21 +53,46 @@ ProcessIndices :: proc(mesh: ^ass.Mesh) -> []u32 {
             indices[i * 3 + 0] = face.mIndices[0]
             indices[i * 3 + 1] = face.mIndices[1]
             indices[i * 3 + 2] = face.mIndices[2]
+        } else if face.mNumIndices == 2 {
+            indices[i * 2 + 0] = face.mIndices[0]
+            indices[i * 2 + 1] = face.mIndices[1]
+        } else if face.mNumIndices == 1 {
+            indices[i * 1 + 0] = face.mIndices[0]
+        } else if face.mNumIndices == 4 {
+            indices[i * 4 + 0] = face.mIndices[0]
+            indices[i * 4 + 1] = face.mIndices[1]
+            indices[i * 4 + 2] = face.mIndices[2]
+            indices[i * 4 + 3] = face.mIndices[3]
+        } else {
+            fmt.eprintfln("WARNING: Face has {} indices! Skipping...", face.mNumIndices)
+            continue
         }
     }
     return indices
 }
 
-/*
-    @description Converts assimp string to c string
-    @input str: ass.String
-    @output ocstr: cstring
-*/
+
 AssStringToCString :: proc(str: ass.String) -> (ocstr: cstring = "") {
     ostr: string = ""
     for i in 0..<str.length {
-        ostr = fmt.tprintf("%s%s", ostr, (rune)(str.data[i]))
+        letterBuilder := strings.builder_make_len(1, context.temp_allocator)
+        defer strings.builder_destroy(&letterBuilder)
+
+        letter: rune = (rune)(str.data[i])
+        
+        err: io.Error = nil
+        _, err = strings.write_rune(&letterBuilder, letter)
+        if err != nil {
+            fmt.eprintln("Error writing rune to string builder!")
+            panic("Error writing rune to string builder!")
+        }
+
+        letterStr: string = strings.to_string(letterBuilder)
+        ostr = fmt.tprintf("%s%s", ostr, letterStr)
     }
+
+    fmt.eprintfln("\n\n\n Assimp string: %s\n", ostr)
+
     ocstr = strings.clone_to_cstring(ostr)
     return
 }
@@ -109,11 +127,7 @@ ProcessBones :: proc(mesh: ^ass.Mesh, vertices: []Vertex) -> map[cstring]u32 {
     return bone_mapping
 }
 
-/*
-    @description Processes material data from assimp material
-    @input material: ^ass.Material
-    @output material_data: MaterialData
-*/
+
 ProcessMaterial :: proc(material: ^ass.Material) -> MaterialData {
     mat_data := MaterialData{}
 
@@ -162,8 +176,10 @@ ProcessMaterial :: proc(material: ^ass.Material) -> MaterialData {
 */
 GetMaterialColor :: proc(material: ^ass.Material, key: string) -> ([4]f32, bool) {
     assert(material != nil, "Material is nil!")
-    assert(material.mProperties != nil, "Material properties are nil!")
-    assert(material.mNumProperties > 0, "Material has no properties!")
+
+    if material.mProperties == nil || material.mNumProperties == 0 {
+        return [4]f32{}, false
+    }
 
     for i in 0..<material.mNumProperties {
         fmt.eprintfln("material property index: {}", i)
@@ -196,6 +212,10 @@ GetMaterialColor :: proc(material: ^ass.Material, key: string) -> ([4]f32, bool)
     @output value: f32, ok: bool
 */
 GetMaterialFloat :: proc(material: ^ass.Material, key: string) -> (f32, bool) {
+    if material.mProperties == nil || material.mNumProperties == 0 {
+        return 0.0, false
+    }
+
     for i in 0..<material.mNumProperties {
         prop := material.mProperties[i]
         if strings.compare(string(prop.mKey.data[:prop.mKey.length]), key) == 0 && prop.mType == .Float {
@@ -216,6 +236,10 @@ GetMaterialFloat :: proc(material: ^ass.Material, key: string) -> (f32, bool) {
     @output path: cstring
 */
 GetMaterialTexture :: proc(material: ^ass.Material, tex_type: ass.Texture_Type) -> cstring {
+    if material.mProperties == nil || material.mNumProperties == 0 {
+        return ""
+    }
+
     for i in 0..<material.mNumProperties {
         prop := material.mProperties[i]
         if prop.mSemantic == u32(tex_type) && prop.mType == .String {
@@ -239,12 +263,23 @@ ProcessSceneData :: proc(scene: ^ass.Scene, scene_name: cstring) -> bool {
     sceneData: SceneData = {}
     sceneData.meshes = make([]MeshData, scene.mNumMeshes)
     for i in 0..<scene.mNumMeshes {
-        mesh := scene.mMeshes[i]
+        mesh     := scene.mMeshes[i]
         meshData := &sceneData.meshes[i]
-        meshData.vertices = ProcessVertices(mesh)
-        meshData.indices = ProcessIndices(mesh)
+
+
+        meshData.vertices       = ProcessVertices(mesh)
+        meshData.indices        = ProcessIndices(mesh)
         meshData.material_index = mesh.mMaterialIndex
-        meshData.bone_mapping = ProcessBones(mesh, meshData.vertices)
+        meshData.bone_mapping   = ProcessBones(mesh, meshData.vertices)
+
+
+        if mesh.mName == {} {
+            meshData.name = "mesh"
+            continue
+        }
+
+        name: cstring = AssStringToCString(mesh.mName)
+        meshData.name = name
     }
 
     sceneData.materials = make([]MaterialData, scene.mNumMaterials)
@@ -278,35 +313,25 @@ ProcessSceneData :: proc(scene: ^ass.Scene, scene_name: cstring) -> bool {
     return true
 }
 
-/*
-    @description Get processed scene data by name
-    @input scene_name: cstring
-    @output scene_data: SceneData, ok: bool
-*/
-GetSceneData :: proc(scene_name: cstring) -> (scene_data: SceneData, ok: bool) {
-    if data, exists := &sceneDataMap[scene_name]; exists {
-        return data^, true
-    }
-    return {}, false
-}
-
-/*
-    @description Clean up processed scene data
-    @input scene_name: cstring
-*/
 CleanupSceneData :: proc(scene_name: cstring) {
     if data, exists := sceneDataMap[scene_name]; exists {
         for &mesh in data.meshes {
             delete(mesh.vertices)
             delete(mesh.indices)
+            for k, v in mesh.bone_mapping {
+                delete(k)
+                delete_key(&mesh.bone_mapping, k)
+            }
             delete(mesh.bone_mapping)
         }
         delete(data.meshes)
         delete(data.materials)
+                
         for &texture in data.textures {
             delete(texture.data)
         }
         delete(data.textures)
+        
         delete(data.bones)
         delete_key(&sceneDataMap, scene_name)
     }

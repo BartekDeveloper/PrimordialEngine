@@ -22,8 +22,8 @@ Samplers :: proc(data: ^t.VulkanData) -> () {
     {
         samplerInfo: vk.SamplerCreateInfo = {
             sType                   = .SAMPLER_CREATE_INFO,
-            magFilter               = .LINEAR,
-            minFilter               = .LINEAR,
+            magFilter               = .NEAREST,
+            minFilter               = .NEAREST,
             addressModeU            = .CLAMP_TO_EDGE,
             addressModeV            = .CLAMP_TO_EDGE,
             addressModeW            = .CLAMP_TO_EDGE,
@@ -31,9 +31,9 @@ Samplers :: proc(data: ^t.VulkanData) -> () {
             maxAnisotropy           = 1.0,
             borderColor             = .INT_OPAQUE_BLACK,
             unnormalizedCoordinates = false,
-            compareEnable           = false,
+            compareEnable           = true,
             compareOp               = .ALWAYS,
-            mipmapMode              = .LINEAR,
+            mipmapMode              = .NEAREST,
             mipLodBias              = 0.0,
             minLod                  = 0.0,
             maxLod                  = 0.0,

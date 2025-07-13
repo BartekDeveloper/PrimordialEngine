@@ -15,12 +15,17 @@ import "create"
 import "destroy"
 import "load"
 import "utils"
+
+import e "../entity"
 import t "types"
 import o "objects"
+
 import "../window"
 import "../input"
-import obj "../objects"
-import s "../../shared"
+
+import obj    "../objects"
+
+import s     "../../shared"
 import emath "../../maths"
 
 vkData: t.VulkanData = {}
@@ -32,7 +37,8 @@ worldTime: int = 0 /* World  Time */
 ii:        u32 = 0 /* Image Index */
 
 Render :: proc(
-    rData: ^s.RenderData = nil
+    rData:    ^s.RenderData = nil,
+    entities: ^[dynamic]e.Entity = nil,
 ) -> () {
     defer free_all(context.temp_allocator)
     using vkData;
@@ -67,7 +73,7 @@ Render :: proc(
         aspect: f32 = (f32(swapchain.extent.width) / f32(swapchain.extent.height))
 
         proj := Perspective(
-            60.0 * math.DEG_PER_RAD,
+            60.0 * (math.PI/180.0),
             aspect,
             0.1,
             2048.0
@@ -79,6 +85,9 @@ Render :: proc(
         winWidth  := f32(swapchain.extent.width)
         winHeight := f32(swapchain.extent.height)
         deltaTime := f32(rData.deltaTime_f64)
+
+        fmt.eprintfln("View {},\t InvView {}", view, invView)
+        fmt.eprintfln("Proj {},\t InvProj {}", proj, invProj)
 
         ubo := s.UBO{
             proj      = proj,
@@ -95,9 +104,8 @@ Render :: proc(
             
             worldUp   = WORLD_UP,
             worldTime = worldTime,
-
-            model     = input.modelMatrix
         }
+
         worldTime += 1
         if worldTime > int(~u16(0)-1) { 
             worldTime = 0
@@ -295,11 +303,15 @@ Render :: proc(
         0,
         nil,
     );
-    o.VkDrawMesh(
-        gcbc,
-        "Monke.glb",
-        ":0",
-    )
+    // o.VkDrawMesh(
+    //     gcbc,
+    //     "Monke.glb",
+    //     ":0",
+    // )
+
+    for &entity, i in e.entities {
+        o.DrawEntity(entity, gcbc)
+    }
 
     vk.CmdEndRendering(gcbc^); 
 

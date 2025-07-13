@@ -12,6 +12,7 @@ import vk "vendor:vulkan"
 import "../load"
 import t "../types"
 import win "../../window"
+import em "../../../maths"
 import s "../../../shared"
 
 Pipelines :: proc(data: ^t.VulkanData) -> () {
@@ -106,9 +107,17 @@ Pipelines :: proc(data: ^t.VulkanData) -> () {
             dynamics     = &pDynamicState,
         }
 
+        geometry.range = {
+            stageFlags = { .VERTEX },
+            offset     = 0,
+            size       = size_of(em.Mat4),
+        }
+
         pPipelineLayoutCreateInfo := DefaultPipelineLayoutCreateInfo(
             u32(len(geometry.setLayouts)),
-            raw_data(geometry.setLayouts)
+            raw_data(geometry.setLayouts),
+            1,
+            &geometry.range,
         )
         good = PipelineLayout(data, &pPipelineLayoutCreateInfo, &geometry.layout)
         if !good {

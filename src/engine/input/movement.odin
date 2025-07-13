@@ -7,16 +7,17 @@ import "core:c"
 import "core:fmt"
 import rn "base:runtime"
 
-import em "../../maths"
-
 import sdl "vendor:sdl3"
+
+import e "../entity"
+import em "../../maths"
 
 Camera :: #type struct {
     pos:      em.Vec3,
     rot:      em.Vec3,
 }
 camera: Camera = {
-    pos = { 0.0, 0.0, 0.0 },
+    pos = { 0.0, -5.0, 0.0 },
     rot = { 0.0, 0.0, 0.0 },
 }
 
@@ -27,20 +28,18 @@ ROLL_SPEED : f32 : 0.25
 SCALE_FACTOR     : f32 : 2.0
 TRANSLATE_AMOUNT : f32 : 0.5
 
-modelMatrix: em.Mat4 = linalg.MATRIX4F32_IDENTITY
-
 Move :: proc(
     event:     ^sdl.Event,
 ) -> () {
     if event.type != .KEY_DOWN do return
     
     oldPos := camera.pos
-    yaw := camera.rot.y
+    yaw    := camera.rot.y
 
     forwardDir := em.Vec3{math.sin(yaw), 0, math.cos(yaw)}
     rightDir   := em.Vec3{forwardDir.z, 0, -forwardDir.x}
     upDir      := em.Vec3{0, 1, 0} 
-    moveDelta  := em.Vec3{0,0,0}
+    moveDelta  := em.Vec3{0, 0, 0}
 
     moved     := false
     if event.key.scancode == .W {
@@ -90,28 +89,27 @@ Move :: proc(
     if event.key.scancode == .Q {
         camera.rot.z += ROLL_SPEED
         fmt.eprintfln("New Camera Rot: %v", camera.rot)
-    }
-    if event.key.scancode == .E {
+    } else if event.key.scancode == .E {
         camera.rot.z -= ROLL_SPEED
         fmt.eprintfln("New Camera Rot: %v", camera.rot)
     }
     
-    if event.key.scancode == .J { modelMatrix[3, 2] += TRANSLATE_AMOUNT }
-    if event.key.scancode == .L { modelMatrix[3, 2] -= TRANSLATE_AMOUNT }
-    if event.key.scancode == .I { modelMatrix[3, 1] += TRANSLATE_AMOUNT }
-    if event.key.scancode == .K { modelMatrix[3, 1] -= TRANSLATE_AMOUNT }
-    if event.key.scancode == .U { modelMatrix[3, 0] += TRANSLATE_AMOUNT }
-    if event.key.scancode == .O { modelMatrix[3, 0] -= TRANSLATE_AMOUNT }
+    entity: ^e.Entity = e.entities[0]
+    
+    if event.key.scancode == .J { e.MoveX(entity, TRANSLATE_AMOUNT) }
+    if event.key.scancode == .L { e.MoveX(entity, -TRANSLATE_AMOUNT) }
+    if event.key.scancode == .I { e.MoveY(entity, TRANSLATE_AMOUNT) }
+    if event.key.scancode == .K { e.MoveY(entity, -TRANSLATE_AMOUNT) }
+    if event.key.scancode == .U { e.MoveZ(entity, TRANSLATE_AMOUNT) }
+    if event.key.scancode == .O { e.MoveZ(entity, -TRANSLATE_AMOUNT) }
+
 
     if event.key.scancode == .N {
-        modelMatrix[0, 0] *= SCALE_FACTOR
-        modelMatrix[1, 1] *= SCALE_FACTOR
-        modelMatrix[2, 2] *= SCALE_FACTOR
-    }
-    if event.key.scancode == .M {
-        modelMatrix[0, 0] /= SCALE_FACTOR
-        modelMatrix[1, 1] /= SCALE_FACTOR
-        modelMatrix[2, 2] /= SCALE_FACTOR
+        currentScale := e.GetScale(entity)
+        e.SetScale(entity, currentScale * SCALE_FACTOR)
+    } else if event.key.scancode == .M {
+        currentScale := e.GetScale(entity)
+        e.SetScale(entity, currentScale / SCALE_FACTOR)
     }
 
 

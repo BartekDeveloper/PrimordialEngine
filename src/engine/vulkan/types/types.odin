@@ -180,6 +180,7 @@ Pipeline :: #type struct {
 	renderingInfo:          vk.PipelineRenderingCreateInfo,
 	colorAttachmentFormats: []vk.Format,
     graphicsPipelineData:   GraphicsPipelineData,
+    range:                  vk.PushConstantRange,
 }
 
 Buffer :: #type struct {

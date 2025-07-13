@@ -27,7 +27,7 @@ Perspective :: proc "contextless" (
         deAspect = 1.0 / aspect
     }
     
-    TanHalfFovy: f32 = math.tan(fovy / 2.0)
+    TanHalfFovy: f32 = math.tan(fovy * 0.5)
     o = {
         0, 0, 0, 0,
         0, 0, 0, 0,

@@ -10,9 +10,10 @@ import "core:fmt"
 import "core:io"
 import "core:c"
 
-import s "../shared"
 import "window"
 import "vulkan"
+import e "entity"
+import s "../shared"
 
 Init :: proc() {
     context.logger = log.create_console_logger(.Debug)

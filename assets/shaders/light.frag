@@ -15,8 +15,6 @@ layout(set=0, binding=0) uniform UBO {
     
     vec3 worldUp;
     int worldTime;
-
-    mat4 model;
 } ubo;
 
 layout(set=1, binding=0) uniform sampler2D position;

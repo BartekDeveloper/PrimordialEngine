@@ -2,6 +2,11 @@ package engine_shared
 
 import emath "../maths"
 
+PushData :: #type struct {
+    size:  u32,
+    data: rawptr
+}
+
 RenderData :: #type struct {
     deltaTime:            i64,
     deltaTime_f64:        f64,

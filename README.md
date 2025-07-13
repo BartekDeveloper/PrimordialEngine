@@ -67,9 +67,6 @@ odin run .
 ```
 
 - Run already built binary
-```bash
-./vk_new
-```
 
 ## USED LIBRARIES
 - Vulkan
